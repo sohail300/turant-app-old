@@ -4,7 +4,7 @@ import React from "react";
 import { styles } from "@/constants/styles";
 import { useFontLoaded } from "@/context/FontContext";
 
-const Heading = ({
+const Subheading = ({
   children,
   style,
   ...props
@@ -16,10 +16,10 @@ const Heading = ({
   const fontsLoaded = useFontLoaded();
 
   return (
-    <Text style={[styles.heading, style]} {...props}>
+    <Text style={[styles.Subheading, style]} {...props}>
       {children}
     </Text>
   );
 };
 
-export default Heading;
+export default Subheading;

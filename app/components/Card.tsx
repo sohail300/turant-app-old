@@ -1,10 +1,27 @@
-import { View, Text, SafeAreaView, Image } from "react-native";
+import { View, Text, SafeAreaView, Image, Pressable } from "react-native";
 import React from "react";
 import Feather from "@expo/vector-icons/Feather";
 import { Colors } from "@/constants/Colors";
 import Heading from "./Heading";
+import RedText from "./RedText";
+import Subheading from "./Subheading";
+import ContentText from "./ContentText";
+import Details from "./Details";
+import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
+import IconText from "./IconText";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { Link } from "expo-router";
 
-const Card = () => {
+const Card = ({
+  heading,
+  content,
+  details,
+  author,
+  authorImage,
+  imageUrl,
+  setShowCommentSheet,
+  full = false,
+}) => {
   return (
     <SafeAreaView
       style={{
@@ -13,38 +30,100 @@ const Card = () => {
         padding: 20,
         borderColor: `${Colors.light.border}`,
         borderWidth: 1,
-        borderRadius: 16,
+        borderRadius: 8,
+        gap: 8,
       }}
     >
       <Image
         source={{
-          uri: "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
+          uri: imageUrl,
         }}
         width={330}
         height={200}
-        style={{ objectFit: "contain" }}
+        borderRadius={8}
       />
-      <Heading style={{ fontFamily: "Lora700" }}>
-        Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current
-        Events
-      </Heading>
+      <Link href={"/SingleNews"}>
+        <Heading>{heading}</Heading>
+      </Link>
       <View
         style={{
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        <View style={{ display: "flex", flexDirection: "row" }}>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: 8,
+            paddingVertical: 8,
+          }}
+        >
           <Image
             source={{
-              uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+              uri: authorImage,
             }}
-          ></Image>
-          <Text>Rahul Kumar</Text>
-          <Text>Follow</Text>
+            height={40}
+            width={40}
+            borderRadius={50}
+          />
+          <Subheading>{author}</Subheading>
+          <Text>•</Text>
+          <RedText> Follow </RedText>
         </View>
         <Feather name="bookmark" size={24} color="black" />
+      </View>
+      <ContentText full={full}>{content}</ContentText>
+      <Details>{details}</Details>
+      <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 4,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Pressable>
+            <FontAwesome5 name="heart" size={24} color="black" />
+          </Pressable>
+          <IconText>23.9k</IconText>
+        </View>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 4,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Pressable
+            onPress={() => {
+              full && setShowCommentSheet(true);
+            }}
+          >
+            <FontAwesome5 name="comment" size={24} color="black" />
+          </Pressable>
+          <IconText>23.9k</IconText>
+        </View>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 4,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <SimpleLineIcons name="share-alt" size={24} color="black" />
+          <IconText>214</IconText>
+        </View>
       </View>
     </SafeAreaView>
   );

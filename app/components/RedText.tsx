@@ -15,10 +15,8 @@ const RedText = ({
 }) => {
   const fontsLoaded = useFontLoaded();
 
-  console.log("Fonts loaded in Heading:", fontsLoaded);
-
   return (
-    <Text style={[styles.heading, style]} {...props}>
+    <Text style={[styles.RedText, style]} {...props}>
       {children}
     </Text>
   );
