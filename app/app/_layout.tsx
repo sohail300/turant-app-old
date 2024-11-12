@@ -1,14 +1,17 @@
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import "react-native-reanimated";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Pressable, Text, View } from "react-native";
+import { Animated, Easing, Pressable, Text, View } from "react-native";
 import { FontContext } from "@/context/FontContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Colors } from "@/constants/Colors";
 import RedText from "@/components/RedText";
+import LottieView from "lottie-react-native";
+
+const AnimatedLottieView = Animated.createAnimatedComponent(LottieView);
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -31,8 +34,25 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
+  const animationProgress = useRef(new Animated.Value(0));
+
+  useEffect(() => {
+    Animated.timing(animationProgress.current, {
+      toValue: 1,
+      duration: 5000,
+      easing: Easing.linear,
+      useNativeDriver: false,
+    }).start();
+  }, []);
+
   if (!fontsLoaded) {
-    return null;
+    return (
+      <AnimatedLottieView
+        source={require("../assets/TN_app.json")}
+        progress={animationProgress.current}
+        style={{ width: "100%", height: "100%" }}
+      />
+    );
   }
 
   return (
