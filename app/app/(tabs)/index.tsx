@@ -1,4 +1,11 @@
-import { Image, StyleSheet, Platform, Text, Dimensions } from "react-native";
+import {
+  Image,
+  StyleSheet,
+  Platform,
+  Text,
+  Dimensions,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { Colors } from "@/constants/Colors";
@@ -46,6 +53,7 @@ export default function HomeScreen() {
       details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
     },
   ];
+
   return (
     <SafeAreaView
       style={{
