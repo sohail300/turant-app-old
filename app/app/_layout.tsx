@@ -47,8 +47,9 @@ export default function RootLayout() {
     <FontContext.Provider value={fontsLoaded}>
       <GestureHandlerRootView>
         <Animated.View style={{ flex: 1 }} entering={FadeIn.duration(300)}>
-          <Stack>
+          <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            {/* <Stack.Screen name="(signin)" options={{ headerShown: false }} /> */}
             <Stack.Screen
               name="SingleNews"
               options={{

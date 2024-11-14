@@ -18,6 +18,7 @@ import Feather from "@expo/vector-icons/Feather";
 import { styles } from "@/constants/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
+import { Link } from "expo-router";
 
 const CommentBottomSheet = ({ close }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -152,17 +153,20 @@ const CommentBottomSheet = ({ close }) => {
               placeholder="Add your comment"
               placeholderTextColor={"#A8A8A8"}
             ></TextInput>
-            <TouchableOpacity
-              style={{
-                width: 80,
-                borderRadius: 4,
-                borderColor: Colors.light.accent,
-                borderWidth: 1,
-                padding: 8,
-              }}
-            >
-              <Text style={{ ...styles.button }}>Post</Text>
-            </TouchableOpacity>
+            <Link href="/signup">
+              <TouchableOpacity
+                style={{
+                  width: 80,
+                  borderRadius: 4,
+                  borderColor: Colors.light.accent,
+                  borderWidth: 1,
+                  padding: 8,
+                }}
+                onPress={() => {}}
+              >
+                <Text style={{ ...styles.button }}>Post</Text>
+              </TouchableOpacity>
+            </Link>
           </View>
         </BottomSheetView>
       </BottomSheet>

@@ -39,11 +39,22 @@ export const styles = StyleSheet.create({
     lineHeight: 30,
     color: Colors.light.subheading2,
   },
+  buttonContainer: {
+    backgroundColor: Colors.light.accent,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 5,
+    marginVertical: 16,
+    gap: 8,
+  },
   button: {
     fontFamily: "HindVadodara500",
     fontSize: 16,
     lineHeight: 30,
-    color: Colors.light.accent,
+    color: Colors.light.white,
     textAlign: "center",
   },
   iconText: {
