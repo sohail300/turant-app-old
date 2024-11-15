@@ -110,7 +110,7 @@ const setup = () => {
       >
         <ScrollView
           style={{ flex: 1 }}
-          contentContainerStyle={{ padding: 32, paddingBottom: 0, gap: 24 }}
+          contentContainerStyle={{ padding: 24, paddingBottom: 0, gap: 24 }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >

@@ -63,4 +63,10 @@ export const styles = StyleSheet.create({
     lineHeight: 19,
     color: Colors.light.icons,
   },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginBottom: 8,
+    marginLeft: 4,
+  },
 });
