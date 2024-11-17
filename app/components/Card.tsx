@@ -47,7 +47,7 @@ const Card = ({
         height={200}
         borderRadius={8}
       />
-      <Link href={"/SingleNews"}>
+      <Link href={"/single-news"}>
         <Heading>{heading}</Heading>
       </Link>
       <View
@@ -76,7 +76,9 @@ const Card = ({
             width={40}
             borderRadius={50}
           />
-          <Subheading>{author}</Subheading>
+          <Subheading onPress={() => router.push("/other-profile")}>
+            {author}
+          </Subheading>
           <Text>•</Text>
           <RedText> {language === "english" ? "Follow" : "फॉलो"}</RedText>
         </View>

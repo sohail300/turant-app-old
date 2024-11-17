@@ -54,7 +54,36 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen
-                name="SingleNews"
+                name="single-news"
+                options={{
+                  headerShown: true,
+                  headerTitle: "",
+                  headerTransparent: true,
+                  headerLeft: () => {
+                    return (
+                      <Pressable onPress={() => router.back()}>
+                        <View
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                        >
+                          <Ionicons
+                            name="chevron-back"
+                            size={24}
+                            color={Colors.light.accent}
+                          />
+                          <RedText>Back</RedText>
+                        </View>
+                      </Pressable>
+                    );
+                  },
+                }}
+              />
+              <Stack.Screen
+                name="other-profile"
                 options={{
                   headerShown: true,
                   headerTitle: "",
