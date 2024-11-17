@@ -26,6 +26,7 @@ export default function RootLayout() {
     HindVadodara400: require("../assets/fonts/HindVadodara400.ttf"),
     HindVadodara500: require("../assets/fonts/HindVadodara500.ttf"),
     HindVadodara600: require("../assets/fonts/HindVadodara600.ttf"),
+    HindVadodara700: require("../assets/fonts/HindVadodara700.ttf"),
     OpenSans400: require("../assets/fonts/OpenSans400.ttf"),
     OpenSans700: require("../assets/fonts/OpenSans700.ttf"),
   });
@@ -51,7 +52,7 @@ export default function RootLayout() {
           <Animated.View style={{ flex: 1 }} entering={FadeIn.duration(300)}>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              {/* <Stack.Screen name="(signin)" options={{ headerShown: false }} /> */}
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
               <Stack.Screen
                 name="SingleNews"
                 options={{

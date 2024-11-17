@@ -13,6 +13,7 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Link } from "expo-router";
 import { useSelector } from "react-redux";
 import DisclaimerText from "./DisclaimerText";
+import { router } from "expo-router";
 
 const Card = ({
   heading,
@@ -84,7 +85,7 @@ const Card = ({
       <ContentText full={full}>{content}</ContentText>
       <Details>{details}</Details>
       <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
-        <View
+        <Pressable
           style={{
             display: "flex",
             flexDirection: "row",
@@ -92,13 +93,12 @@ const Card = ({
             justifyContent: "center",
             alignItems: "center",
           }}
+          onPress={() => router.push("/login")}
         >
-          <Pressable>
-            <FontAwesome5 name="heart" size={24} color="black" />
-          </Pressable>
+          <FontAwesome5 name="heart" size={24} color="black" />
           <IconText>23.9k</IconText>
-        </View>
-        <View
+        </Pressable>
+        <Pressable
           style={{
             display: "flex",
             flexDirection: "row",
@@ -106,17 +106,14 @@ const Card = ({
             justifyContent: "center",
             alignItems: "center",
           }}
+          onPress={() => {
+            full && setShowCommentSheet(true);
+          }}
         >
-          <Pressable
-            onPress={() => {
-              full && setShowCommentSheet(true);
-            }}
-          >
-            <FontAwesome5 name="comment" size={24} color="black" />
-          </Pressable>
+          <FontAwesome5 name="comment" size={24} color="black" />
           <IconText>23.9k</IconText>
-        </View>
-        <View
+        </Pressable>
+        <Pressable
           style={{
             display: "flex",
             flexDirection: "row",
@@ -127,7 +124,7 @@ const Card = ({
         >
           <SimpleLineIcons name="share-alt" size={24} color="black" />
           <IconText>214</IconText>
-        </View>
+        </Pressable>
       </View>
       {full && (
         <View
