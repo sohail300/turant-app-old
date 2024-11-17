@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { styles } from "@/constants/styles";
 import { useFontLoaded } from "@/context/FontContext";
 import RedText from "./RedText";
+import { useSelector } from "react-redux";
 
 const ContentText = ({
   children,
@@ -15,6 +16,8 @@ const ContentText = ({
   style?: TextStyle;
   [x: string]: any;
 }) => {
+  const language = useSelector((state) => state.language.data);
+
   return (
     <View>
       {full ? (
@@ -30,7 +33,7 @@ const ContentText = ({
           >
             {children}
           </Text>
-          <RedText>Read More</RedText>
+          <RedText>{language === "english" ? "Read More" : "और पढ़ें"}</RedText>
         </>
       )}
     </View>

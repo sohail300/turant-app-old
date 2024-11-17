@@ -10,8 +10,34 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { Colors } from "@/constants/Colors";
 import Card from "@/components/Card";
+import { useDispatch } from "react-redux";
+import { initializeLanguage } from "@/store/LanguageSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect } from "react";
+import { router } from "expo-router";
+import { initializeLocation } from "@/store/LocationSlice";
 
 export default function HomeScreen() {
+  const dispatch = useDispatch();
+  initializeLanguage(dispatch);
+  initializeLocation(dispatch);
+
+  useEffect(() => {
+    async function getIsAppSetup() {
+      try {
+        const value = await AsyncStorage.getItem("isAppSetup");
+
+        if (value !== "true") {
+          router.push("/setup");
+        }
+      } catch (error) {
+        console.error("Error getting isAppSetup:", error);
+      }
+    }
+
+    getIsAppSetup();
+  }, []);
+
   const data = [
     {
       id: 1,

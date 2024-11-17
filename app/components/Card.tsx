@@ -11,6 +11,7 @@ import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import IconText from "./IconText";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Link } from "expo-router";
+import { useSelector } from "react-redux";
 
 const Card = ({
   heading,
@@ -22,6 +23,8 @@ const Card = ({
   setShowCommentSheet,
   full = false,
 }) => {
+  const language = useSelector((state) => state.language.data);
+
   return (
     <SafeAreaView
       style={{
@@ -73,7 +76,7 @@ const Card = ({
           />
           <Subheading>{author}</Subheading>
           <Text>•</Text>
-          <RedText> Follow </RedText>
+          <RedText> {language === "english" ? "Follow" : "फॉलो"}</RedText>
         </View>
         <Feather name="bookmark" size={24} color="black" />
       </View>

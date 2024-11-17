@@ -11,6 +11,8 @@ import { Colors } from "@/constants/Colors";
 import RedText from "@/components/RedText";
 import SplashScreenComponent from "@/components/SplashScreenComponent";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { Provider } from "react-redux";
+import store from "@/store/store";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 // SplashScreen.preventAutoHideAsync();
@@ -35,7 +37,6 @@ export default function RootLayout() {
   }, [fontsLoaded || fontsError]);
 
   if (!fontsLoaded || fontsError || !splashAnimationFinished) {
-    console.log(fontsLoaded, !fontsError, splashAnimationFinished);
     return (
       <SplashScreenComponent
         onAnimationFinished={() => setSplashAnimationFinished(true)}
@@ -45,44 +46,46 @@ export default function RootLayout() {
 
   return (
     <FontContext.Provider value={fontsLoaded}>
-      <GestureHandlerRootView>
-        <Animated.View style={{ flex: 1 }} entering={FadeIn.duration(300)}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            {/* <Stack.Screen name="(signin)" options={{ headerShown: false }} /> */}
-            <Stack.Screen
-              name="SingleNews"
-              options={{
-                headerShown: true,
-                headerTitle: "",
-                headerTransparent: true,
-                headerLeft: () => {
-                  return (
-                    <Pressable onPress={() => router.back()}>
-                      <View
-                        style={{
-                          display: "flex",
-                          flexDirection: "row",
-                          alignItems: "center",
-                          gap: 4,
-                        }}
-                      >
-                        <Ionicons
-                          name="chevron-back"
-                          size={24}
-                          color={Colors.light.accent}
-                        />
-                        <RedText>Back</RedText>
-                      </View>
-                    </Pressable>
-                  );
-                },
-              }}
-            />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-        </Animated.View>
-      </GestureHandlerRootView>
+      <Provider store={store}>
+        <GestureHandlerRootView>
+          <Animated.View style={{ flex: 1 }} entering={FadeIn.duration(300)}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              {/* <Stack.Screen name="(signin)" options={{ headerShown: false }} /> */}
+              <Stack.Screen
+                name="SingleNews"
+                options={{
+                  headerShown: true,
+                  headerTitle: "",
+                  headerTransparent: true,
+                  headerLeft: () => {
+                    return (
+                      <Pressable onPress={() => router.back()}>
+                        <View
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                        >
+                          <Ionicons
+                            name="chevron-back"
+                            size={24}
+                            color={Colors.light.accent}
+                          />
+                          <RedText>Back</RedText>
+                        </View>
+                      </Pressable>
+                    );
+                  },
+                }}
+              />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+          </Animated.View>
+        </GestureHandlerRootView>
+      </Provider>
     </FontContext.Provider>
   );
 }

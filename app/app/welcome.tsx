@@ -4,8 +4,12 @@ import Feather from "@expo/vector-icons/Feather";
 import { styles } from "@/constants/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
+import welcomePage from "@/locales/welcomePage.json";
+import { useSelector } from "react-redux";
 
 const setup = () => {
+  const language = useSelector((state) => state.language.data);
+
   return (
     <SafeAreaView
       style={{
@@ -23,7 +27,7 @@ const setup = () => {
           textAlign: "center",
         }}
       >
-        Welcome To Turant
+        {welcomePage.welcomeToTurant[language]}
       </Text>
 
       <View style={{ flex: 1, height: 340, backgroundColor: "#D9D9D9" }}></View>
@@ -32,7 +36,7 @@ const setup = () => {
         style={styles.buttonContainer}
         onPress={() => router.push("/")}
       >
-        <Text style={styles.button}>Get Started</Text>
+        <Text style={styles.button}>{welcomePage.getStarted[language]}</Text>
         <Feather name="arrow-right-circle" size={24} color="#fff" />
       </Pressable>
       <View style={{ paddingBottom: 100 }} />
