@@ -15,6 +15,7 @@ export const Colors = {
     background: "#F7EDEE",
     white: "#fff",
     accent: `#B22A2C`,
+    disclaimer: `#F54949`,
   },
   dark: {
     text: "#ECEDEE",

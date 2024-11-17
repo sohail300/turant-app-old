@@ -17,6 +17,7 @@ import { TextInput } from "react-native-gesture-handler";
 import * as Yup from "yup";
 import ErrorText from "@/components/ErrorText";
 import { useNavigation } from "@react-navigation/native";
+import CheckBox from "react-native-check-box";
 
 export default function Signup() {
   const navigation = useNavigation();
@@ -34,6 +35,10 @@ export default function Signup() {
     cpassword: Yup.string()
       .oneOf([Yup.ref("password"), null], "Passwords must match")
       .required("Confirm Password is required"),
+    agreement: Yup.boolean().oneOf(
+      [true],
+      "You must agree to the terms and conditions"
+    ),
   });
 
   return (
@@ -72,6 +77,7 @@ export default function Signup() {
                 phone: "",
                 password: "",
                 cpassword: "",
+                agreement: false,
               }}
               validationSchema={validate}
               onSubmit={(values, { setSubmitting }) => {
@@ -81,6 +87,7 @@ export default function Signup() {
               }}
             >
               {({
+                setFieldValue,
                 handleChange,
                 handleBlur,
                 handleSubmit,
@@ -251,6 +258,22 @@ export default function Signup() {
                       <ErrorText>{errors.cpassword}</ErrorText>
                     )}
                   </View>
+
+                  <View style={{ gap: 8 }}>
+                    <CheckBox
+                      isChecked={values.agreement}
+                      onClick={() => {
+                        console.log(values.agreement);
+                        setFieldValue("agreement", !values.agreement);
+                        console.log(values.agreement);
+                      }}
+                      rightText="I agree to follow the Terms And Conditions and avoid uploading adult content."
+                    />
+                    {touched.agreement && errors.agreement && (
+                      <ErrorText>{errors.agreement}</ErrorText>
+                    )}
+                  </View>
+
                   <TouchableOpacity
                     disabled={isSubmitting}
                     style={styles.buttonContainer}

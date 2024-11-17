@@ -12,6 +12,7 @@ import IconText from "./IconText";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Link } from "expo-router";
 import { useSelector } from "react-redux";
+import DisclaimerText from "./DisclaimerText";
 
 const Card = ({
   heading,
@@ -128,6 +129,23 @@ const Card = ({
           <IconText>214</IconText>
         </View>
       </View>
+      {full && (
+        <View
+          style={{
+            borderTopColor: Colors.light.border,
+            borderTopWidth: 1,
+            paddingTop: 16,
+            marginTop: 8,
+          }}
+        >
+          <DisclaimerText>
+            Disclaimer: This content/video has been published directly by the
+            user on TURANT, an intermediary platform. TURANT has neither
+            reviewed nor endorsed the content and holds no prior knowledge of
+            its details.
+          </DisclaimerText>
+        </View>
+      )}
     </SafeAreaView>
   );
 };

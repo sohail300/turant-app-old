@@ -64,9 +64,16 @@ export const styles = StyleSheet.create({
     color: Colors.light.icons,
   },
   errorText: {
+    fontFamily: "HindVadodara500",
     color: "red",
     fontSize: 12,
     marginBottom: 8,
     marginLeft: 4,
+  },
+  disclaimerText: {
+    fontFamily: "HindVadodara400",
+    fontSize: 14,
+    lineHeight: 21,
+    color: Colors.light.disclaimer,
   },
 });
