@@ -5,8 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Users, FileText, PlusCircle, UserCog, LogOut } from "lucide-react";
 import Image from "next/image";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Button } from "./ui/button";
+import { PopoverClose } from "@radix-ui/react-popover";
+import { useRouter } from "next/navigation";
 
 const Sidebar = () => {
+  const router = useRouter();
   const pathname = usePathname();
 
   const navigation = [
@@ -76,12 +81,48 @@ const Sidebar = () => {
           );
         })}
 
-        <hr className="border-brandBorder" />
+        <div className=" h-[16px] border-b border-brandBorder"></div>
+        <div className=" h-[12px]"></div>
+
         {/* Logout Button */}
-        <button className="flex items-center w-full px-4 py-3 font-hind500 text-lg text-brandText rounded-lg hover:bg-white">
-          <LogOut className="mr-3 h-5 w-5 text-brandText" />
-          Logout
-        </button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant={"ghost"}
+              className="font-hind500 text-lg text-brandText flex justify-start items-center hover:bg-white w-full px-4 py-6"
+            >
+              <LogOut className="mr-2 h-5 w-5 text-brandText" />
+              Logout
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <div className=" py-8 px-6 space-y-6">
+              <div className="flex flex-col text-center font-hind500 text-lg text-brandText">
+                <span>Are your sure,</span>
+                <span className=" leading-6">you want to logout?</span>
+              </div>
+              <div className=" flex flex-row gap-4 font-hind500 text-balance">
+                <PopoverClose asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full text-white bg-brandAccent hover:bg-brandAccent/80 hover:text-white border-white px-4"
+                    onClick={() => router.replace("/")}
+                  >
+                    Log Out
+                  </Button>
+                </PopoverClose>
+                <PopoverClose asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full text-brandAccent border-brandAccent hover:text-brandAccent px-4"
+                  >
+                    Cancel
+                  </Button>
+                </PopoverClose>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </nav>
     </div>
   );

@@ -95,6 +95,7 @@ const UserDetailsDashboard = () => {
   const [isOpen, setIsOpen] = useState("");
 
   const [isEditEnabled, setIsEditEnabled] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -186,11 +187,13 @@ const UserDetailsDashboard = () => {
               Edit
             </Button>
 
-            <DropdownMenu>
+            <DropdownMenu open={isFilterOpen} onOpenChange={setIsFilterOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-1/2 sm:w-fit flex items-center justify-center gap-2 text-lg"
+                  className={`w-1/2 sm:w-fit flex items-center justify-center gap-2 text-lg ${
+                    isFilterOpen ? "bg-brandAccent text-white" : ""
+                  }`}
                 >
                   <Filter className="h-4 w-4" />
                   <span>Filter</span>

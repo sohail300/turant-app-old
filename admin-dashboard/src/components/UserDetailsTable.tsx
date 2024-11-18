@@ -16,6 +16,8 @@ import { ColumnDef, flexRender } from "@tanstack/react-table";
 import { User } from "@/lib/interface";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { PopoverClose } from "@radix-ui/react-popover";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "./ui/label";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -136,7 +138,7 @@ export const columns: ColumnDef<User>[] = [
     accessorKey: "action",
     header: "Action",
     cell: ({ row }) => (
-      <div className="min-w-[160px]">
+      <div className="min-w-[160px] flex flex-row justify-between">
         <span
           className={`py-1 rounded-full text-base font-hind500 whitespace-nowrap ${
             row.getValue("action") === "Active"
@@ -146,7 +148,81 @@ export const columns: ColumnDef<User>[] = [
         >
           {row.getValue("action")}
         </span>
-        <ChevronRight className="ml-2 h-4 w-4" />
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant={"ghost"} size={"icon"}>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <div className=" py-4 px-6">
+              <div className=" flex justify-end">
+                <PopoverClose asChild>
+                  <Button
+                    size={"icon"}
+                    variant="ghost"
+                    className="w-8 h-8 mb-2"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </PopoverClose>
+              </div>
+              <div className=" border-b border-brandBorder pb-4">
+                Shubham Kumar (username: shubhamkumar001)
+              </div>
+              <div className="flex flex-col gap-6 mt-4">
+                <div className="flex flex-row justify-between">
+                  <div>Message</div>
+                  <textarea
+                    cols={30}
+                    rows={5}
+                    className="border border-brandBorder rounded-md"
+                  ></textarea>
+                </div>
+                <div className="flex flex-row justify-between">
+                  <div className=" whitespace-nowrap">Post URL</div>
+                  <input
+                    type="text"
+                    size={30}
+                    className="border border-brandBorder rounded-md w-[260px]"
+                  />
+                </div>
+                <div>
+                  <span>Would you like to delete this post?</span>
+                  <RadioGroup
+                    defaultValue="yes"
+                    className="flex flex-row gap-6"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="yes" id="yes" />
+                      <Label
+                        htmlFor="yes"
+                        className=" font-hind400 text-lg text-brandText"
+                      >
+                        Yes
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="no" id="no" />
+                      <Label
+                        htmlFor="no"
+                        className=" font-hind400 text-lg text-brandText"
+                      >
+                        No
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                  <div className=" border-t border-brandBorder pt-4 mt-4 flex justify-end">
+                    <Button className="bg-brandAccent text-white hover:bg-brandAccent/80 hover:text-white">
+                      Confirm
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     ),
   },
@@ -155,29 +231,55 @@ export const columns: ColumnDef<User>[] = [
     header: "Notes",
     cell: ({ row }) => (
       <div className="min-w-[160px]">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"ghost"}
-              className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
-            >
-              View Details
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <div className=" py-8 px-6 space-y-6">
-              <div className=" flex justify-end">
-                <PopoverClose asChild>
-                  <Button size={"icon"} variant="ghost" className="w-8 h-8">
-                    <X className="h-4 w-4" />
-                  </Button>
-                </PopoverClose>
+        {row.getValue("action") !== "Active" && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"ghost"}
+                className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
+              >
+                View Details
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <div className=" py-4 px-6">
+                <div className=" flex justify-end">
+                  <PopoverClose asChild>
+                    <Button
+                      size={"icon"}
+                      variant="ghost"
+                      className="w-8 h-8 mb-2"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </PopoverClose>
+                </div>
+                <div className=" border-b border-brandBorder pb-4">
+                  Shubham Kumar (username: shubhamkumar001)
+                </div>
+                <div className="flex flex-col gap-6 mt-4">
+                  <div className="flex flex-row justify-between">
+                    <div>Message</div>
+                    <textarea
+                      cols={30}
+                      rows={5}
+                      className="border border-brandBorder rounded-md"
+                    ></textarea>
+                  </div>
+                  <div className="flex flex-row justify-between">
+                    <div className=" whitespace-nowrap">Post URL</div>
+                    <input
+                      type="text"
+                      size={30}
+                      className="border border-brandBorder rounded-md w-[260px]"
+                    />
+                  </div>
+                </div>
               </div>
-              <div>Details of the advertiser</div>
-            </div>
-          </PopoverContent>
-        </Popover>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
     ),
   },
