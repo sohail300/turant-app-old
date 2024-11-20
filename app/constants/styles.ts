@@ -57,6 +57,13 @@ export const styles = StyleSheet.create({
     color: Colors.light.white,
     textAlign: "center",
   },
+  buttonReverse: {
+    fontFamily: "HindVadodara500",
+    fontSize: 16,
+    lineHeight: 30,
+    color: Colors.light.accent,
+    textAlign: "center",
+  },
   iconText: {
     fontFamily: "OpenSans400",
     fontSize: 14,

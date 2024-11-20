@@ -12,6 +12,7 @@ export const Colors = {
     details: "#828282",
     icons: "#1D1D1D",
     border: "#C8C8C8",
+    header: "#f0f0f0",
     background: "#F7EDEE",
     white: "#fff",
     accent: `#B22A2C`,

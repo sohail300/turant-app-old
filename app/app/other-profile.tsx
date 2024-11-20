@@ -8,10 +8,11 @@ import {
   TouchableOpacity,
 } from "react-native-gesture-handler";
 import Card from "@/components/Card";
-import { Ionicons } from "@expo/vector-icons";
 import { styles } from "@/constants/styles";
 
 const OtherProfile = () => {
+  const [isFollowing, setIsFollowing] = useState(false);
+
   const data = [
     {
       id: 1,
@@ -164,18 +165,39 @@ const OtherProfile = () => {
           </View>
 
           {/* Follow Button */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: Colors.light.accent,
-              paddingVertical: 8,
-              paddingHorizontal: 48,
-              borderRadius: 5,
-              alignSelf: "flex-start",
-              marginTop: 8,
-            }}
-          >
-            <Text style={{ ...styles.button }}>Follow</Text>
-          </TouchableOpacity>
+          {isFollowing ? (
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.light.white,
+                borderColor: Colors.light.accent,
+                borderWidth: 1,
+                paddingVertical: 8,
+                paddingHorizontal: 48,
+                borderRadius: 5,
+                alignSelf: "flex-start",
+                marginTop: 8,
+              }}
+              onPress={() => setIsFollowing(false)}
+            >
+              <Text style={{ ...styles.buttonReverse }}>Following</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={{
+                backgroundColor: Colors.light.accent,
+                borderColor: Colors.light.accent,
+                borderWidth: 1,
+                paddingVertical: 8,
+                paddingHorizontal: 48,
+                borderRadius: 5,
+                alignSelf: "flex-start",
+                marginTop: 8,
+              }}
+              onPress={() => setIsFollowing(true)}
+            >
+              <Text style={{ ...styles.button }}>Follow</Text>
+            </TouchableOpacity>
+          )}
         </View>
         <FlatList
           scrollEnabled={false}
