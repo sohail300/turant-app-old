@@ -27,6 +27,12 @@ export const styles = StyleSheet.create({
     lineHeight: 27,
     color: Colors.light.text,
   },
+  ContentText2: {
+    fontFamily: "HindVadodara400",
+    fontSize: 16,
+    lineHeight: 24,
+    color: Colors.light.subheading,
+  },
   details: {
     fontFamily: "HindVadodara400",
     fontSize: 14,
