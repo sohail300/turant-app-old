@@ -5,9 +5,13 @@ import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import SearchBottomSheet from "@/components/SearchBottomSheet";
+import RestrictedBottomSheet from "@/components/RestrictedBottomSheet";
+import { Dimensions, View } from "react-native";
 
 export default function TabLayout() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showRestrictedBottomSheet, setShowRestrictedBottomSheet] =
+    useState(false);
 
   return (
     <>
@@ -35,12 +39,12 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="search"
-          // listeners={{
-          //   tabPress: (e) => {
-          //     e.preventDefault();
-          //     setIsOpen(true);
-          //   },
-          // }}
+          listeners={{
+            tabPress: (e) => {
+              e.preventDefault();
+              router.push("/about");
+            },
+          }}
           options={{
             title: "Search",
             tabBarActiveTintColor: Colors.light.accent,
@@ -54,7 +58,7 @@ export default function TabLayout() {
           listeners={{
             tabPress: (e) => {
               e.preventDefault();
-              router.push("/about");
+              setShowRestrictedBottomSheet(true);
             },
           }}
           options={{
@@ -81,7 +85,24 @@ export default function TabLayout() {
         />
       </Tabs>
 
-      {/* <SearchBottomSheet isOpen={isOpen} close={() => setIsOpen(false)} /> */}
+      {/* Gray overlay */}
+      {showRestrictedBottomSheet && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0, // This ensures it starts from the very top
+            left: 0,
+            right: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.3)",
+            height: Dimensions.get("screen").height,
+          }}
+        />
+      )}
+      {showRestrictedBottomSheet && (
+        <RestrictedBottomSheet
+          close={() => setShowRestrictedBottomSheet(false)}
+        />
+      )}
     </>
   );
 }

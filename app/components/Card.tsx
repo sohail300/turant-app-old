@@ -1,5 +1,5 @@
 import { View, Text, SafeAreaView, Image, Pressable } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import Feather from "@expo/vector-icons/Feather";
 import { Colors } from "@/constants/Colors";
 import Heading from "./Heading";

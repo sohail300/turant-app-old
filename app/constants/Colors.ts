@@ -15,8 +15,10 @@ export const Colors = {
     header: "#f0f0f0",
     background: "#F7EDEE",
     white: "#fff",
+    black: "#000",
     accent: `#B22A2C`,
     disclaimer: `#F54949`,
+    link: "#0000EE",
   },
   dark: {
     text: "#ECEDEE",
