@@ -7,6 +7,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import SearchBottomSheet from "@/components/SearchBottomSheet";
 import RestrictedBottomSheet from "@/components/RestrictedBottomSheet";
 import { Dimensions, View } from "react-native";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 export default function TabLayout() {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +34,11 @@ export default function TabLayout() {
             title: "Home",
             tabBarActiveTintColor: Colors.light.accent,
             tabBarIcon: ({ color, focused }) => (
-              <Feather name="home" size={24} color={color} />
+              <Feather
+                name="home"
+                size={24}
+                color={focused ? Colors.light.accent : Colors.light.black}
+              />
             ),
           }}
         />
@@ -42,14 +47,17 @@ export default function TabLayout() {
           listeners={{
             tabPress: (e) => {
               e.preventDefault();
-              router.push("/about");
             },
           }}
           options={{
             title: "Search",
             tabBarActiveTintColor: Colors.light.accent,
             tabBarIcon: ({ color, focused }) => (
-              <Feather name="search" size={24} color={color} />
+              <Feather
+                name="search"
+                size={24}
+                color={focused ? Colors.light.accent : Colors.light.black}
+              />
             ),
           }}
         />
@@ -68,7 +76,7 @@ export default function TabLayout() {
               <MaterialIcons
                 name="add-circle-outline"
                 size={24}
-                color={color}
+                color={focused ? Colors.light.accent : Colors.light.black}
               />
             ),
           }}
@@ -79,7 +87,11 @@ export default function TabLayout() {
             title: "Profile",
             tabBarActiveTintColor: Colors.light.accent,
             tabBarIcon: ({ color, focused }) => (
-              <Ionicons name="person-outline" size={24} color={color} />
+              <FontAwesome6
+                name="user"
+                size={21}
+                color={focused ? Colors.light.accent : Colors.light.black}
+              />
             ),
           }}
         />

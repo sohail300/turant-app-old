@@ -96,7 +96,7 @@ const OtherProfile = () => {
                   fontSize: 16,
                   lineHeight: 24,
                   marginTop: -4,
-                  marginBottom: 12,
+                  marginBottom: 16,
                 }}
               >
                 @rahulkumar001
