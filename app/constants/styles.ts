@@ -63,6 +63,13 @@ export const styles = StyleSheet.create({
     color: Colors.light.white,
     textAlign: "center",
   },
+  button2: {
+    fontFamily: "HindVadodara500",
+    fontSize: 18,
+    lineHeight: 27,
+    color: Colors.light.white,
+    textAlign: "center",
+  },
   buttonReverse: {
     fontFamily: "HindVadodara500",
     fontSize: 16,

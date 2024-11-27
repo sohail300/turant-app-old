@@ -74,7 +74,7 @@ const profile = () => {
   return (
     <SafeAreaView
       style={{
-        backgroundColor: `${Colors.light.background}`,
+        backgroundColor: `${Colors.light.white}`,
         height: Dimensions.get("window").height,
         flex: 1,
         borderWidth: 1,
@@ -305,7 +305,12 @@ const profile = () => {
       </View>
 
       <View
-        style={{ flex: 1, borderWidth: 1, borderColor: Colors.light.border }}
+        style={{
+          flex: 1,
+          borderWidth: 1,
+          borderColor: Colors.light.border,
+          backgroundColor: `${Colors.light.background}`,
+        }}
       >
         {tab == 1 && <UserPost />}
         {tab == 2 && <UserSaved />}

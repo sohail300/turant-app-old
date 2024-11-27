@@ -66,7 +66,8 @@ export default function TabLayout() {
           listeners={{
             tabPress: (e) => {
               e.preventDefault();
-              setShowRestrictedBottomSheet(true);
+              router.push("/(upload)/upload");
+              // setShowRestrictedBottomSheet(true);
             },
           }}
           options={{
