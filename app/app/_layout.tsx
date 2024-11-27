@@ -112,6 +112,34 @@ export default function RootLayout() {
                   },
                 }}
               />
+              <Stack.Screen
+                name="edit-profile"
+                options={{
+                  headerShown: true,
+                  headerTitle: "Edit Profile",
+                  headerTitleAlign: "center",
+                  headerLeft: () => {
+                    return (
+                      <Pressable onPress={() => router.back()}>
+                        <View
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 4,
+                          }}
+                        >
+                          <Ionicons
+                            name="chevron-back"
+                            size={24}
+                            color={Colors.light.icons}
+                          />
+                        </View>
+                      </Pressable>
+                    );
+                  },
+                }}
+              />
               <Stack.Screen name="+not-found" />
             </Stack>
           </Animated.View>

@@ -19,6 +19,7 @@ export const Colors = {
     accent: `#B22A2C`,
     disclaimer: `#F54949`,
     link: "#0000EE",
+    orange: "#FF8D0B",
   },
   dark: {
     text: "#ECEDEE",

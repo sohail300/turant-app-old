@@ -186,7 +186,9 @@ const profile = () => {
                 borderRadius: 36,
               }}
             />
-            <RedText>Edit Profile</RedText>
+            <RedText onPress={() => router.push("/edit-profile")}>
+              Edit Profile
+            </RedText>
           </View>
         </View>
         <View
