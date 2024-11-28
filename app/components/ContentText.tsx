@@ -5,6 +5,7 @@ import { styles } from "@/constants/styles";
 import { useFontLoaded } from "@/context/FontContext";
 import RedText from "./RedText";
 import { useSelector } from "react-redux";
+import { router } from "expo-router";
 
 const ContentText = ({
   children,
@@ -33,7 +34,9 @@ const ContentText = ({
           >
             {children}
           </Text>
-          <RedText>{language === "english" ? "Read More" : "और पढ़ें"}</RedText>
+          <RedText onPress={() => router.push("/single-news")}>
+            {language === "english" ? "Read More" : "और पढ़ें"}
+          </RedText>
         </>
       )}
     </View>

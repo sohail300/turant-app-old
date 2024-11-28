@@ -19,6 +19,7 @@ import ErrorText from "@/components/ErrorText";
 import { useNavigation } from "@react-navigation/native";
 import CheckBox from "react-native-check-box";
 import { router } from "expo-router";
+import RedText from "@/components/RedText";
 
 export default function Signup() {
   const navigation = useNavigation();
@@ -274,6 +275,17 @@ export default function Signup() {
                       <ErrorText>{errors.agreement}</ErrorText>
                     )}
                   </View>
+
+                  <RedText
+                    onPress={() => router.push("/terms_and_conditions")}
+                    style={{
+                      marginVertical: -8,
+                      textAlign: "right",
+                      fontSize: 14,
+                    }}
+                  >
+                    Read Terms And Conditions
+                  </RedText>
 
                   <TouchableOpacity
                     disabled={isSubmitting}

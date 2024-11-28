@@ -51,7 +51,7 @@ export default function Signup() {
               <Image source={logo} style={style.logo} />
               <Text style={style.title}>Change Password</Text>
               <Text style={style.subtitle}>
-                We have send 4 digit code to nikhil@gmail.com.
+                We have send 4 digit code to nikhil@gmail.com
               </Text>
               <View style={style.spamContainer}>
                 <Text style={style.cantFindText}>Can't find?</Text>
@@ -83,6 +83,7 @@ export default function Signup() {
                     <Text style={style.inputLabel}>Enter OTP</Text>
                     <OtpInput
                       numberOfDigits={4}
+                      autoFocus={false}
                       focusColor={Colors.light.border}
                       focusStickBlinkingDuration={500}
                       onTextChange={(text) => setFieldValue("otp", text)}
@@ -184,6 +185,7 @@ const style = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    marginTop: 16,
   },
   scrollContent: {
     padding: 16,
@@ -271,7 +273,7 @@ const style = StyleSheet.create({
     justifyContent: "flex-end",
     alignItems: "center",
     gap: 4,
-    marginTop: -8,
+    marginTop: -16,
   },
   resendText: {
     ...styles.details,

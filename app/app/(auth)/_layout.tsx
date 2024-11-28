@@ -2,8 +2,8 @@ import React from "react";
 import { router, Stack } from "expo-router";
 import { Pressable, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 import RedText from "@/components/RedText";
+import { Colors } from "@/constants/Colors";
 
 const AuthLayout = () => {
   return (
@@ -31,9 +31,9 @@ const AuthLayout = () => {
                   <Ionicons
                     name="chevron-back"
                     size={24}
-                    color={Colors.light.accent}
+                    color={Colors.light.white}
                   />
-                  <RedText>Back</RedText>
+                  <RedText style={{ color: Colors.light.white }}>Back</RedText>
                 </View>
               </Pressable>
             );

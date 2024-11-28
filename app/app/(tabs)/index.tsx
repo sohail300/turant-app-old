@@ -13,9 +13,11 @@ import Card from "@/components/Card";
 import { useDispatch } from "react-redux";
 import { initializeLanguage } from "@/store/LanguageSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { initializeLocation } from "@/store/LocationSlice";
+import CommentBottomSheet from "@/components/CommentBottomSheet";
+import CardFlatlistComponent from "@/components/CardFlatlistComponent";
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
@@ -88,20 +90,7 @@ export default function HomeScreen() {
         paddingBottom: 24,
       }}
     >
-      <FlatList
-        keyExtractor={(item) => item.id}
-        data={data}
-        renderItem={({ item }) => (
-          <Card
-            heading={item.heading}
-            imageUrl={item.imageUrl}
-            content={item.content}
-            author={item.author}
-            authorImage={item.authorImage}
-            details={item.details}
-          />
-        )}
-      />
+      <CardFlatlistComponent data={data} />
     </SafeAreaView>
   );
 }

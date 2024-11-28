@@ -9,6 +9,7 @@ import {
 } from "react-native-gesture-handler";
 import Card from "@/components/Card";
 import { styles } from "@/constants/styles";
+import CardFlatlistComponent from "@/components/CardFlatlistComponent";
 
 const OtherProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -105,16 +106,14 @@ const OtherProfile = () => {
               <View
                 style={{
                   flexDirection: "row",
-                  gap: 16,
                   marginBottom: 16,
+                  gap: 24,
                 }}
               >
-                <Text
+                <View
                   style={{
-                    fontFamily: "HindVadodara500",
-                    fontSize: 14,
-                    lineHeight: 24,
-                    color: Colors.light.subheading,
+                    flexDirection: "row",
+                    gap: 4,
                   }}
                 >
                   <Text
@@ -127,14 +126,21 @@ const OtherProfile = () => {
                   >
                     2.2k
                   </Text>
-                  Followers
-                </Text>
-                <Text
+                  <Text
+                    style={{
+                      fontFamily: "HindVadodara500",
+                      fontSize: 14,
+                      lineHeight: 22,
+                      color: Colors.light.subheading,
+                    }}
+                  >
+                    Followers
+                  </Text>
+                </View>
+                <View
                   style={{
-                    fontFamily: "HindVadodara500",
-                    fontSize: 14,
-                    lineHeight: 24,
-                    color: Colors.light.subheading,
+                    flexDirection: "row",
+                    gap: 4,
                   }}
                 >
                   <Text
@@ -146,9 +152,18 @@ const OtherProfile = () => {
                     }}
                   >
                     20
-                  </Text>{" "}
-                  Following
-                </Text>
+                  </Text>
+                  <Text
+                    style={{
+                      fontFamily: "HindVadodara500",
+                      fontSize: 14,
+                      lineHeight: 22,
+                      color: Colors.light.subheading,
+                    }}
+                  >
+                    Following
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -199,21 +214,8 @@ const OtherProfile = () => {
             </TouchableOpacity>
           )}
         </View>
-        <FlatList
-          scrollEnabled={false}
-          keyExtractor={(item) => String(item.id)}
-          data={data}
-          renderItem={({ item }) => (
-            <Card
-              heading={item.heading}
-              imageUrl={item.imageUrl}
-              content={item.content}
-              author={item.author}
-              authorImage={item.authorImage}
-              details={item.details}
-            />
-          )}
-        />
+
+        <CardFlatlistComponent data={data} />
       </ScrollView>
     </SafeAreaView>
   );

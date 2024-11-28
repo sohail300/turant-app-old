@@ -31,7 +31,7 @@ const SingleNews = () => {
         flex: 1,
       }}
     >
-      <ScrollView style={{ marginTop: 48 }}>
+      <ScrollView style={{ marginTop: 56 }}>
         <Card
           heading={item.heading}
           imageUrl={item.imageUrl}

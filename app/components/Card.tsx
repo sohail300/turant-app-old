@@ -1,4 +1,11 @@
-import { View, Text, SafeAreaView, Image, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  Image,
+  Pressable,
+  Share,
+} from "react-native";
 import React, { useState } from "react";
 import Feather from "@expo/vector-icons/Feather";
 import { Colors } from "@/constants/Colors";
@@ -14,6 +21,9 @@ import { Link } from "expo-router";
 import { useSelector } from "react-redux";
 import DisclaimerText from "./DisclaimerText";
 import { router } from "expo-router";
+import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const Card = ({
   heading,
@@ -68,17 +78,25 @@ const Card = ({
             paddingVertical: 8,
           }}
         >
-          <Image
-            source={{
-              uri: authorImage,
+          <TouchableOpacity
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              gap: 8,
+              alignItems: "center",
             }}
-            height={40}
-            width={40}
-            borderRadius={50}
-          />
-          <Subheading onPress={() => router.push("/other-profile")}>
-            {author}
-          </Subheading>
+            onPress={() => router.push("/other-profile")}
+          >
+            <Image
+              source={{
+                uri: authorImage,
+              }}
+              height={40}
+              width={40}
+              borderRadius={50}
+            />
+            <Subheading>{author}</Subheading>
+          </TouchableOpacity>
           <Text>•</Text>
           <RedText> {language === "english" ? "Follow" : "फॉलो"}</RedText>
         </View>
@@ -87,7 +105,7 @@ const Card = ({
       <ContentText full={full}>{content}</ContentText>
       <Details>{details}</Details>
       <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
-        <Pressable
+        <TouchableOpacity
           style={{
             display: "flex",
             flexDirection: "row",
@@ -99,8 +117,8 @@ const Card = ({
         >
           <FontAwesome5 name="heart" size={24} color="black" />
           <IconText>23.9k</IconText>
-        </Pressable>
-        <Pressable
+        </TouchableOpacity>
+        <TouchableOpacity
           style={{
             display: "flex",
             flexDirection: "row",
@@ -109,13 +127,13 @@ const Card = ({
             alignItems: "center",
           }}
           onPress={() => {
-            full && setShowCommentSheet(true);
+            setShowCommentSheet(true);
           }}
         >
           <FontAwesome5 name="comment" size={24} color="black" />
           <IconText>23.9k</IconText>
-        </Pressable>
-        <Pressable
+        </TouchableOpacity>
+        <TouchableOpacity
           style={{
             display: "flex",
             flexDirection: "row",
@@ -124,9 +142,28 @@ const Card = ({
             alignItems: "center",
           }}
         >
-          <SimpleLineIcons name="share-alt" size={24} color="black" />
+          <Feather name="eye" size={26} color="black" />
+          <IconText>60k</IconText>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            gap: 4,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={() =>
+            Share.share({
+              message:
+                "Checkout TurantNews, I think you will like it. https://play.google.com/",
+              url: "Checkout TurantNews, I think you will like it. https://play.google.com/",
+            })
+          }
+        >
+          <FontAwesome6 name="share-square" size={22} color="black" />
           <IconText>214</IconText>
-        </Pressable>
+        </TouchableOpacity>
       </View>
       {full && (
         <View
