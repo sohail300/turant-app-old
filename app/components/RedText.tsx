@@ -1,8 +1,9 @@
 // components/Heading.tsx
-import { Text, TextStyle, StyleSheet } from "react-native";
+import { Text, TextStyle } from "react-native";
 import React from "react";
 import { styles } from "@/constants/styles";
 import { useFontLoaded } from "@/context/FontContext";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const RedText = ({
   children,
@@ -16,9 +17,11 @@ const RedText = ({
   const fontsLoaded = useFontLoaded();
 
   return (
-    <Text style={[styles.RedText, style]} {...props}>
-      {children}
-    </Text>
+    <TouchableOpacity>
+      <Text style={[styles.RedText, style]} {...props}>
+        {children}
+      </Text>
+    </TouchableOpacity>
   );
 };
 

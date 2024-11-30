@@ -65,7 +65,7 @@ const Component = () => {
     >
       <ScrollView
         style={{
-          marginTop: 48,
+          marginTop: 56,
           backgroundColor: Colors.light.white,
         }}
       >

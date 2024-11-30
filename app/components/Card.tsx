@@ -100,7 +100,9 @@ const Card = ({
           <Text>•</Text>
           <RedText> {language === "english" ? "Follow" : "फॉलो"}</RedText>
         </View>
-        <Feather name="bookmark" size={24} color="black" />
+        <TouchableOpacity>
+          <Feather name="bookmark" size={24} color="black" />
+        </TouchableOpacity>
       </View>
       <ContentText full={full}>{content}</ContentText>
       <Details>{details}</Details>

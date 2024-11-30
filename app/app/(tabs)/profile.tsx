@@ -1,6 +1,7 @@
 import {
   Dimensions,
   Image,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -23,8 +24,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-
-console.log(logo);
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const profile = () => {
   const [tab, setTab] = useState(1);
@@ -176,16 +176,18 @@ const profile = () => {
               gap: 8,
             }}
           >
-            <Image
-              source={{
-                uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-              }}
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 36,
-              }}
-            />
+            <Pressable onPress={() => router.push("/edit-profile")}>
+              <Image
+                source={{
+                  uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+                }}
+                style={{
+                  width: 72,
+                  height: 72,
+                  borderRadius: 36,
+                }}
+              />
+            </Pressable>
             <RedText onPress={() => router.push("/edit-profile")}>
               Edit Profile
             </RedText>
@@ -196,10 +198,10 @@ const profile = () => {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            gap: 8,
+            gap: 6,
           }}
         >
-          <Image source={verified} style={{ height: 16, width: 16 }} />
+          <MaterialIcons name="verified" size={20} color="#5C76E6" />
           <Text
             style={{
               fontFamily: "HindVadodara500",

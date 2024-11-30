@@ -23,10 +23,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { changeLocation } from "@/store/LocationSlice";
 
 const setup = () => {
+  const language = useSelector((state) => state.language.data);
+  const location = useSelector((state) => state.location.data);
+  const dispatch = useDispatch();
+
   const [stateOpen, setStateOpen] = useState(false);
   const [cityOpen, setCityOpen] = useState(false);
-  const [selectedState, setSelectedState] = useState(null);
-  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedState, setSelectedState] = useState(location.countryState);
+  const [selectedCity, setSelectedCity] = useState(location.city);
   const [states, setStates] = useState([
     { label: "Andhra Pradesh", value: "andhra_pradesh" },
     { label: "Arunachal Pradesh", value: "arunachal_pradesh" },
@@ -104,10 +108,6 @@ const setup = () => {
   const onCityOpen = () => {
     setStateOpen(false);
   };
-
-  const language = useSelector((state) => state.language.data);
-  const location = useSelector((state) => state.location.data);
-  const dispatch = useDispatch();
 
   return (
     <SafeAreaView
@@ -310,7 +310,7 @@ const setup = () => {
             style={styles.buttonContainer}
             onPress={async () => {
               AsyncStorage.setItem("isAppSetup", "true");
-              router.push("/welcome");
+              router.replace("/welcome");
             }}
           >
             <Text style={styles.button}>
@@ -319,8 +319,8 @@ const setup = () => {
             <Feather name="arrow-right-circle" size={24} color="#fff" />
           </Pressable>
 
-          <Text>{location.countryState}</Text>
-          <Text>{location.city}</Text>
+          {/* <Text>{location.countryState}</Text> */}
+          {/* <Text>{location.city}</Text> */}
           <View style={{ paddingBottom: 100 }} />
         </ScrollView>
       </KeyboardAvoidingView>

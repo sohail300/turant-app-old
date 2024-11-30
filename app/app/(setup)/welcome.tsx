@@ -34,7 +34,7 @@ const setup = () => {
 
       <Pressable
         style={styles.buttonContainer}
-        onPress={() => router.push("/")}
+        onPress={() => router.replace("/")}
       >
         <Text style={styles.button}>{welcomePage.getStarted[language]}</Text>
         <Feather name="arrow-right-circle" size={24} color="#fff" />

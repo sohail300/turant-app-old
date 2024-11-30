@@ -30,7 +30,7 @@ export default function HomeScreen() {
         const value = await AsyncStorage.getItem("isAppSetup");
 
         if (value !== "true") {
-          router.push("/setup");
+          router.replace("/setup");
         }
       } catch (error) {
         console.error("Error getting isAppSetup:", error);
