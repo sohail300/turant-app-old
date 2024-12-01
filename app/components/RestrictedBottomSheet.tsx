@@ -23,6 +23,15 @@ const RestrictedBottomSheet = ({ close }) => {
         containerHeight={Dimensions.get("window").height}
         enablePanDownToClose={true}
         onClose={close}
+        style={{
+          backgroundColor: "#fff", // Ensure background is set
+          shadowColor: "#000", // Shadow color
+          shadowOffset: { width: 0, height: -2 }, // Top shadow with a negative height
+          shadowOpacity: 0.5, // Opacity of the shadow
+          shadowRadius: 4, // Blur radius
+          elevation: 12, // For Android
+          borderRadius: 10,
+        }}
       >
         <BottomSheetView
           style={{

@@ -2,12 +2,7 @@ import { View, Text, Dimensions, Image } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
-import {
-  FlatList,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native-gesture-handler";
-import Card from "@/components/Card";
+import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { styles } from "@/constants/styles";
 import CardFlatlistComponent from "@/components/CardFlatlistComponent";
 
@@ -215,7 +210,7 @@ const OtherProfile = () => {
           )}
         </View>
 
-        <CardFlatlistComponent data={data} />
+        <CardFlatlistComponent scrollEnabled={false} data={data} />
       </ScrollView>
     </SafeAreaView>
   );

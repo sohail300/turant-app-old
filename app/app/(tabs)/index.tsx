@@ -1,22 +1,12 @@
-import {
-  Image,
-  StyleSheet,
-  Platform,
-  Text,
-  Dimensions,
-  View,
-} from "react-native";
+import { Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { FlatList, ScrollView } from "react-native-gesture-handler";
 import { Colors } from "@/constants/Colors";
-import Card from "@/components/Card";
 import { useDispatch } from "react-redux";
 import { initializeLanguage } from "@/store/LanguageSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { initializeLocation } from "@/store/LocationSlice";
-import CommentBottomSheet from "@/components/CommentBottomSheet";
 import CardFlatlistComponent from "@/components/CardFlatlistComponent";
 
 export default function HomeScreen() {

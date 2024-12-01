@@ -18,10 +18,19 @@ import Feather from "@expo/vector-icons/Feather";
 import { styles } from "@/constants/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
+import { useDispatch } from "react-redux";
+import { changeBottomSheetState } from "@/store/CommentBottomSheetSlice";
 
-const CommentBottomSheet = ({ close }) => {
+const CommentBottomSheet = ({
+  isSingle = false,
+  close,
+}: {
+  isSingle?: boolean;
+  close?: () => void;
+}) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const dispatch = useDispatch();
 
   const comments = [
     {
@@ -34,45 +43,54 @@ const CommentBottomSheet = ({ close }) => {
     },
     {
       id: 2,
-      name: "Amit Singh",
+      name: "Rahul Kumar",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
       comment:
-        "The new economic policy is expected to boost the nation's GDP significantly.",
+        "India and China reached an agreement on patrolling arrangements along the LAC.",
     },
     {
       id: 3,
-      name: "Priya Sharma",
+      name: "Rahul Kumar",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
       comment:
-        "The healthcare initiative will benefit millions in rural areas.",
+        "India and China reached an agreement on patrolling arrangements along the LAC.",
     },
     {
       id: 4,
-      name: "Vikas Mehta",
+      name: "Rahul Kumar",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
       comment:
-        "A new record has been set in the tech industry with this innovation.",
+        "India and China reached an agreement on patrolling arrangements along the LAC.",
     },
     {
       id: 5,
-      name: "Neha Gupta",
+      name: "Rahul Kumar",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
       comment:
-        "The environmental policies introduced are essential for sustainable development.",
+        "India and China reached an agreement on patrolling arrangements along the LAC.",
     },
     {
       id: 6,
-      name: "Rohit Patel",
+      name: "Rahul Kumar",
       image:
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
       comment:
-        "Educational reforms are a great step towards a brighter future.",
+        "India and China reached an agreement on patrolling arrangements along the LAC.",
     },
   ];
+
+  const handleClose = () => {
+    console.log(isSingle, close);
+    if (isSingle && close) {
+      close();
+    } else {
+      dispatch(changeBottomSheetState(false));
+    }
+  };
 
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -88,7 +106,16 @@ const CommentBottomSheet = ({ close }) => {
         }}
         containerHeight={Dimensions.get("window").height}
         enablePanDownToClose={true}
-        onClose={close}
+        onClose={handleClose}
+        style={{
+          backgroundColor: "#fff", // Ensure background is set
+          shadowColor: "#000", // Shadow color
+          shadowOffset: { width: 0, height: -2 }, // Top shadow with a negative height
+          shadowOpacity: 0.5, // Opacity of the shadow
+          shadowRadius: 4, // Blur radius
+          elevation: 12, // For Android
+          borderRadius: 10,
+        }}
       >
         <BottomSheetView
           style={{
@@ -108,36 +135,48 @@ const CommentBottomSheet = ({ close }) => {
               alignItems: "center",
               paddingHorizontal: 16,
               paddingVertical: 8,
+              position: "relative",
             }}
           >
-            <Pressable onPress={close}>
+            <Pressable onPress={handleClose}>
               <Feather name="chevron-down" size={24} color="black" />
             </Pressable>
             <Text style={styles.Subheading2}>Comments</Text>
             <SafeAreaView />
           </View>
-          <ScrollView style={{ flex: 1 }}>
-            {comments.map((item) => {
-              return (
-                <CommentCard
-                  key={item.id}
-                  name={item.name}
-                  image={item.image}
-                  comment={item.comment}
-                />
-              );
-            })}
-          </ScrollView>
+          <FlatList
+            data={comments}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <CommentCard
+                name={item.name}
+                image={item.image}
+                comment={item.comment}
+              />
+            )}
+            style={{
+              flexGrow: 0,
+              maxHeight: Dimensions.get("window").height * 0.54, // Constrain height
+            }}
+          />
           <View
             style={{
-              borderTopColor: "#B1B1B1",
-              borderTopWidth: 1,
               display: "flex",
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
               padding: 24,
               gap: 4,
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              backgroundColor: "#fff", // Ensure background is set
+              shadowColor: "#000", // Shadow color
+              shadowOffset: { width: 0, height: -2 }, // Top shadow with a negative height
+              shadowOpacity: 0.25, // Opacity of the shadow
+              shadowRadius: 4, // Blur radius
+              elevation: 8, // For Android
             }}
           >
             <TextInput
@@ -164,7 +203,9 @@ const CommentBottomSheet = ({ close }) => {
                 }}
                 onPress={() => {}}
               >
-                <Text style={{ ...styles.button }}>Post</Text>
+                <Text style={{ ...styles.button, color: Colors.light.accent }}>
+                  Post
+                </Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -188,14 +229,18 @@ function CommentCard({ name, image, comment }) {
         borderBottomWidth: 1,
       }}
     >
-      <Image
-        source={{ uri: image }}
-        width={40}
-        height={40}
-        borderRadius={50}
-      ></Image>
+      <Pressable onPress={() => router.push("/other-profile")}>
+        <Image
+          source={{ uri: image }}
+          width={40}
+          height={40}
+          borderRadius={50}
+        />
+      </Pressable>
       <View style={{ display: "flex", marginTop: 8, paddingRight: 32 }}>
-        <Text style={styles.Subheading}>{name}</Text>
+        <Pressable onPress={() => router.push("/other-profile")}>
+          <Text style={styles.Subheading}>{name}</Text>
+        </Pressable>
         <Text style={styles.ContentText}>{comment}</Text>
       </View>
     </View>

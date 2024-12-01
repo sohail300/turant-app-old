@@ -1,11 +1,9 @@
 import { View, Text, Dimensions } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { ScrollView } from "react-native-gesture-handler";
-import { Entypo } from "@expo/vector-icons";
 import { styles } from "@/constants/styles";
-import { router } from "expo-router";
 
 const Component = () => {
   return (

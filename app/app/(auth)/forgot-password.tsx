@@ -185,7 +185,6 @@ const style = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    marginTop: 16,
   },
   scrollContent: {
     padding: 16,
@@ -197,6 +196,7 @@ const style = StyleSheet.create({
     backgroundColor: Colors.light.white,
     borderRadius: 20,
     marginVertical: 24,
+    marginTop: 40,
   },
   headerContainer: {
     marginBottom: 32,

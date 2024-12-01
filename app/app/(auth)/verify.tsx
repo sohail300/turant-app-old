@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Text,
   View,
@@ -13,10 +13,6 @@ import { Colors } from "@/constants/Colors";
 import Feather from "@expo/vector-icons/Feather";
 import { styles } from "@/constants/styles";
 import { router } from "expo-router";
-import { Formik } from "formik";
-import { TextInput } from "react-native-gesture-handler";
-import * as Yup from "yup";
-import ErrorText from "@/components/ErrorText";
 import RedText from "@/components/RedText";
 import { OtpInput } from "react-native-otp-entry";
 

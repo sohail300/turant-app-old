@@ -1,18 +1,28 @@
 import { router, Tabs } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Colors } from "@/constants/Colors";
 import Feather from "@expo/vector-icons/Feather";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import SearchBottomSheet from "@/components/SearchBottomSheet";
 import RestrictedBottomSheet from "@/components/RestrictedBottomSheet";
 import { Dimensions, View } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import CommentBottomSheet from "@/components/CommentBottomSheet";
+import { useSelector } from "react-redux";
+import FollowersBottomSheet from "@/components/FollowersBottomSheet";
 
 export default function TabLayout() {
-  const [isOpen, setIsOpen] = useState(false);
   const [showRestrictedBottomSheet, setShowRestrictedBottomSheet] =
     useState(false);
+
+  const [showSearchBar, setShowSearchBar] = useState(false);
+
+  const commentSheetState = useSelector(
+    (state) => state.commentBottomSheet.data
+  );
+  const followersSheetState = useSelector(
+    (state) => state.followersBottomSheet.data
+  );
 
   return (
     <>
@@ -47,7 +57,7 @@ export default function TabLayout() {
           listeners={{
             tabPress: (e) => {
               e.preventDefault();
-              router.replace("/setup");
+              setShowSearchBar(true);
             },
           }}
           options={{
@@ -67,8 +77,8 @@ export default function TabLayout() {
           listeners={{
             tabPress: (e) => {
               e.preventDefault();
-              // router.push("/(upload)/upload");
-              setShowRestrictedBottomSheet(true);
+              router.push("/(upload)/upload");
+              // setShowRestrictedBottomSheet(true);
             },
           }}
           options={{
@@ -117,6 +127,15 @@ export default function TabLayout() {
           close={() => setShowRestrictedBottomSheet(false)}
         />
       )}
+      {showSearchBar && (
+        <SearchBottomSheet
+          isOpen={true}
+          close={() => setShowSearchBar(false)}
+        />
+      )}
+
+      {commentSheetState && <CommentBottomSheet />}
+      {followersSheetState && <FollowersBottomSheet />}
     </>
   );
 }

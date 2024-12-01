@@ -1,10 +1,4 @@
-import {
-  View,
-  Text,
-  Dimensions,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, Text, Dimensions } from "react-native";
 import React, { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";

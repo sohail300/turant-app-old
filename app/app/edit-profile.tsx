@@ -1,30 +1,24 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Text,
   View,
   TouchableOpacity,
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   Image,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
-import Feather from "@expo/vector-icons/Feather";
 import { styles } from "@/constants/styles";
 import { Formik } from "formik";
 import { TextInput } from "react-native-gesture-handler";
 import * as Yup from "yup";
 import ErrorText from "@/components/ErrorText";
-import { useNavigation } from "@react-navigation/native";
 import { router } from "expo-router";
 import RedText from "@/components/RedText";
 import { OtpInput } from "react-native-otp-entry";
 
 export default function Signup() {
-  const navigation = useNavigation();
-
   const languages = [
     { label: "Hindi", value: "hindi" },
     { label: "English", value: "english" },

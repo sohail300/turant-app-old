@@ -3,7 +3,7 @@ import React from "react";
 import { FlatList } from "react-native-gesture-handler";
 import Card from "./Card";
 
-const UserPost = () => {
+const UserPost = ({ ...props }) => {
   const data = [
     {
       id: 1,
@@ -48,6 +48,7 @@ const UserPost = () => {
 
   return (
     <FlatList
+      {...props}
       keyExtractor={(item) => String(item.id)}
       data={data}
       renderItem={({ item }) => (

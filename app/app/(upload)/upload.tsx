@@ -1,5 +1,5 @@
 import { View, Text, Dimensions, Share } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
@@ -9,8 +9,6 @@ import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 const About = () => {
-  const [showLogoutSheet, setShowLogoutSheet] = useState(false);
-
   return (
     <SafeAreaView
       style={{

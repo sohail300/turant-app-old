@@ -18,12 +18,13 @@ import SimpleLineIcons from "@expo/vector-icons/SimpleLineIcons";
 import IconText from "./IconText";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { Link } from "expo-router";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import DisclaimerText from "./DisclaimerText";
 import { router } from "expo-router";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { changeBottomSheetState } from "@/store/CommentBottomSheetSlice";
 
 const Card = ({
   heading,
@@ -32,10 +33,20 @@ const Card = ({
   author,
   authorImage,
   imageUrl,
-  setShowCommentSheet,
   full = false,
+  setShowCommentSheet,
+}: {
+  heading: string;
+  content: string;
+  details: string;
+  author: string;
+  authorImage: string;
+  imageUrl: string;
+  full?: boolean;
+  setShowCommentSheet?: (value: boolean) => void;
 }) => {
   const language = useSelector((state) => state.language.data);
+  const dispatch = useDispatch();
 
   return (
     <SafeAreaView
@@ -53,7 +64,7 @@ const Card = ({
         source={{
           uri: imageUrl,
         }}
-        width={330}
+        width={"100%"}
         height={200}
         borderRadius={8}
       />
@@ -104,7 +115,7 @@ const Card = ({
           <Feather name="bookmark" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      <ContentText full={full}>{content}</ContentText>
+      <ContentText full={false}>{content}</ContentText>
       <Details>{details}</Details>
       <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
         <TouchableOpacity
@@ -129,7 +140,11 @@ const Card = ({
             alignItems: "center",
           }}
           onPress={() => {
-            setShowCommentSheet(true);
+            {
+              full && setShowCommentSheet
+                ? setShowCommentSheet(true)
+                : dispatch(changeBottomSheetState(true));
+            }
           }}
         >
           <FontAwesome5 name="comment" size={24} color="black" />

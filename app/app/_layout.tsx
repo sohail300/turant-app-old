@@ -1,10 +1,8 @@
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useCallback, useEffect, useRef, useState } from "react";
-import "react-native-reanimated";
+import { useEffect, useState } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { Easing, Pressable, Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { FontContext } from "@/context/FontContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Colors } from "@/constants/Colors";

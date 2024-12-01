@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { Text, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -7,7 +7,6 @@ import { useSelector } from "react-redux";
 const search = () => {
   const [isAppSetup, setIsAppSetup] = useState("");
   const location = useSelector((state) => state.location.data);
-  console.log(location);
 
   useEffect(() => {
     async function getIsAppSetup() {

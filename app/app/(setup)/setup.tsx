@@ -6,16 +6,14 @@ import {
   Pressable,
 } from "react-native";
 import React, { useState } from "react";
-import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
+import { ScrollView } from "react-native-gesture-handler";
 import Feather from "@expo/vector-icons/Feather";
 import { styles } from "@/constants/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DropDownPicker from "react-native-dropdown-picker";
-import { Link } from "expo-router";
 import { router } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { Colors } from "@/constants/Colors";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { useDispatch, useSelector } from "react-redux";
 import { changeLanguage } from "@/store/LanguageSlice";
 import setupPage from "@/locales/setupPage.json";

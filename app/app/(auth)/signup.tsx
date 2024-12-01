@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Text,
   View,
@@ -16,14 +16,11 @@ import { Formik } from "formik";
 import { TextInput } from "react-native-gesture-handler";
 import * as Yup from "yup";
 import ErrorText from "@/components/ErrorText";
-import { useNavigation } from "@react-navigation/native";
 import CheckBox from "react-native-check-box";
 import { router } from "expo-router";
 import RedText from "@/components/RedText";
 
 export default function Signup() {
-  const navigation = useNavigation();
-
   const validate = Yup.object({
     name: Yup.string().required("Name is required"),
     email: Yup.string().email("Email is invalid").required("Email is required"),

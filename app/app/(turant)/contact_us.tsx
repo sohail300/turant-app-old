@@ -3,9 +3,8 @@ import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { FlatList, ScrollView, TextInput } from "react-native-gesture-handler";
-import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { styles } from "@/constants/styles";
-import { router } from "expo-router";
 import ContactCard from "@/components/ContactCard";
 
 const Component = () => {
