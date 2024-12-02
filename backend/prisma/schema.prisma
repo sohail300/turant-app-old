@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id            Int         @id @default(autoincrement())
+  email              String      @unique
+  phone              String?     @db.VarChar(15)
+  display_name       String?     @db.VarChar(50)
+  username           String      @unique @db.VarChar(50)
+  username_last_edit DateTime?
+  profile_url        String?
+  app_language       String?     @db.VarChar(10)
+  password           String
+  state              String?     @db.VarChar(50)
+  city               String?     @db.VarChar(50)
+  verified           Boolean
+  status             Status
+  role               Role
+  otps               Otp[]
+  followers          Follower[]  @relation("FollowedBy")
+  following          Follower[]  @relation("Follows")
+  posts              Post[]
+  saved_posts        SavedPost[]
+  post_likes         PostLike[]
+  comments           Comment[]
+  ad_views           AdView[]
+  ad_clicks          AdClick[]
+}
+
+model Otp {
+  otp_id  Int    @id @default(autoincrement())
+  user_id Int
+  related String
+  otp     Int
+  user    User   @relation(fields: [user_id], references: [user_id])
+}
+
+model Follower {
+  follower_id  Int
+  following_id Int
+  follower     User @relation("Follows", fields: [follower_id], references: [user_id])
+  following    User @relation("FollowedBy", fields: [following_id], references: [user_id])
+
+  @@id([follower_id, following_id]) // Composite primary key
+}
+
+model Post {
+  post_id     Int         @id @default(autoincrement())
+  user_id     Int
+  language    String?     @db.VarChar(10)
+  title       String      @db.VarChar(255)
+  photo       String?
+  video       String?
+  description String?
+  likes       Int         @default(0)
+  shares      Int         @default(0)
+  created_at  DateTime    @default(now())
+  video_views Int         @default(0)
+  user        User        @relation(fields: [user_id], references: [user_id])
+  saved_posts SavedPost[]
+  post_likes  PostLike[]
+  comments    Comment[]
+}
+
+model SavedPost {
+  saved_post_id Int  @id @default(autoincrement())
+  user_id       Int
+  post_id       Int
+  user          User @relation(fields: [user_id], references: [user_id])
+  post          Post @relation(fields: [post_id], references: [post_id])
+}
+
+model PostLike {
+  like_id Int  @id @default(autoincrement())
+  post_id Int
+  user_id Int
+  post    Post @relation(fields: [post_id], references: [post_id])
+  user    User @relation(fields: [user_id], references: [user_id])
+}
+
+model Comment {
+  comment_id Int      @id @default(autoincrement())
+  user_id    Int
+  post_id    Int
+  comment    String
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [user_id])
+  post       Post     @relation(fields: [post_id], references: [post_id])
+}
+
+model Ad {
+  ad_id        Int       @id @default(autoincrement())
+  company_name String    @db.VarChar(255)
+  media_type   MediaType
+  media_link   String?
+  target_url   String?
+  start_date   DateTime
+  end_date     DateTime
+  target_state String?   @db.VarChar(50)
+  target_city  String?   @db.VarChar(50)
+  cost         Decimal   @db.Decimal(10, 2)
+  ad_views     AdView[]
+  ad_clicks    AdClick[]
+}
+
+model AdView {
+  view_id Int  @id @default(autoincrement())
+  ad_id   Int
+  user_id Int
+  ad      Ad   @relation(fields: [ad_id], references: [ad_id])
+  user    User @relation(fields: [user_id], references: [user_id])
+}
+
+model AdClick {
+  click_id Int  @id @default(autoincrement())
+  ad_id    Int
+  user_id  Int
+  ad       Ad   @relation(fields: [ad_id], references: [ad_id])
+  user     User @relation(fields: [user_id], references: [user_id])
+}
+
+enum Status {
+  active
+  ban
+}
+
+enum Role {
+  admin
+  reporter
+  user
+}
+
+enum MediaType {
+  none
+  image
+  video
+}
