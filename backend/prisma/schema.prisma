@@ -25,10 +25,12 @@ model User {
   password           String
   state              String?     @db.VarChar(50)
   city               String?     @db.VarChar(50)
+  otps               Otp[]
+  verificationOtp    Boolean
+  forgotPasswordOtp  Boolean
   verified           Boolean
   status             Status
   role               Role
-  otps               Otp[]
   followers          Follower[]  @relation("FollowedBy")
   following          Follower[]  @relation("Follows")
   posts              Post[]
@@ -61,9 +63,12 @@ model Post {
   user_id     Int
   language    String?     @db.VarChar(10)
   title       String      @db.VarChar(255)
+  type        MediaType?
+  thumbnail   String?
   photo       String?
   video       String?
-  description String?
+  content     String?
+  snippet     String?
   likes       Int         @default(0)
   shares      Int         @default(0)
   created_at  DateTime    @default(now())
