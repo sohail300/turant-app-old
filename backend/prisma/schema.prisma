@@ -16,19 +16,17 @@ datasource db {
 model User {
   user_id            Int         @id @default(autoincrement())
   email              String      @unique
-  phone              String?     @db.VarChar(15)
-  display_name       String?     @db.VarChar(50)
+  phone              String      @unique @db.VarChar(15)
+  display_name       String      @db.VarChar(50)
   username           String      @unique @db.VarChar(50)
-  username_last_edit DateTime?
-  profile_url        String?
-  app_language       String?     @db.VarChar(10)
+  username_last_edit DateTime
+  profile_url        String
+  app_language       String      @db.VarChar(10)
   password           String
-  state              String?     @db.VarChar(50)
-  city               String?     @db.VarChar(50)
+  state              String      @db.VarChar(50)
+  city               String      @db.VarChar(50)
+  verified           Boolean     @default(false)
   otps               Otp[]
-  verificationOtp    Boolean
-  forgotPasswordOtp  Boolean
-  verified           Boolean
   status             Status
   role               Role
   followers          Follower[]  @relation("FollowedBy")
@@ -42,13 +40,15 @@ model User {
 }
 
 model Otp {
-  otp_id  Int    @id @default(autoincrement())
-  user_id Int
-  related String
-  otp     Int
-  user    User   @relation(fields: [user_id], references: [user_id])
+  otp_id     Int      @id @default(autoincrement())
+  user_id    Int
+  related    OtpType
+  otp        String
+  expires_at DateTime
+  user       User     @relation(fields: [user_id], references: [user_id])
 }
 
+// !reported schema
 model Follower {
   follower_id  Int
   following_id Int
@@ -143,7 +143,6 @@ enum Status {
 
 enum Role {
   admin
-  reporter
   user
 }
 
@@ -151,4 +150,10 @@ enum MediaType {
   none
   image
   video
+}
+
+enum OtpType {
+  register_mail
+  register_phone
+  forgot_password
 }

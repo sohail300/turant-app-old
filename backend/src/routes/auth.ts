@@ -2,8 +2,8 @@ import { Router } from "express";
 import {
   login,
   logout,
-  sendOtp,
   signup,
+  sendForgotPasswordOtp
   verifyForgotPasswordOtp,
   verifyRegisterOtp,
 } from "../controllers/auth";
@@ -14,7 +14,7 @@ router.post("/signup", signup);
 
 router.post("/login", login);
 
-router.post("/send-otp", sendOtp);
+router.post("/send-forgot-password-otp", sendForgotPasswordOtp);
 
 router.post("/verify-register-otp", verifyRegisterOtp);
 
