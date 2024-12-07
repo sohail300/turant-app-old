@@ -21,11 +21,14 @@ model User {
   username           String      @unique @db.VarChar(50)
   username_last_edit DateTime
   profile_url        String
+  image              String?
   app_language       String      @db.VarChar(10)
   password           String
   state              String      @db.VarChar(50)
   city               String      @db.VarChar(50)
   verified           Boolean     @default(false)
+  follower_count     Int         @default(0)
+  following_count    Int         @default(0)
   otps               Otp[]
   status             Status
   role               Role
@@ -48,7 +51,16 @@ model Otp {
   user       User     @relation(fields: [user_id], references: [user_id])
 }
 
-// !reported schema
+model Reporter {
+  reporter_id Int    @id @default(autoincrement())
+  name        String
+  phone       String
+  state       String
+  district    String
+  block       String
+  image       String
+}
+
 model Follower {
   follower_id  Int
   following_id Int
@@ -59,24 +71,25 @@ model Follower {
 }
 
 model Post {
-  post_id     Int         @id @default(autoincrement())
-  user_id     Int
-  language    String?     @db.VarChar(10)
-  title       String      @db.VarChar(255)
-  type        MediaType?
-  thumbnail   String?
-  photo       String?
-  video       String?
-  content     String?
-  snippet     String?
-  likes       Int         @default(0)
-  shares      Int         @default(0)
-  created_at  DateTime    @default(now())
-  video_views Int         @default(0)
-  user        User        @relation(fields: [user_id], references: [user_id])
-  saved_posts SavedPost[]
-  post_likes  PostLike[]
-  comments    Comment[]
+  post_id       Int         @id @default(autoincrement())
+  user_id       Int
+  language      String?     @db.VarChar(10)
+  title         String      @db.VarChar(255)
+  type          MediaType?
+  thumbnail     String?
+  photo         String?
+  video         String?
+  content       String?
+  snippet       String?
+  likes         Int         @default(0)
+  comments      Int         @default(0)
+  shares        Int         @default(0)
+  created_at    DateTime    @default(now())
+  video_views   Int         @default(0)
+  user          User        @relation(fields: [user_id], references: [user_id])
+  saved_posts   SavedPost[]
+  post_likes    PostLike[]
+  post_comments Comment[]
 }
 
 model SavedPost {
@@ -147,7 +160,7 @@ enum Role {
 }
 
 enum MediaType {
-  none
+  text
   image
   video
 }

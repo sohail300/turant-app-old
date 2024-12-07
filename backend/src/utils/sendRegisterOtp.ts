@@ -12,7 +12,6 @@ export const sendRegisterMailOtp = async (email) => {
     specialChars: false,
     digits: true,
   });
-  //   const otp = Math.floor(1000 + Math.random() * 9000); // Generate 4-digit OTP
 
   const user = await prisma.user.findUnique({
     where: { email },
@@ -43,7 +42,6 @@ export const sendRegisterPhoneOtp = async (phone) => {
     specialChars: false,
     digits: true,
   });
-  //   const otp = Math.floor(1000 + Math.random() * 9000); // Generate 4-digit OTP
 
   const user = await prisma.user.findUnique({
     where: { phone },
@@ -61,6 +59,6 @@ export const sendRegisterPhoneOtp = async (phone) => {
     },
   });
 
-  // Simulate sending the OTP (Replace this with an email service integration)
+  // Simulate sending the OTP (Replace this with an phone service integration)
   console.log(`Sending email OTP to ${phone}: ${otp}`);
 };

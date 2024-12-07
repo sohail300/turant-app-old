@@ -5,42 +5,46 @@ import {
   getUserFollowing,
   getUserPosts,
   getUserProfile,
+  getOwnProfile,
   getUserSavedPosts,
   searchUser,
-  setup,
   userFollow,
-  userSearchFollowers,
-  userSearchFollowing,
+  userFollowersSearch,
+  userFollowingSearch,
   userUnfollow,
-  validUserProfile,
+  isValidUsername,
+  isFollowing,
 } from "../controllers/user";
+import { authenticate } from "../middlewares/authenticate";
 
 const router = Router();
 
-router.post("/setup", setup);
+router.post("/search", authenticate, searchUser);
 
-router.post("/search", searchUser);
+router.get("/profile", authenticate, getUserProfile);
 
-router.get("/profile", getUserProfile);
+router.get("/own-profile", authenticate, getOwnProfile);
 
-router.post("/posts", getUserPosts);
+router.post("/posts", authenticate, getUserPosts);
 
-router.get("/saved-posts", getUserSavedPosts);
+router.get("/saved-posts", authenticate, getUserSavedPosts);
 
-router.get("/follow", userFollow);
+router.get("/follow", authenticate, userFollow);
 
-router.get("/unfollow", userUnfollow);
+router.get("/unfollow", authenticate, userUnfollow);
 
-router.get("/following", getUserFollowing);
+router.get("is-following", authenticate, isFollowing);
 
-router.get("/followers", getUserFollowers);
+router.get("/following", authenticate, getUserFollowing);
 
-router.get("/search-followers", userSearchFollowers);
+router.get("/followers", authenticate, getUserFollowers);
 
-router.get("/search-following", userSearchFollowing);
+router.get("/search-followers", authenticate, userFollowersSearch);
 
-router.put("/edit-profile", editUserProfile);
+router.get("/search-following", authenticate, userFollowingSearch);
 
-router.put("/valid-profile", validUserProfile);
+router.put("/edit-profile", authenticate, editUserProfile);
+
+router.put("/valid-profile", authenticate, isValidUsername);
 
 export default router;

@@ -2,6 +2,8 @@ import { Router } from "express";
 import {
   getComments,
   getVideo,
+  hasLikedPost,
+  hasSavedPost,
   likePost,
   postComment,
   savePost,
@@ -9,23 +11,28 @@ import {
   showPost,
   showSinglePost,
 } from "../controllers/post";
+import { authenticate } from "../middlewares/authenticate";
 
 const router = Router();
 
 router.get("/show", showPost);
 
-router.get("/show-single", showSinglePost);
+router.get("/show-single/:postId", showSinglePost);
 
-router.post("/video", getVideo);
+router.get("/video/:postId", getVideo);
 
-router.get("/comment", getComments);
+router.get("/comment/:postId", authenticate, getComments);
 
-router.post("/comment", postComment);
+router.post("/comment/:postId", authenticate, postComment);
 
-router.get("/like", likePost);
+router.get("/like/:postId", authenticate, likePost);
 
-router.get("/share", sharePost);
+router.get("/has-liked/:postId", authenticate, hasLikedPost);
 
-router.get("/save", savePost);
+router.get("/share/:postId", sharePost);
+
+router.get("/save/:postId", authenticate, savePost);
+
+router.get("/has-saved/:postId", authenticate, hasSavedPost);
 
 export default router;

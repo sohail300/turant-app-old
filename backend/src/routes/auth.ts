@@ -3,10 +3,11 @@ import {
   login,
   logout,
   signup,
-  sendForgotPasswordOtp
+  sendForgotPasswordOtp,
   verifyForgotPasswordOtp,
   verifyRegisterOtp,
 } from "../controllers/auth";
+import { authenticate } from "../middlewares/authenticate";
 
 const router = Router();
 
@@ -16,10 +17,8 @@ router.post("/login", login);
 
 router.post("/send-forgot-password-otp", sendForgotPasswordOtp);
 
-router.post("/verify-register-otp", verifyRegisterOtp);
+router.post("/verify-register-otp", authenticate, verifyRegisterOtp);
 
 router.post("/verify-forgot-password-otp", verifyForgotPasswordOtp);
-
-router.post("/logout", logout);
 
 export default router;
