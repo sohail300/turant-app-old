@@ -3,6 +3,10 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+interface DecodedToken {
+  userId: number; // Adjust the type of userId as per your application
+}
+
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRATION_TIME = process.env.JWT_EXPIRATION_TIME!;
 // const REFRESH_TOKEN_EXPIRATION_TIME = process.env.REFRESH_TOKEN_EXPIRATION_TIME!;
@@ -13,9 +17,9 @@ export const generateAccessToken = (userId) => {
 };
 
 // Verify Access Token
-export const verifyAccessToken = (token) => {
+export const verifyAccessToken = (token): DecodedToken => {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, JWT_SECRET) as DecodedToken;
   } catch (err) {
     return null; // Token invalid or expired
   }

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-  isBlocked,
+  isBlockedHandler,
   uploadArticle,
   uploadImage,
   uploadVideo,
@@ -9,7 +9,7 @@ import { authenticate } from "../middlewares/authenticate";
 
 const router = Router();
 
-router.get("/is-blocked", authenticate, isBlocked);
+router.get("/is-blocked", authenticate, isBlockedHandler);
 
 router.post("/article", authenticate, uploadArticle);
 

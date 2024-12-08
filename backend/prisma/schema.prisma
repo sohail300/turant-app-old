@@ -14,32 +14,33 @@ datasource db {
 }
 
 model User {
-  user_id            Int         @id @default(autoincrement())
-  email              String      @unique
-  phone              String      @unique @db.VarChar(15)
-  display_name       String      @db.VarChar(50)
-  username           String      @unique @db.VarChar(50)
-  username_last_edit DateTime
-  profile_url        String
-  image              String?
-  app_language       String      @db.VarChar(10)
-  password           String
-  state              String      @db.VarChar(50)
-  city               String      @db.VarChar(50)
-  verified           Boolean     @default(false)
-  follower_count     Int         @default(0)
-  following_count    Int         @default(0)
-  otps               Otp[]
-  status             Status
-  role               Role
-  followers          Follower[]  @relation("FollowedBy")
-  following          Follower[]  @relation("Follows")
-  posts              Post[]
-  saved_posts        SavedPost[]
-  post_likes         PostLike[]
-  comments           Comment[]
-  ad_views           AdView[]
-  ad_clicks          AdClick[]
+  user_id                  Int         @id @default(autoincrement())
+  email                    String      @unique
+  phone                    String      @unique @db.VarChar(15)
+  display_name             String      @db.VarChar(50)
+  username                 String      @unique @db.VarChar(50)
+  username_last_edit       DateTime
+  profile_url              String
+  image                    String?
+  app_language             String      @db.VarChar(10)
+  password                 String
+  state                    String      @db.VarChar(50)
+  city                     String      @db.VarChar(50)
+  verified                 Boolean     @default(false)
+  verifiedByFollowersCount Boolean     @default(false)
+  follower_count           Int         @default(0)
+  following_count          Int         @default(0)
+  otps                     Otp[]
+  status                   Status
+  role                     Role
+  followers                Follower[]  @relation("FollowedBy")
+  following                Follower[]  @relation("Follows")
+  posts                    Post[]
+  saved_posts              SavedPost[]
+  post_likes               PostLike[]
+  comments                 Comment[]
+  ad_views                 AdView[]
+  ad_clicks                AdClick[]
 }
 
 model Otp {

@@ -7,20 +7,21 @@ import {
   sendRegisterPhoneOtp,
 } from "../utils/sendRegisterOtp";
 import { loginSchema } from "../zod/auth/login";
-import { generateAccessToken, generateRefreshToken } from "../utils/jwtMethods";
+import { generateAccessToken } from "../utils/jwtMethods";
 import { sendForgotPasswordOtpSchema } from "../zod/auth/sendForgotPasswordOtp";
 import otpGenerator from "otp-generator";
 import { verifyForgotPasswordOtpSchema } from "../zod/auth/verifyForgotPasswordOtp";
 import { verifyRegisterOtpSchema } from "../zod/auth/verifyRegisterOtp";
+import { Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
-export const signup = async (req, res) => {
+export const signup = async (req: Request, res: Response) => {
   try {
     const inputData = signupSchema.safeParse(req.body);
 
     if (inputData.success === false) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
@@ -44,7 +45,7 @@ export const signup = async (req, res) => {
     });
 
     if (existingEmail) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Email already in use",
       });
     }
@@ -56,7 +57,7 @@ export const signup = async (req, res) => {
     });
 
     if (existingUsername) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Username already in use",
       });
     }
@@ -68,7 +69,7 @@ export const signup = async (req, res) => {
     });
 
     if (existingPhone) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Phone number already in use",
       });
     }
@@ -83,6 +84,7 @@ export const signup = async (req, res) => {
         email,
         username,
         username_last_edit: new Date(),
+        image: "",
         profile_url: `turant-news.in/${username}`, //! changes
         phone,
         password: hashedPassword,
@@ -104,7 +106,7 @@ export const signup = async (req, res) => {
     // const refreshToken = generateRefreshToken(newUser.user_id);
 
     // Respond with success
-    return res.status(201).json({
+    res.status(201).json({
       message: "User registered successfully",
       userId: newUser.user_id,
       accessToken,
@@ -113,7 +115,7 @@ export const signup = async (req, res) => {
   } catch (error) {
     if (error instanceof z.ZodError) {
       // Handle validation errors
-      return res.status(400).json({
+      res.status(400).json({
         message: "Validation error",
         errors: error.errors,
       });
@@ -121,21 +123,22 @@ export const signup = async (req, res) => {
 
     // Handle other errors
     console.error("Signup error:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Internal server error",
     });
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req: Request, res: Response) => {
   try {
     const inputData = loginSchema.safeParse(req.body);
 
     if (!inputData.success) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
+      return;
     }
 
     const { identifier, password, state, city, app_language } = inputData.data;
@@ -151,16 +154,17 @@ export const login = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "User not found",
       });
+      return;
     }
 
     // Check if the password is correct
     const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
     if (!isPasswordCorrect) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Invalid credentials",
       });
     }
@@ -174,7 +178,7 @@ export const login = async (req, res) => {
       data: { state, city, app_language },
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "Login successful",
       user: {
         id: user.user_id,
@@ -184,20 +188,21 @@ export const login = async (req, res) => {
     });
   } catch (error) {
     console.error("Login error:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Internal server error",
     });
   }
 };
 
-export const sendForgotPasswordOtp = async (req, res) => {
+export const sendForgotPasswordOtp = async (req: Request, res: Response) => {
   const inputData = sendForgotPasswordOtpSchema.safeParse(req.body);
 
   if (inputData.success === false) {
-    return res.status(400).json({
+    res.status(400).json({
       message: "Validation error",
       errors: inputData.error.flatten().fieldErrors,
     });
+    return;
   }
 
   const { email, phone, medium } = inputData.data;
@@ -249,17 +254,19 @@ export const sendForgotPasswordOtp = async (req, res) => {
     });
   }
 
-  console.log(`Sending email OTP to ${email}: ${otp}`);
+  console.log(`Sending phone OTP to ${phone}: ${otp}`);
+  res.json({ success: true, message: "OTP sent successfully" });
 };
 
-export const verifyForgotPasswordOtp = async (req, res) => {
+export const verifyForgotPasswordOtp = async (req: Request, res: Response) => {
   const inputData = verifyForgotPasswordOtpSchema.safeParse(req.body);
 
   if (inputData.success === false) {
-    return res.status(400).json({
+    res.status(400).json({
       message: "Validation error",
       errors: inputData.error.flatten().fieldErrors,
     });
+    return;
   }
 
   const { otp, email, phone, medium, password } = inputData.data;
@@ -269,9 +276,8 @@ export const verifyForgotPasswordOtp = async (req, res) => {
   // Validate user based on the medium
   if (medium === "email") {
     if (!email) {
-      return res
-        .status(400)
-        .json({ message: "Email is required for verification" });
+      res.status(400).json({ message: "Email is required for verification" });
+      return;
     }
 
     user = await prisma.user.findUnique({
@@ -279,20 +285,23 @@ export const verifyForgotPasswordOtp = async (req, res) => {
     });
   } else if (medium === "phone") {
     if (!phone) {
-      return res
+      res
         .status(400)
         .json({ message: "Phone number is required for verification" });
+      return;
     }
 
     user = await prisma.user.findUnique({
       where: { phone },
     });
   } else {
-    return res.status(400).json({ message: "Invalid medium" });
+    res.status(400).json({ message: "Invalid medium" });
+    return;
   }
 
   if (!user) {
-    return res.status(404).json({ message: "User not found" });
+    res.status(404).json({ message: "User not found" });
+    return;
   }
 
   // Find OTP record for the user
@@ -305,12 +314,14 @@ export const verifyForgotPasswordOtp = async (req, res) => {
   });
 
   if (!otpRecord) {
-    return res.status(400).json({ message: "Invalid OTP" });
+    res.status(400).json({ message: "Invalid OTP" });
+    return;
   }
 
   // Check if OTP is expired
   if (new Date(otpRecord.expires_at) < new Date()) {
-    return res.status(400).json({ message: "OTP has expired" });
+    res.status(400).json({ message: "OTP has expired" });
+    return;
   }
 
   // Update the user's password
@@ -325,18 +336,54 @@ export const verifyForgotPasswordOtp = async (req, res) => {
     where: { otp_id: otpRecord.otp_id },
   });
 
-  return res.json({ success: true, message: "Password updated successfully" });
+  res.json({ success: true, message: "Password updated successfully" });
 };
 
-export const verifyRegisterOtp = async (req, res) => {
+export const sendRegisterOtp = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.headers;
+
+    const user = await prisma.user.findUnique({
+      where: {
+        user_id: Number(userId),
+      },
+      select: {
+        email: true,
+        phone: true,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const { email, phone } = user;
+
+    await Promise.all([
+      sendRegisterMailOtp(email),
+      sendRegisterPhoneOtp(phone),
+    ]);
+
+    res.json({ success: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Error sending register OTP:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const verifyRegisterOtp = async (req: Request, res: Response) => {
   try {
     const inputData = verifyRegisterOtpSchema.safeParse(req.body);
 
     if (!inputData.success) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
+      return;
     }
 
     const { email, phone } = inputData.data;
@@ -350,11 +397,13 @@ export const verifyRegisterOtp = async (req, res) => {
     });
 
     if (!emailOtpRecord) {
-      return res.status(400).json({ message: "Invalid or expired email OTP" });
+      res.status(400).json({ message: "Invalid or expired email OTP" });
+      return;
     }
 
     if (new Date(emailOtpRecord.expires_at) < new Date()) {
-      return res.status(400).json({ message: "Email OTP has expired" });
+      res.status(400).json({ message: "Email OTP has expired" });
+      return;
     }
 
     // Validate Phone OTP
@@ -366,11 +415,13 @@ export const verifyRegisterOtp = async (req, res) => {
     });
 
     if (!phoneOtpRecord) {
-      return res.status(400).json({ message: "Invalid or expired phone OTP" });
+      res.status(400).json({ message: "Invalid or expired phone OTP" });
+      return;
     }
 
     if (new Date(phoneOtpRecord.expires_at) < new Date()) {
-      return res.status(400).json({ message: "Phone OTP has expired" });
+      res.status(400).json({ message: "Phone OTP has expired" });
+      return;
     }
 
     // Mark user as verified (if both OTPs are valid)
@@ -378,9 +429,10 @@ export const verifyRegisterOtp = async (req, res) => {
     const phoneUserId = phoneOtpRecord.user_id;
 
     if (userId !== phoneUserId) {
-      return res
+      res
         .status(400)
         .json({ message: "Email and phone OTPs do not match the same user" });
+      return;
     }
 
     await prisma.user.update({
@@ -394,13 +446,13 @@ export const verifyRegisterOtp = async (req, res) => {
       prisma.otp.delete({ where: { otp_id: phoneOtpRecord.otp_id } }),
     ]);
 
-    return res.json({
+    res.json({
       success: true,
       message: "Both OTPs verified successfully",
     });
   } catch (error) {
     console.error("OTP verification error:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Internal server error",
     });
   }

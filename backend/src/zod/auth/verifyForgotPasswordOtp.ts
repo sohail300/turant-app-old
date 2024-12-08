@@ -6,8 +6,11 @@ export const verifyForgotPasswordOtpSchema = z.object({
       message: "Medium must be either email or phone",
     }),
   }),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^\d{10}$/, "Phone must be exactly 10 digits"),
+  email: z.string().email("Invalid email address").optional(),
+  phone: z
+    .string()
+    .regex(/^\d{10}$/, "Phone must be exactly 10 digits")
+    .optional(),
   otp: z
     .string()
     .min(4, "OTP must be exactly 4 digits")

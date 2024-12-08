@@ -5,8 +5,10 @@ import postRouter from "./routes/post";
 import userRouter from "./routes/user";
 import uploadRouter from "./routes/upload";
 import infoRouter from "./routes/info";
+import dotenv from "dotenv";
 
 const app = express();
+dotenv.config();
 
 app.use(express.json());
 app.use(cors());

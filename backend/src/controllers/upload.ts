@@ -1,53 +1,51 @@
 import { PrismaClient } from "@prisma/client";
 import { uploadArticleSchema } from "../zod/upload/uploadArticle";
+import { Request, Response } from "express";
+import { checkIfBlocked } from "../utils/checkIfBlocked";
 
 const prisma = new PrismaClient();
 
-export const isBlocked = async (req, res) => {
+export const isBlockedHandler = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const { userId } = req;
+    const userId = Number(req.headers.userId);
 
-    const user = await prisma.user.findUnique({
-      where: {
-        user_id: userId,
-      },
-      select: {
-        status: true,
-      },
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (isNaN(userId)) {
+      res.status(400).json({
+        message: "Invalid user ID.",
+      });
+      return;
     }
 
-    const blocked = user.status === "ban";
+    const blocked = await checkIfBlocked(userId);
 
-    return res.json({
+    res.json({
       blocked,
     });
   } catch (error) {
-    console.error("Error checking if user is blocked:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Internal server error",
     });
   }
 };
 
-export const uploadArticle = async (req, res) => {
+export const uploadArticle = async (req: Request, res: Response) => {
   try {
-    const { userId } = req;
+    const { userId } = req.headers;
 
     // Check if the user is blocked from uploading articles
-    const blocked = await isBlocked(req, res);
+    const blocked = await checkIfBlocked(Number(userId));
     if (blocked) {
-      return res.status(403).json({
+      res.status(403).json({
         message: "You are blocked from uploading articles.",
       });
     }
 
     const inputData = uploadArticleSchema.safeParse(req.body);
     if (!inputData.success) {
-      return res.status(400).json({
+      res.status(400).json({
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
@@ -58,7 +56,7 @@ export const uploadArticle = async (req, res) => {
     // Create the article in the database
     const newArticle = await prisma.post.create({
       data: {
-        user_id: userId,
+        user_id: Number(userId),
         language,
         title,
         type: "text", // Assuming articles are represented by the type "ARTICLE"
@@ -66,22 +64,22 @@ export const uploadArticle = async (req, res) => {
       },
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "Article uploaded successfully.",
       article: newArticle,
     });
   } catch (error) {
     console.error("Error uploading article:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Internal server error",
     });
   }
 };
 
-export const uploadImage = (req, res) => {
-  return res.json({ msg: "Image" });
+export const uploadImage = (req: Request, res: Response) => {
+  res.json({ msg: "Image" });
 };
 
-export const uploadVideo = (req, res) => {
-  return res.json({ msg: "Video" });
+export const uploadVideo = (req: Request, res: Response) => {
+  res.json({ msg: "Video" });
 };

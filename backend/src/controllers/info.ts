@@ -1,10 +1,11 @@
 import { PrismaClient } from "@prisma/client";
 import { states } from "../utils/locations";
 import axios from "axios";
+import { Request, Response } from "express";
 
 const prisma = new PrismaClient();
 
-export const getContacts = async (req, res) => {
+export const getContacts = async (req: Request, res: Response) => {
   try {
     // Fetch all reporters
     const reporters = await prisma.reporter.findMany({
@@ -20,31 +21,31 @@ export const getContacts = async (req, res) => {
     });
 
     if (!reporters.length) {
-      return res.status(404).json({ message: "No reporters found" });
+      res.status(404).json({ message: "No reporters found" });
     }
 
     // Respond with the list of reporters
-    return res.json({
+    res.json({
       reporters,
     });
   } catch (error) {
     console.error("Error fetching reporters:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Internal server error",
     });
   }
 };
 
-export const getStates = (req, res) => {
-  return res.json(states);
+export const getStates = (req: Request, res: Response) => {
+  res.json({ states });
 };
 
-export const getCities = async (req, res) => {
+export const getCities = async (req: Request, res: Response) => {
   try {
     const { state } = req.query;
 
     if (!state) {
-      return res.status(400).json({ message: "State is required" });
+      res.status(400).json({ message: "State is required" });
     }
 
     const cities = await axios.post(
@@ -55,12 +56,10 @@ export const getCities = async (req, res) => {
       }
     );
 
-    console.log(cities);
-
-    return res.json(cities);
+    res.json({ cities });
   } catch (error) {
     console.error("Error fetching reporters:", error);
-    return res.status(500).json({
+    res.status(500).json({
       message: "Internal server error",
     });
   }

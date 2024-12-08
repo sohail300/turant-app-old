@@ -1,19 +1,26 @@
 import { verifyAccessToken } from "../utils/jwtMethods";
+import { NextFunction, Request, Response } from "express";
 
-export const authenticate = (req, res, next) => {
-  const token = req.headers.authorization;
+export const authenticate = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const authHeader = req.headers.authorization;
 
-  if (!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+  if (!authHeader) {
+    res.status(401).json({ message: "Unauthorized" });
   }
+
+  const token = authHeader.split(" ")[1];
 
   try {
     const decoded = verifyAccessToken(token);
 
     if (decoded) {
-      req.userId = decoded.userId;
+      req.headers.userId = decoded.userId.toString();
     } else {
-      return res.status(401).json({ message: "Unauthorized" });
+      res.status(401).json({ message: "Unauthorized" });
     }
     next();
   } catch (err) {
