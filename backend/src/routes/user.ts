@@ -3,15 +3,16 @@ import {
   editUserProfile,
   getUserFollowers,
   getUserFollowing,
-  getUserPosts,
-  getUserProfile,
+  getOtherUserProfile,
+  getOtherUserPosts,
   getOwnProfile,
+  getOwnPosts,
   getUserSavedPosts,
-  searchUser,
+  searchUsers,
   userFollow,
+  userUnfollow,
   userFollowersSearch,
   userFollowingSearch,
-  userUnfollow,
   isValidUsername,
   isFollowing,
 } from "../controllers/user";
@@ -19,15 +20,17 @@ import { authenticate } from "../middlewares/authenticate";
 
 const router = Router();
 
-router.post("/search", authenticate, searchUser);
+router.post("/search-users", authenticate, searchUsers);
 
-router.get("/profile", authenticate, getUserProfile);
+router.post("/others-profile", authenticate, getOtherUserProfile);
+
+router.post("/others-posts", authenticate, getOtherUserPosts);
 
 router.get("/own-profile", authenticate, getOwnProfile);
 
-router.post("/posts", authenticate, getUserPosts);
+router.post("/own-posts", authenticate, getOwnPosts);
 
-router.get("/saved-posts", authenticate, getUserSavedPosts);
+router.post("/saved-posts", authenticate, getUserSavedPosts);
 
 router.get("/follow", authenticate, userFollow);
 

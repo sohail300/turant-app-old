@@ -3,10 +3,11 @@ import { searchUserSchema } from "../zod/user/searchUser";
 import { usernameSchema } from "../zod/user/isUsernameValid";
 import { editUserProfileSchema } from "../zod/user/editUserProfile";
 import { Request, Response } from "express";
+import { paginationSchema } from "../zod/user/pagination";
 
 const prisma = new PrismaClient();
 
-export const searchUser = async (req: Request, res: Response) => {
+export const searchUsers = async (req: Request, res: Response) => {
   try {
     const inputData = searchUserSchema.safeParse(req.body);
 
@@ -18,7 +19,7 @@ export const searchUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const { identifier } = inputData.data;
+    const { identifier, limit, offset } = inputData.data;
 
     // Search for users by username or name
     const users = await prisma.user.findMany({
@@ -36,10 +37,23 @@ export const searchUser = async (req: Request, res: Response) => {
         phone: true,
         profile_url: true,
       },
+      take: limit,
+      skip: offset,
+    });
+
+    // Search for users by username or name
+    const totalUsers = await prisma.user.count({
+      where: {
+        OR: [
+          { username: { contains: identifier, mode: "insensitive" } },
+          { display_name: { contains: identifier, mode: "insensitive" } },
+        ],
+      },
     });
 
     res.json({
       users,
+      totalUsers,
     });
   } catch (error) {
     console.error("Error searching users:", error);
@@ -49,9 +63,10 @@ export const searchUser = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserProfile = async (req: Request, res: Response) => {
+export const getOtherUserProfile = async (req: Request, res: Response) => {
   try {
     const { userId } = req.body;
+    const loggedInUserId = req.headers.userId;
 
     // Fetch user profile
     const user = await prisma.user.findUnique({
@@ -86,8 +101,25 @@ export const getUserProfile = async (req: Request, res: Response) => {
       return;
     }
 
+    // See if the user is followed by the logged in user
+    const isFollowing = await prisma.follower.findFirst({
+      where: {
+        follower_id: Number(loggedInUserId),
+        following_id: Number(userId),
+      },
+    });
+
+    let isFollowingBoolean;
+
+    if (isFollowing) {
+      isFollowingBoolean = true;
+    } else {
+      isFollowingBoolean = false;
+    }
+
     res.json({
       user,
+      isFollowing: isFollowingBoolean,
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);
@@ -130,11 +162,23 @@ export const getOwnProfile = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserPosts = async (req: Request, res: Response) => {
+export const getOtherUserPosts = async (req: Request, res: Response) => {
   try {
-    const { userId } = req.headers;
+    const inputData = paginationSchema.safeParse(req.body);
 
-    const posts = await prisma.user.findUnique({
+    if (!inputData.success) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const { limit, offset } = inputData.data;
+
+    const { userId } = req.body;
+
+    const posts = await prisma.user.findMany({
       where: {
         user_id: Number(userId),
       },
@@ -154,14 +198,85 @@ export const getUserPosts = async (req: Request, res: Response) => {
           },
         },
       },
+      take: limit,
+      skip: offset,
     });
 
     if (!posts) {
       res.status(404).json({ message: "Posts not found" });
     }
 
+    const totalPosts = await prisma.post.count({
+      where: {
+        user_id: Number(userId),
+      },
+    });
+
     res.json({
       posts,
+      totalPosts,
+    });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getOwnPosts = async (req: Request, res: Response) => {
+  try {
+    const inputData = paginationSchema.safeParse(req.body);
+
+    if (!inputData.success) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const { limit, offset } = inputData.data;
+
+    const { userId } = req.headers;
+
+    const posts = await prisma.user.findMany({
+      where: {
+        user_id: Number(userId),
+      },
+      select: {
+        user_id: true,
+        posts: {
+          select: {
+            user_id: true,
+            post_id: true,
+            thumbnail: true,
+            title: true,
+            snippet: true,
+            likes: true,
+            comments: true,
+            shares: true,
+            created_at: true,
+          },
+        },
+      },
+      take: limit,
+      skip: offset,
+    });
+
+    if (!posts) {
+      res.status(404).json({ message: "Posts not found" });
+    }
+
+    const totalPosts = await prisma.post.count({
+      where: {
+        user_id: Number(userId),
+      },
+    });
+
+    res.json({
+      posts,
+      totalPosts,
     });
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -173,9 +288,21 @@ export const getUserPosts = async (req: Request, res: Response) => {
 
 export const getUserSavedPosts = async (req: Request, res: Response) => {
   try {
+    const inputData = paginationSchema.safeParse(req.body);
+
+    if (!inputData.success) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const { limit, offset } = inputData.data;
+
     const { userId } = req.headers;
 
-    const posts = await prisma.user.findUnique({
+    const posts = await prisma.user.findMany({
       where: {
         user_id: Number(userId),
       },
@@ -199,14 +326,23 @@ export const getUserSavedPosts = async (req: Request, res: Response) => {
           },
         },
       },
+      take: limit,
+      skip: offset,
     });
 
     if (!posts) {
       res.status(404).json({ message: "Posts not found" });
     }
 
+    const totalPosts = await prisma.post.count({
+      where: {
+        user_id: Number(userId),
+      },
+    });
+
     res.json({
       posts,
+      totalPosts,
     });
   } catch (error) {
     console.error("Error fetching posts:", error);

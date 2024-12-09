@@ -10,6 +10,7 @@ export const authenticate = (
 
   if (!authHeader) {
     res.status(401).json({ message: "Unauthorized" });
+    return;
   }
 
   const token = authHeader.split(" ")[1];
@@ -18,9 +19,10 @@ export const authenticate = (
     const decoded = verifyAccessToken(token);
 
     if (decoded) {
-      req.headers.userId = decoded.userId.toString();
+      req.headers["userId"] = decoded.userId.toString();
     } else {
       res.status(401).json({ message: "Unauthorized" });
+      return;
     }
     next();
   } catch (err) {

@@ -20,10 +20,6 @@ export const getContacts = async (req: Request, res: Response) => {
       },
     });
 
-    if (!reporters.length) {
-      res.status(404).json({ message: "No reporters found" });
-    }
-
     // Respond with the list of reporters
     res.json({
       reporters,
@@ -43,12 +39,13 @@ export const getStates = (req: Request, res: Response) => {
 export const getCities = async (req: Request, res: Response) => {
   try {
     const { state } = req.query;
+    console.log(state);
 
     if (!state) {
       res.status(400).json({ message: "State is required" });
     }
 
-    const cities = await axios.post(
+    const response = await axios.post(
       "https://countriesnow.space/api/v0.1/countries/state/cities",
       {
         country: "India",
@@ -56,7 +53,9 @@ export const getCities = async (req: Request, res: Response) => {
       }
     );
 
-    res.json({ cities });
+    console.log(response.data.data);
+
+    res.json({ cities: response.data.data });
   } catch (error) {
     console.error("Error fetching reporters:", error);
     res.status(500).json({
