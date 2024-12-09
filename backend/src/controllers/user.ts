@@ -4,6 +4,7 @@ import { usernameSchema } from "../zod/user/isUsernameValid";
 import { editUserProfileSchema } from "../zod/user/editUserProfile";
 import { Request, Response } from "express";
 import { paginationSchema } from "../zod/user/pagination";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -149,6 +150,7 @@ export const getOwnProfile = async (req: Request, res: Response) => {
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
+      return;
     }
 
     res.json({
@@ -204,6 +206,7 @@ export const getOtherUserPosts = async (req: Request, res: Response) => {
 
     if (!posts) {
       res.status(404).json({ message: "Posts not found" });
+      return;
     }
 
     const totalPosts = await prisma.post.count({
@@ -361,23 +364,26 @@ export const userFollow = async (req: Request, res: Response) => {
       res.status(400).json({
         message: "Target user ID is required",
       });
+      return;
     }
 
     if (userId === targetUserId) {
       res.status(400).json({
         message: "You cannot follow yourself",
       });
+      return;
     }
 
     // Check if target user exists
     const targetUser = await prisma.user.findUnique({
-      where: { user_id: targetUserId },
+      where: { user_id: Number(targetUserId) },
     });
 
     if (!targetUser) {
       res.status(404).json({
         message: "Target user not found",
       });
+      return;
     }
 
     // Check if the user is already following the target user
@@ -385,7 +391,7 @@ export const userFollow = async (req: Request, res: Response) => {
       where: {
         follower_id_following_id: {
           follower_id: Number(userId),
-          following_id: targetUserId,
+          following_id: Number(targetUserId),
         },
       },
     });
@@ -394,13 +400,14 @@ export const userFollow = async (req: Request, res: Response) => {
       res.status(400).json({
         message: "You are already following this user",
       });
+      return;
     }
 
     // Add the follow relationship
     await prisma.follower.create({
       data: {
         follower_id: Number(userId),
-        following_id: targetUserId,
+        following_id: Number(targetUserId),
       },
     });
 
@@ -414,7 +421,7 @@ export const userFollow = async (req: Request, res: Response) => {
 
     // Increment the follower count of the target user
     await prisma.user.update({
-      where: { user_id: targetUserId },
+      where: { user_id: Number(targetUserId) },
       data: {
         follower_count: { increment: 1 },
       },
@@ -441,12 +448,14 @@ export const userUnfollow = async (req: Request, res: Response) => {
       res.status(400).json({
         message: "Target user ID is required",
       });
+      return;
     }
 
     if (userId === targetUserId) {
       res.status(400).json({
         message: "You cannot unfollow yourself",
       });
+      return;
     }
 
     // Check if the follow relationship exists
@@ -454,7 +463,7 @@ export const userUnfollow = async (req: Request, res: Response) => {
       where: {
         follower_id_following_id: {
           follower_id: Number(userId),
-          following_id: targetUserId,
+          following_id: Number(targetUserId),
         },
       },
     });
@@ -463,6 +472,7 @@ export const userUnfollow = async (req: Request, res: Response) => {
       res.status(400).json({
         message: "You are not following this user",
       });
+      return;
     }
 
     // Remove the follow relationship
@@ -470,7 +480,7 @@ export const userUnfollow = async (req: Request, res: Response) => {
       where: {
         follower_id_following_id: {
           follower_id: Number(userId),
-          following_id: targetUserId,
+          following_id: Number(targetUserId),
         },
       },
     });
@@ -485,7 +495,7 @@ export const userUnfollow = async (req: Request, res: Response) => {
 
     // Decrement the follower count of the target user
     await prisma.user.update({
-      where: { user_id: targetUserId },
+      where: { user_id: Number(targetUserId) },
       data: {
         follower_count: { decrement: 1 },
       },
@@ -503,48 +513,20 @@ export const userUnfollow = async (req: Request, res: Response) => {
   }
 };
 
-export const isFollowing = async (req: Request, res: Response) => {
-  try {
-    const { userId } = req.headers; // Logged-in user's ID (from middleware/auth)
-    const { targetUserId } = req.body; // The user to check
-
-    if (!targetUserId) {
-      res.status(400).json({
-        message: "Target user ID is required",
-      });
-    }
-
-    // Check if the user is following the target user
-    const following = await prisma.follower.findUnique({
-      where: {
-        follower_id_following_id: {
-          follower_id: Number(userId),
-          following_id: targetUserId,
-        },
-      },
-    });
-
-    if (following) {
-      res.status(200).json({
-        success: true,
-        message: "You are following this user",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "You are not following this user",
-    });
-  } catch (error) {
-    console.error("Error checking if user is following:", error);
-    res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-};
-
 export const getUserFollowing = async (req: Request, res: Response) => {
   try {
+    const inputData = paginationSchema.safeParse(req.body);
+
+    if (!inputData.success) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const { limit, offset } = inputData.data;
+
     const { userId } = req.headers; // Logged-in user's ID (from middleware/auth)
 
     // Fetch the list of users the logged-in user is following
@@ -560,6 +542,17 @@ export const getUserFollowing = async (req: Request, res: Response) => {
           },
         },
       },
+      take: limit,
+      skip: offset,
+    });
+
+    if (!following) {
+      res.status(404).json({ message: "Following not found" });
+      return;
+    }
+
+    const totalFollowing = await prisma.follower.count({
+      where: { follower_id: Number(userId) },
     });
 
     // Transform the response to return an array of followed users
@@ -567,7 +560,7 @@ export const getUserFollowing = async (req: Request, res: Response) => {
 
     res.status(200).json({
       followingList,
-      // following,
+      totalFollowing,
     });
   } catch (error) {
     console.error("Error fetching user following list:", error);
@@ -579,6 +572,18 @@ export const getUserFollowing = async (req: Request, res: Response) => {
 
 export const getUserFollowers = async (req: Request, res: Response) => {
   try {
+    const inputData = paginationSchema.safeParse(req.body);
+
+    if (!inputData.success) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const { limit, offset } = inputData.data;
+
     const { userId } = req.headers; // Logged-in user's ID (from middleware/auth)
 
     // Fetch the list of users following the logged-in user
@@ -594,6 +599,17 @@ export const getUserFollowers = async (req: Request, res: Response) => {
           },
         },
       },
+      take: limit,
+      skip: offset,
+    });
+
+    if (!followers) {
+      res.status(404).json({ message: "Followers not found" });
+      return;
+    }
+
+    const totalFollowers = await prisma.follower.count({
+      where: { following_id: Number(userId) },
     });
 
     // Transform the response to return an array of follower users
@@ -601,7 +617,7 @@ export const getUserFollowers = async (req: Request, res: Response) => {
 
     res.status(200).json({
       followersList,
-      // followers,
+      totalFollowers,
     });
   } catch (error) {
     console.error("Error fetching user followers list:", error);
@@ -611,7 +627,7 @@ export const getUserFollowers = async (req: Request, res: Response) => {
   }
 };
 
-export const userFollowersSearch = async (req: Request, res: Response) => {
+export const searchUserFollowers = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers; // Assuming `req.userId` holds the logged-in user's ID
     const inputData = searchUserSchema.safeParse(req.body);
@@ -621,9 +637,10 @@ export const userFollowersSearch = async (req: Request, res: Response) => {
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
+      return;
     }
 
-    const { identifier } = inputData.data;
+    const { identifier, limit, offset } = inputData.data;
 
     // Fetch followers with search applied to their username or display name
     const followers = await prisma.follower.findMany({
@@ -646,6 +663,17 @@ export const userFollowersSearch = async (req: Request, res: Response) => {
           },
         },
       },
+      take: limit,
+      skip: offset,
+    });
+
+    if (!followers) {
+      res.status(404).json({ message: "Followers not found" });
+      return;
+    }
+
+    const totalFollowers = await prisma.follower.count({
+      where: { following_id: Number(userId) },
     });
 
     // Extract follower details from the nested object
@@ -653,6 +681,7 @@ export const userFollowersSearch = async (req: Request, res: Response) => {
 
     res.json({
       result,
+      totalFollowers,
     });
   } catch (error) {
     console.error("Error searching user's followers:", error);
@@ -662,7 +691,7 @@ export const userFollowersSearch = async (req: Request, res: Response) => {
   }
 };
 
-export const userFollowingSearch = async (req: Request, res: Response) => {
+export const searchUserFollowings = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers; // Assuming `req.userId` holds the logged-in user's ID
     const inputData = searchUserSchema.safeParse(req.body);
@@ -672,9 +701,10 @@ export const userFollowingSearch = async (req: Request, res: Response) => {
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
+      return;
     }
 
-    const { identifier } = inputData.data;
+    const { identifier, limit, offset } = inputData.data;
 
     // Fetch following with search applied to their username or display name
     const following = await prisma.follower.findMany({
@@ -699,6 +729,17 @@ export const userFollowingSearch = async (req: Request, res: Response) => {
           },
         },
       },
+      take: limit,
+      skip: offset,
+    });
+
+    if (!following) {
+      res.status(404).json({ message: "Following not found" });
+      return;
+    }
+
+    const totalFollowing = await prisma.follower.count({
+      where: { follower_id: Number(userId) },
     });
 
     // Extract following details from the nested object
@@ -706,6 +747,7 @@ export const userFollowingSearch = async (req: Request, res: Response) => {
 
     res.json({
       result,
+      totalFollowing,
     });
   } catch (error) {
     console.error("Error searching user's following:", error);
@@ -726,10 +768,21 @@ export const editUserProfile = async (req: Request, res: Response) => {
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
+      return;
     }
 
-    const { display_name, username, phone, email, app_language, state, city } =
-      inputData.data;
+    const {
+      display_name,
+      username,
+      phone,
+      email,
+      password,
+      app_language,
+      state,
+      city,
+    } = inputData.data;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     // Update the user's profile
     await prisma.user.update({
@@ -741,6 +794,7 @@ export const editUserProfile = async (req: Request, res: Response) => {
         username,
         email,
         phone,
+        password: hashedPassword,
         app_language,
         state,
         city,
@@ -758,7 +812,7 @@ export const editUserProfile = async (req: Request, res: Response) => {
   }
 };
 
-export const isValidUsername = async (req: Request, res: Response) => {
+export const isUsernameAvailable = async (req: Request, res: Response) => {
   try {
     const inputData = usernameSchema.safeParse(req.body);
 
@@ -767,27 +821,29 @@ export const isValidUsername = async (req: Request, res: Response) => {
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
+      return;
     }
 
     const { username } = inputData.data;
 
     // Check if username is already taken
-    const existingUsername = await prisma.user.findFirst({
+    const alreadyInUse = await prisma.user.findFirst({
       where: {
         username,
       },
     });
 
-    if (existingUsername) {
-      res.status(400).json({
-        message: "Username already in use.",
+    if (alreadyInUse) {
+      res.status(200).json({
+        available: false,
       });
+      return;
+    } else {
+      res.status(200).json({
+        available: true,
+      });
+      return;
     }
-
-    // If valid
-    res.json({
-      msg: "Valid Profile",
-    });
   } catch (error) {
     console.error("Error validating username:", error);
     res.status(500).json({

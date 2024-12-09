@@ -12,6 +12,7 @@ export const editUserProfileSchema = z.object({
     ),
   phone: z.string().regex(/^\d{10}$/, "Phone must be exactly 10 digits"),
   email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password must be at least 1 character long"),
   app_language: z.enum(["english", "hindi"]),
   state: z.enum(["delhi", "bihar", "punjab", "haryana", "kerala"]),
   city: z.string().min(1, "City must be at least 1 characters"),

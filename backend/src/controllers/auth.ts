@@ -25,6 +25,7 @@ export const signup = async (req: Request, res: Response) => {
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
+      return;
     }
 
     const {
@@ -48,6 +49,7 @@ export const signup = async (req: Request, res: Response) => {
       res.status(400).json({
         message: "Email already in use",
       });
+      return;
     }
 
     const existingUsername = await prisma.user.findFirst({
@@ -60,6 +62,7 @@ export const signup = async (req: Request, res: Response) => {
       res.status(400).json({
         message: "Username already in use",
       });
+      return;
     }
 
     const existingPhone = await prisma.user.findFirst({
@@ -72,6 +75,7 @@ export const signup = async (req: Request, res: Response) => {
       res.status(400).json({
         message: "Phone number already in use",
       });
+      return;
     }
 
     // Hash the password
@@ -148,7 +152,7 @@ export const login = async (req: Request, res: Response) => {
       where: {
         OR: [
           { email: identifier }, // Check by email
-          { phone: identifier }, // Check by phone
+          { username: identifier }, // Check by phone
         ],
       },
     });
@@ -167,6 +171,7 @@ export const login = async (req: Request, res: Response) => {
       res.status(400).json({
         message: "Invalid credentials",
       });
+      return;
     }
 
     const accessToken = generateAccessToken(user.user_id);
@@ -195,148 +200,163 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const sendForgotPasswordOtp = async (req: Request, res: Response) => {
-  const inputData = sendForgotPasswordOtpSchema.safeParse(req.body);
+  try {
+    const inputData = sendForgotPasswordOtpSchema.safeParse(req.body);
 
-  if (inputData.success === false) {
-    res.status(400).json({
-      message: "Validation error",
-      errors: inputData.error.flatten().fieldErrors,
+    if (inputData.success === false) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const { email, phone, medium } = inputData.data;
+
+    const otp = otpGenerator.generate(4, {
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+      digits: true,
     });
-    return;
+
+    if (medium == "email") {
+      if (!email) throw new Error("Email is required for OTP generation");
+
+      const user = await prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) throw new Error("User not found");
+
+      // ! TODO: Send OTP to email
+
+      await prisma.otp.create({
+        data: {
+          user_id: user.user_id,
+          related: "forgot_password", // OTP type
+          otp,
+          expires_at: new Date(Date.now() + 10 * 60 * 1000),
+        },
+      });
+    } else if (medium == "phone") {
+      if (!phone)
+        throw new Error("Phone Number is required for OTP generation");
+
+      const user = await prisma.user.findUnique({
+        where: { phone },
+      });
+
+      if (!user) throw new Error("User not found");
+
+      // ! TODO: Send OTP to phone
+
+      await prisma.otp.create({
+        data: {
+          user_id: user.user_id,
+          related: "forgot_password", // OTP type
+          otp,
+          expires_at: new Date(Date.now() + 10 * 60 * 1000),
+        },
+      });
+    }
+
+    console.log(`Sending phone OTP to ${phone}: ${otp}`);
+    res.json({ success: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Error sending forgot password OTP:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
   }
-
-  const { email, phone, medium } = inputData.data;
-
-  const otp = otpGenerator.generate(4, {
-    lowerCaseAlphabets: false,
-    upperCaseAlphabets: false,
-    specialChars: false,
-    digits: true,
-  });
-
-  if (medium == "email") {
-    if (!email) throw new Error("Email is required for OTP generation");
-
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) throw new Error("User not found");
-
-    // ! TODO: Send OTP to email
-
-    await prisma.otp.create({
-      data: {
-        user_id: user.user_id,
-        related: "forgot_password", // OTP type
-        otp,
-        expires_at: new Date(Date.now() + 10 * 60 * 1000),
-      },
-    });
-  } else if (medium == "phone") {
-    if (!phone) throw new Error("Phone Number is required for OTP generation");
-
-    const user = await prisma.user.findUnique({
-      where: { phone },
-    });
-
-    if (!user) throw new Error("User not found");
-
-    // ! TODO: Send OTP to phone
-
-    await prisma.otp.create({
-      data: {
-        user_id: user.user_id,
-        related: "forgot_password", // OTP type
-        otp,
-        expires_at: new Date(Date.now() + 10 * 60 * 1000),
-      },
-    });
-  }
-
-  console.log(`Sending phone OTP to ${phone}: ${otp}`);
-  res.json({ success: true, message: "OTP sent successfully" });
 };
 
 export const verifyForgotPasswordOtp = async (req: Request, res: Response) => {
-  const inputData = verifyForgotPasswordOtpSchema.safeParse(req.body);
+  try {
+    const inputData = verifyForgotPasswordOtpSchema.safeParse(req.body);
 
-  if (inputData.success === false) {
-    res.status(400).json({
-      message: "Validation error",
-      errors: inputData.error.flatten().fieldErrors,
-    });
-    return;
-  }
-
-  const { otp, email, phone, medium, password } = inputData.data;
-
-  let user;
-
-  // Validate user based on the medium
-  if (medium === "email") {
-    if (!email) {
-      res.status(400).json({ message: "Email is required for verification" });
+    if (inputData.success === false) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
       return;
     }
 
-    user = await prisma.user.findUnique({
-      where: { email },
-    });
-  } else if (medium === "phone") {
-    if (!phone) {
-      res
-        .status(400)
-        .json({ message: "Phone number is required for verification" });
+    const { otp, email, phone, medium, password } = inputData.data;
+
+    let user;
+
+    // Validate user based on the medium
+    if (medium === "email") {
+      if (!email) {
+        res.status(400).json({ message: "Email is required for verification" });
+        return;
+      }
+
+      user = await prisma.user.findUnique({
+        where: { email },
+      });
+    } else if (medium === "phone") {
+      if (!phone) {
+        res
+          .status(400)
+          .json({ message: "Phone number is required for verification" });
+        return;
+      }
+
+      user = await prisma.user.findUnique({
+        where: { phone },
+      });
+    } else {
+      res.status(400).json({ message: "Invalid medium" });
       return;
     }
 
-    user = await prisma.user.findUnique({
-      where: { phone },
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Find OTP record for the user
+    const otpRecord = await prisma.otp.findFirst({
+      where: {
+        user_id: user.user_id,
+        related: "forgot_password",
+        otp,
+      },
     });
-  } else {
-    res.status(400).json({ message: "Invalid medium" });
-    return;
+
+    if (!otpRecord) {
+      res.status(400).json({ message: "Invalid OTP" });
+      return;
+    }
+
+    // Check if OTP is expired
+    if (new Date(otpRecord.expires_at) < new Date()) {
+      res.status(400).json({ message: "OTP has expired" });
+      return;
+    }
+
+    // Update the user's password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await prisma.user.update({
+      where: { user_id: user.user_id },
+      data: { password: hashedPassword },
+    });
+
+    // Optionally delete the OTP record after successful verification
+    await prisma.otp.delete({
+      where: { otp_id: otpRecord.otp_id },
+    });
+
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error verifying forgot password OTP:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
   }
-
-  if (!user) {
-    res.status(404).json({ message: "User not found" });
-    return;
-  }
-
-  // Find OTP record for the user
-  const otpRecord = await prisma.otp.findFirst({
-    where: {
-      user_id: user.user_id,
-      related: "forgot_password",
-      otp,
-    },
-  });
-
-  if (!otpRecord) {
-    res.status(400).json({ message: "Invalid OTP" });
-    return;
-  }
-
-  // Check if OTP is expired
-  if (new Date(otpRecord.expires_at) < new Date()) {
-    res.status(400).json({ message: "OTP has expired" });
-    return;
-  }
-
-  // Update the user's password
-  const hashedPassword = await bcrypt.hash(password, 10);
-  await prisma.user.update({
-    where: { user_id: user.user_id },
-    data: { password: hashedPassword },
-  });
-
-  // Optionally delete the OTP record after successful verification
-  await prisma.otp.delete({
-    where: { otp_id: otpRecord.otp_id },
-  });
-
-  res.json({ success: true, message: "Password updated successfully" });
 };
 
 export const sendRegisterOtp = async (req: Request, res: Response) => {

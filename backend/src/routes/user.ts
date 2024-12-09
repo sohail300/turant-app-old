@@ -11,10 +11,9 @@ import {
   searchUsers,
   userFollow,
   userUnfollow,
-  userFollowersSearch,
-  userFollowingSearch,
-  isValidUsername,
-  isFollowing,
+  searchUserFollowers,
+  searchUserFollowings,
+  isUsernameAvailable,
 } from "../controllers/user";
 import { authenticate } from "../middlewares/authenticate";
 
@@ -32,22 +31,20 @@ router.post("/own-posts", authenticate, getOwnPosts);
 
 router.post("/saved-posts", authenticate, getUserSavedPosts);
 
-router.get("/follow", authenticate, userFollow);
+router.post("/follow", authenticate, userFollow);
 
-router.get("/unfollow", authenticate, userUnfollow);
+router.post("/unfollow", authenticate, userUnfollow);
 
-router.get("is-following", authenticate, isFollowing);
+router.post("/following", authenticate, getUserFollowing);
 
-router.get("/following", authenticate, getUserFollowing);
+router.post("/followers", authenticate, getUserFollowers);
 
-router.get("/followers", authenticate, getUserFollowers);
+router.post("/search-followers", authenticate, searchUserFollowers);
 
-router.get("/search-followers", authenticate, userFollowersSearch);
-
-router.get("/search-following", authenticate, userFollowingSearch);
+router.post("/search-following", authenticate, searchUserFollowings);
 
 router.put("/edit-profile", authenticate, editUserProfile);
 
-router.put("/valid-profile", authenticate, isValidUsername);
+router.post("/available-username", authenticate, isUsernameAvailable);
 
 export default router;

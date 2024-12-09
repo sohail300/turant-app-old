@@ -4,10 +4,7 @@ import { states } from "../../utils/locations";
 
 export const loginSchema = z.object({
   identifier: z
-    .union([
-      z.string().email("Invalid email address"),
-      z.string().regex(/^\d{10}$/, "Phone must be exactly 10 digits"),
-    ])
+    .union([z.string().email("Invalid email address"), z.string()])
     .refine(
       (val) => {
         return val.length > 0;
