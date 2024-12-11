@@ -16,7 +16,6 @@ export interface User {
   created_at: string; // Date of joining
   banTill: string; // Date of ban
   lastBan: string; // Date of last ban
-  notes: string; // Additional notes
 }
 
 export interface Reporter {
@@ -30,13 +29,14 @@ export interface Reporter {
 }
 
 export interface Advertiser {
-  name: string; // Advertiser company name
-  start_date: string; // Start date of the campaign (formatted as a string, e.g., "YYYY-MM-DD")
-  end_date: string; // End date of the campaign (formatted as a string, e.g., "YYYY-MM-DD")
-  duration: string; // Duration of the campaign (e.g., "30 days")
-  total_reach: number; // Total reach of the campaign (e.g., number of people reached)
-  target_city: string; // Targeted city for the campaign
-  target_state: string; // Targeted state for the campaign
-  cost: string; // Cost of the campaign (e.g., "₹5000")
-  detail: string; // Placeholder for action-related details (e.g., button or view handler)
+  company_name: string;
+  start_date: string;
+  end_date: string;
+  duration: string;
+  total_views: number;
+  total_clicks: number;
+  target_city: string;
+  target_state: string;
+  cost: string;
+  detail: string;
 }

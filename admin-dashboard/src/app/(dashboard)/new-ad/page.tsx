@@ -27,8 +27,11 @@ import { toast } from "react-toastify";
 import { api } from "@/utils/config";
 import { LoaderContext } from "@/context/LoaderContext";
 import Loader from "@/components/Loader";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = useState(false);
   const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
@@ -116,6 +119,7 @@ export default function Page() {
 
   const onSubmit = async (formData) => {
     console.log(formData);
+
     if (!file) {
       toast.error("Please upload an image");
       return;
@@ -123,9 +127,14 @@ export default function Page() {
 
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value);
+      if (value instanceof Date) {
+        console.log(typeof value);
+        data.append(key, format(value, "yyyy-MM-dd"));
+      } else {
+        data.append(key, value);
+      }
     });
-    data.append("image", file);
+    data.append("file", file);
 
     try {
       setIsLoading(true);
@@ -138,8 +147,7 @@ export default function Page() {
 
       console.log(response.data);
       if (response) {
-        toast.success("Reporter added successfully");
-        // fetchAds();
+        toast.success("Advertisement added successfully");
       }
     } catch (error) {
       const errorMessage =
@@ -149,6 +157,24 @@ export default function Page() {
       setIsLoading(false);
     }
   };
+
+  async function isLoggedIn() {
+    try {
+      setIsLoading(true);
+      const response = await api.get("/me", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+    } catch (error) {
+      setIsLoading(false);
+      router.push("/");
+    }
+  }
+
+  useEffect(() => {
+    isLoggedIn();
+  }, []);
 
   if (isLoading) return <Loader />;
 
@@ -199,7 +225,7 @@ export default function Page() {
                     <SelectContent defaultValue={"Image"}>
                       <SelectItem value="image">Image</SelectItem>
                       <SelectItem value="video">Video</SelectItem>
-                      <SelectItem value="audio">Audio</SelectItem>
+                      <SelectItem value="text">Text</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -292,72 +318,91 @@ export default function Page() {
               <label className="text-brandGray font-hind500 text-lg">
                 Start Date <span className="text-red-500">*</span>
               </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn("w-full pl-3 text-left font-normal")}
-                  >
-                    {startDate ? (
-                      format(startDate, "dd/MM/yyyy")
-                    ) : (
-                      <span className="font-hind400 text-brandBorder text-base">
-                        dd/mm/yyyy
-                      </span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 text-brandText" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-50" align="start">
-                  <Calendar
-                    className=" bg-white rounded-lg border border-brandBorder"
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <Controller
+                name="start_date"
+                control={control}
+                rules={{ required: "Start date is required" }}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn("w-full pl-3 text-left font-normal")}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span className="font-hind400 text-brandBorder text-base">
+                            dd/mm/yyyy
+                          </span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 text-brandText" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                      <Calendar
+                        className="bg-white rounded-lg border border-brandBorder"
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(date) => field.onChange(date)}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.start_date && (
+                <p className="text-red-500 text-sm">
+                  {errors.start_date.message}
+                </p>
+              )}
             </div>
-
             <div className="space-y-2 flex flex-col">
               <label className="text-brandGray font-hind500 text-lg">
                 End Date <span className="text-red-500">*</span>
               </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={"outline"}
-                    className={cn("w-full pl-3 text-left font-normal")}
-                  >
-                    {endDate ? (
-                      format(endDate, "dd/MM/yyyy")
-                    ) : (
-                      <span className="font-hind400 text-brandBorder text-base">
-                        dd/mm/yyyy
-                      </span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 text-brandText" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 z-50" align="start">
-                  <Calendar
-                    className=" bg-white rounded-lg border border-brandBorder"
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    disabled={(date) =>
-                      date > new Date() || date < new Date("1900-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <Controller
+                name="end_date"
+                control={control}
+                rules={{ required: "End date is required" }}
+                render={({ field }) => (
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={"outline"}
+                        className={cn("w-full pl-3 text-left font-normal")}
+                      >
+                        {field.value ? (
+                          format(field.value, "dd/MM/yyyy")
+                        ) : (
+                          <span className="font-hind400 text-brandBorder text-base">
+                            dd/mm/yyyy
+                          </span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 text-brandText" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                      <Calendar
+                        className="bg-white rounded-lg border border-brandBorder"
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(date) => field.onChange(date)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                )}
+              />
+              {errors.end_date && (
+                <p className="text-red-500 text-sm">
+                  {errors.end_date.message}
+                </p>
+              )}
             </div>
-
             <div className="space-y-2">
               <label className="text-brandGray font-hind500 text-lg">
                 Duration
@@ -368,7 +413,6 @@ export default function Page() {
                   type="number"
                   className="rounded-r-md placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
                   placeholder="Enter Duration"
-                  defaultValue={0}
                 />
                 <div className="absolute right-0 bg-brandHeader px-4 py-0 h-full border border-l-0 rounded-r-md text-brandText font-hind500 text-lg flex justify-center items-center">
                   Days
@@ -380,7 +424,6 @@ export default function Page() {
                 </p>
               )}
             </div>
-
             <div className="space-y-2">
               <label className="text-brandGray font-hind500 text-lg">
                 Target State <span className="text-red-500">*</span>
@@ -418,7 +461,6 @@ export default function Page() {
                 <p className="text-red-500 text-sm">{errors.state.message}</p>
               )}
             </div>
-
             <div className="space-y-2">
               <label className="text-brandGray font-hind500 text-lg">
                 Target City <span className="text-red-500">*</span>
@@ -452,7 +494,6 @@ export default function Page() {
                 <p className="text-red-500 text-sm">{errors.city.message}</p>
               )}
             </div>
-
             <div className="space-y-2">
               <label className="text-brandGray font-hind500 text-lg">
                 Cost

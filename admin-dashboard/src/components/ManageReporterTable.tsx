@@ -22,11 +22,11 @@ import {
 import { PopoverClose } from "@radix-ui/react-popover";
 import { toast } from "react-toastify";
 import { api } from "@/utils/config";
-import Loader from "./Loader";
 import { Reporter } from "@/lib/interface";
 
 export const createColumns = (
   fetchData,
+  fetchTotalReporters,
   setIsLoading
 ): ColumnDef<Reporter>[] => {
   const handleDelete = async (id) => {
@@ -44,6 +44,7 @@ export const createColumns = (
       if (response) {
         toast.success("Reporter deleted successfully");
         fetchData();
+        fetchTotalReporters();
       } else {
         toast.error("Error deleting reporter");
       }

@@ -41,14 +41,17 @@ export const uploadArticle = async (req: Request, res: Response) => {
       res.status(403).json({
         message: "You are blocked from uploading articles.",
       });
+      return;
     }
 
     const inputData = uploadArticleSchema.safeParse(req.body);
+
     if (!inputData.success) {
       res.status(400).json({
         message: "Validation error",
         errors: inputData.error.flatten().fieldErrors,
       });
+      return;
     }
 
     const { language, title, content } = inputData.data;
@@ -59,14 +62,14 @@ export const uploadArticle = async (req: Request, res: Response) => {
         user_id: Number(userId),
         language,
         title,
-        type: "text", // Assuming articles are represented by the type "ARTICLE"
+        type: "text",
         content,
+        snippet: content.split(" ").slice(0, 30).join(" "),
       },
     });
 
     res.status(201).json({
-      message: "Article uploaded successfully.",
-      article: newArticle,
+      message: "Article uploaded successfully",
     });
   } catch (error) {
     console.error("Error uploading article:", error);

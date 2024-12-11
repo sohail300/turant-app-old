@@ -22,8 +22,11 @@ import { toast } from "react-toastify";
 import { api } from "@/utils/config";
 import Loader from "@/components/Loader";
 import { LoaderContext } from "@/context/LoaderContext";
+import { useRouter } from "next/navigation";
 
 const Page = () => {
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = useState("");
 
   const [isAddReporterOpen, setIsAddReporterOpen] = useState(false);
@@ -42,6 +45,8 @@ const Page = () => {
     pageSize: 10,
   });
 
+  const [currentCallTotalReporters, setCurrentCallTotalReporters] = useState(0);
+
   const fetchTotalReporters = async () => {
     try {
       const response = await api.get("/reporter/total-reporters", {
@@ -50,7 +55,8 @@ const Page = () => {
         },
       });
 
-      setTotalReporters(response.data.totalUsers);
+      console.log(response.data);
+      setTotalReporters(response.data.totalReporters);
     } catch (error) {
       console.error("Error fetching reporters:", error);
       toast.error("Error fetching data");
@@ -81,8 +87,8 @@ const Page = () => {
       );
 
       console.log(response.data.users);
-      const { users, totalUsers } = response.data;
-      setData(users);
+      setCurrentCallTotalReporters(response.data.totalReporters);
+      setData(response.data.users);
     } catch (error) {
       console.error("Error fetching reporters:", error);
       toast.error("Error fetching data");
@@ -95,9 +101,27 @@ const Page = () => {
     fetchData();
   }, [debouncedFilter, pagination]);
 
+  async function isLoggedIn() {
+    try {
+      setIsLoading(true);
+      const response = await api.get("/me", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+    } catch (error) {
+      setIsLoading(false);
+      router.push("/");
+    }
+  }
+
+  useEffect(() => {
+    isLoggedIn();
+  }, []);
+
   const table = useReactTable({
     data,
-    columns: createColumns(fetchData, setIsLoading),
+    columns: createColumns(fetchData, fetchTotalReporters, setIsLoading),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -110,7 +134,7 @@ const Page = () => {
       globalFilter,
       pagination,
     },
-    pageCount: Math.ceil(totalReporters / pagination.pageSize),
+    pageCount: Math.ceil(currentCallTotalReporters / pagination.pageSize),
     manualPagination: true,
   });
 
@@ -158,6 +182,7 @@ const Page = () => {
         isOpen={isAddReporterOpen}
         setIsOpen={setIsAddReporterOpen}
         fetchReporters={fetchData}
+        fetchTotalReporters={fetchTotalReporters}
       />
     </div>
   );

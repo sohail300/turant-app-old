@@ -7,17 +7,15 @@ export const checkIfBlocked = async (userId: number): Promise<boolean> => {
     const user = await prisma.user.findUnique({
       where: {
         user_id: userId,
-      },
-      select: {
-        status: true,
+        banTill: { gt: new Date() },
       },
     });
 
-    if (!user) {
+    if (user) {
+      return true;
+    } else {
       return false;
     }
-
-    return user.status === "ban";
   } catch (error) {
     console.error("Error checking if user is blocked:", error);
     throw new Error("Internal server error");

@@ -30,8 +30,12 @@ model User {
   verifiedByFollowersCount Boolean     @default(false)
   follower_count           Int         @default(0)
   following_count          Int         @default(0)
+  violationMessage         String?
+  violationPostId          Int?
+  created_at               DateTime    @default(now())
+  lastBan                  String?
+  banTill                  DateTime?
   otps                     Otp[]
-  status                   Status
   role                     Role
   followers                Follower[]  @relation("FollowedBy")
   following                Follower[]  @relation("Follows")
@@ -41,6 +45,22 @@ model User {
   comments                 Comment[]
   ad_views                 AdView[]
   ad_clicks                AdClick[]
+}
+
+model Admin {
+  admin_id Int        @id @default(autoincrement())
+  email    String     @unique
+  password String
+  AdminOtp AdminOtp[]
+}
+
+model AdminOtp {
+  admin_otp_id Int      @id @default(autoincrement())
+  admin_id     Int
+  related      OtpType
+  otp          String
+  expires_at   DateTime
+  admin        Admin    @relation(fields: [admin_id], references: [admin_id])
 }
 
 model Otp {
@@ -82,10 +102,11 @@ model Post {
   video         String?
   content       String?
   snippet       String?
+  visible       Boolean     @default(true)
+  created_at    DateTime    @default(now())
   likes         Int         @default(0)
   comments      Int         @default(0)
   shares        Int         @default(0)
-  created_at    DateTime    @default(now())
   video_views   Int         @default(0)
   user          User        @relation(fields: [user_id], references: [user_id])
   saved_posts   SavedPost[]
@@ -127,6 +148,7 @@ model Ad {
   target_url   String?
   start_date   DateTime
   end_date     DateTime
+  duration     Int
   target_state String?   @db.VarChar(50)
   target_city  String?   @db.VarChar(50)
   cost         Decimal   @db.Decimal(10, 2)

@@ -17,7 +17,12 @@ const reporterSchema = z.object({
   block: z.string().min(1, "Block is required"),
 });
 
-const AddReporter = ({ isOpen, setIsOpen, fetchReporters }) => {
+const AddReporter = ({
+  isOpen,
+  setIsOpen,
+  fetchReporters,
+  fetchTotalReporters,
+}) => {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
@@ -77,6 +82,7 @@ const AddReporter = ({ isOpen, setIsOpen, fetchReporters }) => {
       if (response) {
         toast.success("Reporter added successfully");
         fetchReporters();
+        fetchTotalReporters();
         handleMenuToggle(); // Close the menu
       }
     } catch (error) {

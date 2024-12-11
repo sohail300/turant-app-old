@@ -25,8 +25,33 @@ import { formatDate } from "@/lib/extractDate";
 export const createColumns = (
   fetchData,
   setIsLoading,
-  isEditEnabled
+  isEditEnabled,
+  actionDetails,
+  setActionDetails,
+  actionMessage,
+  setActionMessage
 ): ColumnDef<User>[] => {
+  async function getActionDetails(userId: number) {
+    try {
+      const response = await api.post(
+        "/user/get-action-details",
+        {
+          userId,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      setActionDetails(response.data.details);
+      console.log(response.data.details);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return [
     {
       accessorKey: "display_name",
@@ -175,7 +200,15 @@ export const createColumns = (
                 </Button>
               )}
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent
+              className="w-auto p-0"
+              align="start"
+              onPointerDownOutside={(e) => {
+                if (e.target.closest("textarea")) {
+                  e.preventDefault(); // Prevent closing on textarea interaction
+                }
+              }}
+            >
               <div className=" py-4 px-6">
                 <div className=" flex justify-end">
                   <PopoverClose asChild>
@@ -199,7 +232,14 @@ export const createColumns = (
                       cols={30}
                       rows={5}
                       className="border border-brandBorder rounded-md"
-                    ></textarea>
+                      value={actionMessage.violationMessage}
+                      onChange={(e) =>
+                        setActionMessage((prev) => ({
+                          ...prev,
+                          violationMessages: e.target.value,
+                        }))
+                      }
+                    />
                   </div>
                   <div className="flex flex-row justify-between gap-4">
                     <div className=" whitespace-nowrap">Post ID</div>
@@ -247,63 +287,61 @@ export const createColumns = (
         </div>
       ),
     },
-    // {
-    //   accessorKey: "notes",
-    //   header: "Notes",
-    //   cell: ({ row }) => (
-    //     <div className="min-w-[160px]">
-    //       {row.getValue("ban") !== "Active" && (
-    //         <Popover>
-    //           <PopoverTrigger asChild>
-    //             <Button
-    //               variant={"ghost"}
-    //               className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
-    //             >
-    //               View Details
-    //               <ChevronRight className="ml-2 h-4 w-4" />
-    //             </Button>
-    //           </PopoverTrigger>
-    //           <PopoverContent className="w-auto p-0" align="start">
-    //             <div className=" py-4 px-6">
-    //               <div className=" flex justify-end">
-    //                 <PopoverClose asChild>
-    //                   <Button
-    //                     size={"icon"}
-    //                     variant="ghost"
-    //                     className="w-8 h-8 mb-2"
-    //                   >
-    //                     <X className="h-4 w-4" />
-    //                   </Button>
-    //                 </PopoverClose>
-    //               </div>
-    //               <div className=" border-b border-brandBorder pb-4">
-    //                 Shubham Kumar (username: shubhamkumar001)
-    //               </div>
-    //               <div className="flex flex-col gap-6 mt-4">
-    //                 <div className="flex flex-row justify-between">
-    //                   <div>Message</div>
-    //                   <textarea
-    //                     cols={30}
-    //                     rows={5}
-    //                     className="border border-brandBorder rounded-md"
-    //                   ></textarea>
-    //                 </div>
-    //                 <div className="flex flex-row justify-between">
-    //                   <div className=" whitespace-nowrap">Post URL</div>
-    //                   <input
-    //                     type="text"
-    //                     size={30}
-    //                     className="border border-brandBorder rounded-md w-[260px]"
-    //                   />
-    //                 </div>
-    //               </div>
-    //             </div>
-    //           </PopoverContent>
-    //         </Popover>
-    //       )}
-    //     </div>
-    //   ),
-    // },
+    {
+      accessorKey: "notes",
+      header: "Notes",
+      cell: ({ row }) => (
+        <div className="min-w-[160px]">
+          {row.getValue("banTill") && (
+            <Popover
+              onOpenChange={(open) => {
+                if (open) {
+                  getActionDetails(row.original.user_id);
+                }
+              }}
+            >
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"ghost"}
+                  className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
+                >
+                  View Details
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <div className=" py-4 px-6">
+                  <div className=" flex justify-end">
+                    <PopoverClose asChild>
+                      <Button
+                        size={"icon"}
+                        variant="ghost"
+                        className="w-8 h-8 mb-2"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </PopoverClose>
+                  </div>
+                  <div className=" border-b border-brandBorder pb-4">
+                    Shubham Kumar (username: shubhamkumar001)
+                  </div>
+                  <div className="flex flex-col gap-6 mt-4">
+                    <div className="flex flex-row justify-between">
+                      <div>Message</div>
+                      <div>{actionDetails.violationMessage}</div>
+                    </div>
+                    <div className="flex flex-row justify-between">
+                      <div className=" whitespace-nowrap">Post ID</div>
+                      <div>{actionDetails.violationpostId}</div>
+                    </div>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+        </div>
+      ),
+    },
   ];
 };
 

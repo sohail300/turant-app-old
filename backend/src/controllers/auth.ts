@@ -95,9 +95,9 @@ export const signup = async (req: Request, res: Response) => {
         app_language,
         state,
         city,
+        created_at: new Date(),
         verified: false,
         role: "user",
-        status: "active",
       },
     });
 
@@ -221,13 +221,21 @@ export const sendForgotPasswordOtp = async (req: Request, res: Response) => {
     });
 
     if (medium == "email") {
-      if (!email) throw new Error("Email is required for OTP generation");
+      if (!email) {
+        res
+          .status(400)
+          .json({ message: "Email is required for OTP generation" });
+        return;
+      }
 
       const user = await prisma.user.findUnique({
         where: { email },
       });
 
-      if (!user) throw new Error("User not found");
+      if (!user) {
+        res.status(400).json({ message: "User not found" });
+        return;
+      }
 
       // ! TODO: Send OTP to email
 
@@ -240,14 +248,21 @@ export const sendForgotPasswordOtp = async (req: Request, res: Response) => {
         },
       });
     } else if (medium == "phone") {
-      if (!phone)
-        throw new Error("Phone Number is required for OTP generation");
+      if (!phone) {
+        res
+          .status(400)
+          .json({ message: "Phone Number is required for OTP generation" });
+        return;
+      }
 
       const user = await prisma.user.findUnique({
         where: { phone },
       });
 
-      if (!user) throw new Error("User not found");
+      if (!user) {
+        res.status(400).json({ message: "User not found" });
+        return;
+      }
 
       // ! TODO: Send OTP to phone
 

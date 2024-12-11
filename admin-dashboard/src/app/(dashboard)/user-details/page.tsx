@@ -28,14 +28,27 @@ import { api } from "@/utils/config";
 import { LoaderContext } from "@/context/LoaderContext";
 import Loader from "@/components/Loader";
 import { createColumns } from "@/components/UserDetailsTable";
+import { useRouter } from "next/navigation";
 
 const UserDetailsDashboard = () => {
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = useState("");
 
   const [isEditEnabled, setIsEditEnabled] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  const [actionDetails, setActionDetails] = useState({
+    violationMessage: "",
+    violationpostId: 0,
+  });
+
+  const [actionMessage, setActionMessage] = useState({
+    violationMessage: "",
+    violationpostId: 0,
+  });
 
   const [data, setData] = useState<User[]>([]);
   const [user, setUser] = useState({
@@ -58,6 +71,24 @@ const UserDetailsDashboard = () => {
     7: false,
     permanent: false,
   });
+
+  async function isLoggedIn() {
+    try {
+      setIsLoading(true);
+      const response = await api.get("/me", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+    } catch (error) {
+      setIsLoading(false);
+      router.push("/");
+    }
+  }
+
+  useEffect(() => {
+    isLoggedIn();
+  }, []);
 
   const fetTotalUsers = async () => {
     try {
@@ -148,7 +179,15 @@ const UserDetailsDashboard = () => {
 
   const table = useReactTable({
     data,
-    columns: createColumns(fetchData, setIsLoading, isEditEnabled),
+    columns: createColumns(
+      fetchData,
+      setIsLoading,
+      isEditEnabled,
+      actionDetails,
+      setActionDetails,
+      actionMessage,
+      setActionMessage
+    ),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),

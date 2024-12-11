@@ -20,107 +20,125 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { PopoverClose } from "@radix-ui/react-popover";
+import { formatDate } from "@/lib/extractDate";
 
-export const columns: ColumnDef<Advertiser>[] = [
-  {
-    accessorKey: "name",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          className="p-0 hover:bg-transparent text-lg whitespace-nowrap"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Advertiser Company Name
-          <ChevronDown className="ml-1 h-4 w-4" />
-        </Button>
-      );
+export const createColumns = (
+  fetchData,
+  fetchTotalAds,
+  setIsLoading
+): ColumnDef<Advertiser>[] => {
+  return [
+    {
+      accessorKey: "company_name",
+      header: ({ column }) => {
+        return (
+          <Button
+            variant="ghost"
+            className="p-0 hover:bg-transparent text-lg whitespace-nowrap"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Advertiser Company Name
+            <ChevronDown className="ml-1 h-4 w-4" />
+          </Button>
+        );
+      },
+      cell: ({ row }) => (
+        <div className="min-w-[200px]">{row.getValue("company_name")}</div>
+      ),
     },
-    cell: ({ row }) => (
-      <div className="min-w-[200px]">{row.getValue("name")}</div>
-    ),
-  },
-  {
-    accessorKey: "start_date",
-    header: "Start Date",
-    cell: ({ row }) => (
-      <div className="min-w-[200px]">{row.getValue("start_date")}</div>
-    ),
-  },
-  {
-    accessorKey: "end_date",
-    header: "End Date",
-    cell: ({ row }) => (
-      <div className="min-w-[160px]">{row.getValue("end_date")}</div>
-    ),
-  },
-  {
-    accessorKey: "duration",
-    header: "Duration",
-    cell: ({ row }) => (
-      <div className="min-w-[160px]">{row.getValue("duration")}</div>
-    ),
-  },
-  {
-    accessorKey: "total_reach",
-    header: "Total Reach",
-    cell: ({ row }) => (
-      <div className="min-w-[160px]">{row.getValue("total_reach")}</div>
-    ),
-  },
-  {
-    accessorKey: "target_city",
-    header: "Target City",
-    cell: ({ row }) => (
-      <div className="min-w-[160px]">{row.getValue("target_city")}</div>
-    ),
-  },
-  {
-    accessorKey: "target_state",
-    header: "Target State",
-    cell: ({ row }) => (
-      <div className="min-w-[160px]">{row.getValue("target_state")}</div>
-    ),
-  },
-  {
-    accessorKey: "cost",
-    header: "Cost",
-    cell: ({ row }) => (
-      <div className="min-w-[160px]">{row.getValue("cost")}</div>
-    ),
-  },
-  {
-    accessorKey: "detail",
-    header: "Detail",
-    cell: ({ row }) => (
-      <div className="min-w-[160px]">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"ghost"}
-              className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
-            >
-              View Details
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <div className=" py-8 px-6 space-y-6">
-              <div className=" flex justify-end">
-                <PopoverClose asChild>
-                  <Button size={"icon"} variant="ghost" className="w-8 h-8">
-                    <X className="h-4 w-4" />
-                  </Button>
-                </PopoverClose>
+    {
+      accessorKey: "start_date",
+      header: "Start Date",
+      cell: ({ row }) => (
+        <div className="min-w-[200px]">
+          {formatDate(row.getValue("start_date"))}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "end_date",
+      header: "End Date",
+      cell: ({ row }) => (
+        <div className="min-w-[160px]">
+          {formatDate(row.getValue("end_date"))}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "duration",
+      header: "Duration",
+      cell: ({ row }) => (
+        <div className="min-w-[160px]">{row.getValue("duration")} Days</div>
+      ),
+    },
+    {
+      accessorKey: "total_views",
+      header: "Total Views",
+      cell: ({ row }) => (
+        <div className="min-w-[160px]">{row.getValue("total_views")}</div>
+      ),
+    },
+    {
+      accessorKey: "total_clicks",
+      header: "Total Clicks",
+      cell: ({ row }) => (
+        <div className="min-w-[160px]">{row.getValue("total_clicks")}</div>
+      ),
+    },
+    {
+      accessorKey: "target_city",
+      header: "Target City",
+      cell: ({ row }) => (
+        <div className="min-w-[160px]">{row.getValue("target_city")}</div>
+      ),
+    },
+    {
+      accessorKey: "target_state",
+      header: "Target State",
+      cell: ({ row }) => (
+        <div className="min-w-[160px]">{row.getValue("target_state")}</div>
+      ),
+    },
+    {
+      accessorKey: "cost",
+      header: "Cost",
+      cell: ({ row }) => (
+        <div className="min-w-[160px]">₹{row.getValue("cost")}</div>
+      ),
+    },
+    {
+      accessorKey: "detail",
+      header: "Detail",
+      cell: ({ row }) => (
+        <div className="min-w-[160px]">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"ghost"}
+                className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
+              >
+                View Details
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <div className=" py-8 px-6 space-y-6">
+                <div className=" flex justify-end">
+                  <PopoverClose asChild>
+                    <Button size={"icon"} variant="ghost" className="w-8 h-8">
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </PopoverClose>
+                </div>
+                <div>Details of the advertiser</div>
               </div>
-              <div>Details of the advertiser</div>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-    ),
-  },
-];
+            </PopoverContent>
+          </Popover>
+        </div>
+      ),
+    },
+  ];
+};
 
 const TableComponent = ({ table }) => {
   // Memoize the pagination state to prevent unnecessary re-renders
