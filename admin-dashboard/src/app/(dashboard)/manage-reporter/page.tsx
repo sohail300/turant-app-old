@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, CirclePlus } from "lucide-react";
 import {
@@ -13,67 +13,108 @@ import {
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import { Reporter } from "@/lib/interface";
-import TableComponent from "@/components/ManageReporterTable";
-import { columns } from "@/components/ManageReporterTable";
+import TableComponent, {
+  createColumns,
+} from "@/components/ManageReporterTable";
 import AddReporter from "@/components/AddReporter";
-
-const data: Reporter[] = [
-  {
-    name: "Shubham Kumar",
-    image:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT3i_qZtrjSgoPCyIOywhlX8MKOzRIaQbKU0A&s",
-    phone: "9999999999",
-    state: "Jharkhand",
-    district: "Koderma",
-    block: "Jainagar Block Office",
-  },
-  {
-    name: "Rahul Patel",
-    image: "/profile.jpg",
-    phone: "9999999999",
-    state: "Gujarat",
-    district: "Ahmedabad",
-    block: "Jainagar Block Office",
-  },
-  {
-    name: "Ramesh Kumar",
-    image: "/profile.jpg",
-    phone: "9999999999",
-    state: "Gujarat",
-    district: "Ahmedabad",
-    block: "Jainagar Block Office",
-  },
-  {
-    name: "Rohit Kumar",
-    image: "/profile.jpg",
-    phone: "9999999999",
-    state: "Gujarat",
-    district: "Ahmedabad",
-    block: "Jainagar Block Office",
-  },
-];
+import { useDebounce } from "use-debounce";
+import { toast } from "react-toastify";
+import { api } from "@/utils/config";
+import Loader from "@/components/Loader";
+import { LoaderContext } from "@/context/LoaderContext";
 
 const Page = () => {
   const [isOpen, setIsOpen] = useState("");
-  const [isAddReporterOpen, setIsAddReporterOpen] = useState(false);
 
+  const [isAddReporterOpen, setIsAddReporterOpen] = useState(false);
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
+  const [data, setData] = useState<Reporter[]>([]);
+  const [totalReporters, setTotalReporters] = useState(0);
+
+  const { isLoading, setIsLoading } = useContext(LoaderContext);
+
+  const [debouncedFilter] = useDebounce(globalFilter, 300);
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
+  const fetchTotalReporters = async () => {
+    try {
+      const response = await api.get("/reporter/total-reporters", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      setTotalReporters(response.data.totalUsers);
+    } catch (error) {
+      console.error("Error fetching reporters:", error);
+      toast.error("Error fetching data");
+    }
+  };
+
+  useEffect(() => {
+    fetchTotalReporters();
+  }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const { pageIndex, pageSize } = pagination;
+
+      const response = await api.post(
+        "/reporter/search-reporters",
+        {
+          identifier: debouncedFilter || "",
+          limit: pageSize,
+          offset: pageIndex * pageSize,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      console.log(response.data.users);
+      const { users, totalUsers } = response.data;
+      setData(users);
+    } catch (error) {
+      console.error("Error fetching reporters:", error);
+      toast.error("Error fetching data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [debouncedFilter, pagination]);
+
   const table = useReactTable({
     data,
-    columns,
+    columns: createColumns(fetchData, setIsLoading),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
       globalFilter,
+      pagination,
     },
+    pageCount: Math.ceil(totalReporters / pagination.pageSize),
+    manualPagination: true,
   });
+
+  if (isLoading) return <Loader />;
 
   return (
     <div className="bg-white">
@@ -92,8 +133,9 @@ const Page = () => {
                 className="pl-10 w-full xs:w-[300px] border border-gray-300 rounded-md py-2 placeholder-brandGray placeholder:font-hind500 placeholder:text-base"
               />
             </div>
-            <div className=" font-hind400 text-lg text-brandAccent">
-              Total Reporter: <span className=" font-hind500">2</span>
+            <div className="font-hind400 text-lg text-brandAccent">
+              Total Reporter:{" "}
+              <span className="font-hind500">{totalReporters}</span>
             </div>
           </div>
 
@@ -115,6 +157,7 @@ const Page = () => {
       <AddReporter
         isOpen={isAddReporterOpen}
         setIsOpen={setIsAddReporterOpen}
+        fetchReporters={fetchData}
       />
     </div>
   );

@@ -1,15 +1,68 @@
 "use client";
-import React from "react";
+import React, { useContext, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { api } from "@/utils/config";
+import { toast } from "react-toastify";
+import { loginSchema } from "@/zod/auth/login";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { LoaderContext } from "@/context/LoaderContext";
+import Loader from "@/components/Loader";
 
 const LoginPage = () => {
   const router = useRouter();
+  const { isLoading, setIsLoading } = useContext(LoaderContext);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data) => {
+    setIsLoading(true);
+    try {
+      const { email, password } = data;
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      if (response) {
+        localStorage.setItem("token", response.data.user.accessToken);
+        router.push("/user-details");
+      } else {
+      }
+    } catch (error) {
+      toast.error("Invalid Email or Password");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    try {
+      const response = await api.post("/auth/send-forgot-password-otp", {
+        email: "email@emai.as",
+      });
+
+      if (response) {
+        router.push("/forgot-password");
+      }
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+  };
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-center min-h-screen w-full">
+      <Loader />
       {/* Left section - visible only on desktop */}
       <div className="hidden md:flex min-h-screen w-1/2 bg-brandAccent flex-col items-center justify-center gap-4 p-6 md:p-8">
         <Image src="/icon.png" alt="logo" width={240} height={480} />
@@ -41,7 +94,7 @@ const LoginPage = () => {
               </p>
             </div>
 
-            <div className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
               <div className="space-y-2">
                 <label
                   htmlFor="email"
@@ -49,7 +102,17 @@ const LoginPage = () => {
                 >
                   Email
                 </label>
-                <Input id="email" type="email" className="h-11" />
+                <Input
+                  id="email"
+                  type="email"
+                  className={`h-11 border rounded px-3 ${
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -59,25 +122,37 @@ const LoginPage = () => {
                 >
                   Password
                 </label>
-                <Input id="password" type="password" className="h-11" />
+                <Input
+                  id="password"
+                  type="password"
+                  className={`h-11 border rounded px-3 ${
+                    errors.password ? "border-red-500" : "border-gray-300"
+                  }`}
+                  {...register("password")}
+                />
+                {errors.password && (
+                  <p className="text-red-500 text-sm">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               <div className="text-right">
-                <a
-                  href="#"
-                  className="text-brandAccent text-base md:text-lg font-hind600"
+                <span
+                  className="text-brandAccent text-base md:text-lg font-hind600 cursor-pointer"
+                  onClick={handleForgotPassword}
                 >
                   Forgot Password?
-                </a>
+                </span>
               </div>
 
-              <Button
-                className="w-full h-11 bg-brandAccent text-white"
-                onClick={() => router.replace("/user-details")}
+              <button
+                type="submit"
+                className="w-full h-11 bg-brandAccent text-white rounded"
               >
                 Log In
-              </Button>
-            </div>
+              </button>
+            </form>
           </div>
         </div>
 

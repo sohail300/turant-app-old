@@ -1,21 +1,26 @@
+import { number } from "zod";
+
 export interface User {
-  name: string; // Full name of the user
+  user_id: number;
+  display_name: string; // Full name of the user
   username: string; // Unique username
   phone: string; // Phone number
   email: string; // Email address
   city: string; // City of residence
   state: string; // State of residence
   type: "Basic" | "Verified"; // User type
-  followers: number; // Number of followers
+  follower_count: number; // Number of followers
   totalPosts: number; // Total posts by the user
   lastPost: string; // Date of the last post
-  language: string; // Languages used by the user
-  joinedDate: string; // Date of joining
-  action: string; // Current action/status of the user
+  app_language: string; // Languages used by the user
+  created_at: string; // Date of joining
+  banTill: string; // Date of ban
+  lastBan: string; // Date of last ban
   notes: string; // Additional notes
 }
 
 export interface Reporter {
+  reporter_id: number; // Unique identifier for the reporter
   name: string; // Full name of the user
   image: string; // Profile image
   phone: string; // Phone number

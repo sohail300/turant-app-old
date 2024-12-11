@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 const Sidebar = () => {
   const router = useRouter();
@@ -40,6 +41,15 @@ const Sidebar = () => {
       current: false,
     },
   ];
+
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem("token");
+      router.push("/");
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen w-60 bg-[#FFF6F6] border-r border-gray-200">
@@ -106,7 +116,7 @@ const Sidebar = () => {
                   <Button
                     variant="outline"
                     className="w-full text-white bg-brandAccent hover:bg-brandAccent/80 hover:text-white border-white px-4"
-                    onClick={() => router.replace("/")}
+                    onClick={() => handleLogout()}
                   >
                     Log Out
                   </Button>

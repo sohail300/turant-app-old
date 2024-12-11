@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useContext, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Filter, Edit, ChevronDown, Search } from "lucide-react";
 import {
@@ -18,78 +18,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useDebounce } from "use-debounce";
 import { Checkbox } from "@/components/ui/checkbox";
 import Navbar from "@/components/Navbar";
 import { User } from "@/lib/interface";
 import TableComponent from "@/components/UserDetailsTable";
-import { columns } from "@/components/UserDetailsTable";
-
-const data: User[] = [
-  {
-    name: "Shubham Kumar",
-    username: "shubhamkumar001",
-    phone: "9999999999",
-    email: "shubham@gmail.com",
-    city: "Koderma",
-    state: "Jharkhand",
-    type: "Basic",
-    followers: 900,
-    totalPosts: 40,
-    lastPost: "20 Oct",
-    language: "Hindi",
-    joinedDate: "15 Jan 2024",
-    action: "Active",
-    notes: "",
-  },
-  {
-    name: "Priya Sharma",
-    username: "priyasharma123",
-    phone: "9876543210",
-    email: "priya.s@gmail.com",
-    city: "Mumbai",
-    state: "Maharashtra",
-    type: "Verified",
-    followers: 15000,
-    totalPosts: 220,
-    lastPost: "2 Nov",
-    language: "English",
-    joinedDate: "3 Mar 2023",
-    action: "Temporary Block (3 Days)",
-    notes: "Multiple community guidelines violations",
-  },
-  {
-    name: "Rahul Verma",
-    username: "rahulv_official",
-    phone: "9876123450",
-    email: "rahul.verma@yahoo.com",
-    city: "Delhi",
-    state: "Delhi",
-    type: "Verified",
-    followers: 25000,
-    totalPosts: 180,
-    lastPost: "15 Oct",
-    language: "Hindi, English",
-    joinedDate: "22 Jun 2023",
-    action: "Extended Block (10 Days)",
-    notes: "Repeated spam activities",
-  },
-  {
-    name: "Anjali Patel",
-    username: "anjali_p",
-    phone: "9898989898",
-    email: "anjali.patel@hotmail.com",
-    city: "Ahmedabad",
-    state: "Gujarat",
-    type: "Basic",
-    followers: 450,
-    totalPosts: 28,
-    lastPost: "1 Nov",
-    language: "Gujarati",
-    joinedDate: "10 Feb 2024",
-    action: "Active",
-    notes: "",
-  },
-];
+import { toast } from "react-toastify";
+import { api } from "@/utils/config";
+import { LoaderContext } from "@/context/LoaderContext";
+import Loader from "@/components/Loader";
+import { createColumns } from "@/components/UserDetailsTable";
 
 const UserDetailsDashboard = () => {
   const [isOpen, setIsOpen] = useState("");
@@ -99,12 +37,87 @@ const UserDetailsDashboard = () => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [sorting, setSorting] = useState<SortingState>([]);
 
+  const [data, setData] = useState<User[]>([]);
+  const [user, setUser] = useState({
+    totalUsers: 0,
+    totalVerifiedUsers: 0,
+  });
+
+  const { isLoading, setIsLoading } = useContext(LoaderContext);
+
+  const [debouncedFilter] = useDebounce(globalFilter, 300);
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
   const [filterState, setFilterState] = useState({
     active: false,
-    tempBlock: false,
-    extBlock: false,
-    permBlock: false,
+    3: false,
+    7: false,
+    permanent: false,
   });
+
+  const fetTotalUsers = async () => {
+    try {
+      setIsLoading(true);
+      const response = await api.get("/user/total-users", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      console.log(response.data);
+      setUser(response.data);
+    } catch (error) {
+      toast.error("Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetTotalUsers();
+  }, []);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const { pageIndex, pageSize } = pagination;
+
+      const response = await api.post(
+        "/user/search-users",
+        {
+          identifier: debouncedFilter || "",
+          limit: pageSize,
+          offset: pageIndex * pageSize,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      console.log(response.data.users);
+      const { users, totalUsers } = response.data;
+
+      const transformedData = users.map((user) => ({
+        ...user,
+        totalPosts: user._count.posts, // Extract posts count and assign to totalPosts
+      }));
+      setData(transformedData);
+    } catch (error) {
+      console.error("Error fetching reporters:", error);
+      toast.error("Error fetching data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [debouncedFilter, pagination]);
 
   // Toggle function for checkboxes
   const toggleCheckbox = (key) => {
@@ -119,23 +132,23 @@ const UserDetailsDashboard = () => {
     e.preventDefault();
     setFilterState({
       active: false,
-      tempBlock: false,
-      extBlock: false,
-      permBlock: false,
+      3: false,
+      7: false,
+      permanent: false,
     });
   };
 
   // Filter options array
   const filterOptions = [
     { label: "Active", key: "active" },
-    { label: "Temporary Block (3 Days)", key: "tempBlock" },
-    { label: "Extended Block (10 Days)", key: "extBlock" },
-    { label: "Permanent Block", key: "permBlock" },
+    { label: "Temporary Block (3 Days)", key: "3" },
+    { label: "Extended Block (10 Days)", key: "7" },
+    { label: "Permanent Block", key: "7" },
   ];
 
   const table = useReactTable({
     data,
-    columns,
+    columns: createColumns(fetchData, setIsLoading, isEditEnabled),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -145,8 +158,13 @@ const UserDetailsDashboard = () => {
     state: {
       sorting,
       globalFilter,
+      pagination,
     },
+    pageCount: Math.ceil(user.totalUsers / pagination.pageSize),
+    manualPagination: true,
   });
+
+  if (isLoading) return <Loader />;
 
   return (
     <div className="bg-white">
@@ -168,8 +186,12 @@ const UserDetailsDashboard = () => {
 
             {/* User Count Section */}
             <div className="flex flex-row items-center space-x-2 whitespace-nowrap font-hind400">
-              <p className="text-brandText text-lg">Total Users: 4000</p>
-              <span className="text-brandBlue text-xl">(600 verified)</span>
+              <p className="text-brandText text-lg">
+                Total Users: {user.totalUsers}
+              </p>
+              <span className="text-brandBlue text-xl">
+                ({user.totalVerifiedUsers} verified)
+              </span>
             </div>
           </div>
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, LayoutDashboard, Upload, X } from "lucide-react";
-import React from "react";
+import { CalendarIcon, Upload, X } from "lucide-react";
+import React, { useContext, useEffect } from "react";
 import {
   Select,
   SelectContent,
@@ -18,13 +18,58 @@ import { Popover, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import Navbar from "@/components/Navbar";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
+import { addAdSchema } from "@/zod/ad/addAd";
+import { Form } from "@/components/ui/form";
+import { toast } from "react-toastify";
+import { api } from "@/utils/config";
+import { LoaderContext } from "@/context/LoaderContext";
+import Loader from "@/components/Loader";
 
 export default function Page() {
   const [isOpen, setIsOpen] = useState(false);
   const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+
+  const [startDate, setStartDate] = useState();
+  const [endDate, setEndDate] = useState();
+
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const { isLoading, setIsLoading } = useContext(LoaderContext);
+
+  async function getStates() {
+    try {
+      setIsLoading(true);
+      const response = await api.get("/reporter/get-states");
+      setStates(response.data.states);
+    } catch (error) {
+      toast.error("Error fetching states");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getStates();
+  }, []);
+
+  async function getCities(selectedState) {
+    try {
+      setIsLoading(true);
+      const response = await api.get(
+        `/reporter/get-cities?state=${selectedState}`
+      );
+      setCities(response.data.cities);
+    } catch (error) {
+      toast.error("Error fetching cities");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const handleFileUpload = (e) => {
     const selectedFile = e.target.files[0];
@@ -59,11 +104,62 @@ export default function Page() {
     fileInputRef.current?.click();
   };
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    control,
+  } = useForm({
+    resolver: zodResolver(addAdSchema),
+  });
+
+  const onSubmit = async (formData) => {
+    console.log(formData);
+    if (!file) {
+      toast.error("Please upload an image");
+      return;
+    }
+
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      data.append(key, value);
+    });
+    data.append("image", file);
+
+    try {
+      setIsLoading(true);
+      const response = await api.post("/ad/add-ad", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      console.log(response.data);
+      if (response) {
+        toast.success("Reporter added successfully");
+        // fetchAds();
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to add reporter";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) return <Loader />;
+
   return (
     <div className="bg-white">
       <Navbar isOpen={isOpen} setIsOpen={setIsOpen} />
 
-      <div className="w-full lg:max-w-4xl px-4">
+      <form
+        className="w-full lg:max-w-4xl px-4"
+        onSubmit={handleSubmit(onSubmit)}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Left Column */}
           <div className="space-y-6">
@@ -74,23 +170,45 @@ export default function Page() {
               <Input
                 placeholder="Enter Company Name"
                 className="w-full placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
+                {...register("name")}
               />
+              {errors.name && (
+                <p className="text-red-500 text-sm">{errors.name.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <label className="text-brandGray font-hind500 text-lg">
                 Select Media Type <span className="text-red-500">*</span>
               </label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Image" />
-                </SelectTrigger>
-                <SelectContent className=" font-hind500 text-brandText">
-                  <SelectItem value="image">Image</SelectItem>
-                  <SelectItem value="video">Video</SelectItem>
-                  <SelectItem value="audio">Audio</SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                name="media_type"
+                control={control}
+                rules={{ required: "Media Type is required" }}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || ""}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder="Select"
+                        className="placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
+                      />
+                    </SelectTrigger>
+                    <SelectContent defaultValue={"Image"}>
+                      <SelectItem value="image">Image</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                      <SelectItem value="audio">Audio</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.media_type && (
+                <p className="text-red-500 text-sm">
+                  {errors.media_type.message}
+                </p>
+              )}
             </div>
 
             <div
@@ -158,7 +276,13 @@ export default function Page() {
               <Input
                 placeholder="www.company.com"
                 className="w-full placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
+                {...register("target_url")}
               />
+              {errors.target_url && (
+                <p className="text-red-500 text-sm">
+                  {errors.target_url.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -240,49 +364,93 @@ export default function Page() {
               </label>
               <div className="flex relative">
                 <Input
+                  {...register("duration")}
+                  type="number"
                   className="rounded-r-md placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
                   placeholder="Enter Duration"
+                  defaultValue={0}
                 />
                 <div className="absolute right-0 bg-brandHeader px-4 py-0 h-full border border-l-0 rounded-r-md text-brandText font-hind500 text-lg flex justify-center items-center">
                   Days
                 </div>
               </div>
+              {errors.duration && (
+                <p className="text-red-500 text-sm">
+                  {errors.duration.message}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
               <label className="text-brandGray font-hind500 text-lg">
                 Target State <span className="text-red-500">*</span>
               </label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder="Select"
-                    className="placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="state1">State 1</SelectItem>
-                  <SelectItem value="state2">State 2</SelectItem>
-                </SelectContent>
-              </Select>
+
+              <Controller
+                name="state"
+                control={control}
+                rules={{ required: "State is required" }}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value); // Update form value
+                      getCities(value); // Trigger your async function
+                    }}
+                    value={field.value || ""}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder="Select"
+                        className="placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {states?.map((state) => (
+                        <SelectItem key={state} value={state}>
+                          {state}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.state && (
+                <p className="text-red-500 text-sm">{errors.state.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
               <label className="text-brandGray font-hind500 text-lg">
                 Target City <span className="text-red-500">*</span>
               </label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder="Select"
-                    className="placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="city1">City 1</SelectItem>
-                  <SelectItem value="city2">City 2</SelectItem>
-                </SelectContent>
-              </Select>
+              <Controller
+                name="city"
+                control={control}
+                rules={{ required: "City is required" }}
+                render={({ field }) => (
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value || ""}
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder="Select"
+                        className="placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cities?.map((city) => (
+                        <SelectItem value={city} key={city}>
+                          {city}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.city && (
+                <p className="text-red-500 text-sm">{errors.city.message}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -291,6 +459,8 @@ export default function Page() {
               </label>
               <div className="flex relative">
                 <Input
+                  {...register("cost")}
+                  type="number"
                   className="rounded-r-md placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base pl-12"
                   placeholder="Enter Amount"
                 />
@@ -298,22 +468,29 @@ export default function Page() {
                   ₹
                 </div>
               </div>
+              {errors.cost && (
+                <p className="text-red-500 text-sm">{errors.cost.message}</p>
+              )}
             </div>
           </div>
-        </div>
 
-        <div className="flex justify-end space-x-4 mt-8 py-4 border-t border-brandBorder">
-          <Button
-            variant="outline"
-            className="text-brandAccent border-brandAccent"
-          >
-            Cancel
-          </Button>
-          <Button className="bg-brandAccent hover:bg-brandAccent/80 text-white">
-            Submit
-          </Button>
+          <div />
+          <div className="flex justify-end space-x-4 mt-8 py-4 border-t border-brandBorder">
+            <Button
+              variant="outline"
+              className="text-brandAccent border-brandAccent"
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-brandAccent hover:bg-brandAccent/80 text-white"
+              type="submit"
+            >
+              Submit
+            </Button>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

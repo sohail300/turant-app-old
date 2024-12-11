@@ -11,6 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { PopoverClose } from "@radix-ui/react-popover";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 const Navbar = ({ isOpen, setIsOpen }) => {
   const router = useRouter();
@@ -20,6 +21,16 @@ const Navbar = ({ isOpen, setIsOpen }) => {
   const handleMenuToggle = () => {
     setIsOpen((prev) => !prev);
   };
+
+  const handleLogout = async () => {
+    try {
+      localStorage.removeItem("token");
+      router.push("/");
+    } catch (error) {
+      toast.error("Something went wrong");
+    }
+  };
+
   return (
     <>
       {/* Desktop NavBar */}
@@ -119,7 +130,7 @@ const Navbar = ({ isOpen, setIsOpen }) => {
                       <Button
                         variant="outline"
                         className="w-full text-white bg-brandAccent hover:bg-brandAccent/80 hover:text-white border-white px-4"
-                        onClick={() => router.replace("/")}
+                        onClick={() => handleLogout()}
                       >
                         Log Out
                       </Button>
