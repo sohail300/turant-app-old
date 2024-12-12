@@ -1,8 +1,11 @@
 import { Prisma, PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 import { addAdSchema } from "../zod/ad/addAd";
-import { searchUserSchema } from "../zod/user/searchUser";
 import { searchAdSchema } from "../zod/ad/searchAd";
+import fs from "fs";
+import path from "path";
+import { compressVideo } from "../../utils/compressVideo";
+import { uploadToS3 } from "../../utils/uploadToS3";
 
 const prisma = new PrismaClient();
 
@@ -96,15 +99,9 @@ export const searchAds = async (req: Request, res: Response) => {
 export const addAd = async (req: Request, res: Response) => {
   try {
     const inputData = addAdSchema.safeParse(req.body);
-    const image = req.file;
-    console.log(req.body);
-    console.log(image);
 
     if (!inputData.success) {
-      console.log(inputData.error.issues);
-      res.status(400).json({
-        error: inputData.error.issues[0].message,
-      });
+      res.status(400).json({ error: inputData.error.issues[0].message });
       return;
     }
 
@@ -120,9 +117,41 @@ export const addAd = async (req: Request, res: Response) => {
       cost,
     } = inputData.data;
 
-    console.log(image);
+    const file = req.file;
+    const filePath = req.file.path;
+    const originalExtension = path.extname(req.file.originalname); // e.g., ".jpg"
+    const outputFilePath = `compressed_${Date.now()}_${req.file.originalname}`;
+    const completeOutputFilePath = `uploads/${outputFilePath}`;
+    const thumbnailPath = `uploads/thumbnail_${Date.now()}.jpg`;
 
-    const ad = await prisma.ad.create({
+    let s3Url;
+
+    if (media_type === "video") {
+      // Compress the video
+
+      await new Promise((resolve, reject) => {
+        compressVideo(filePath, outputFilePath, thumbnailPath, (err) => {
+          if (err) reject(err); // Reject the promise on error
+          resolve(undefined); // Resolve when compression finishes
+        });
+      });
+
+      // Upload the compressed video to S3
+      s3Url = await uploadToS3(completeOutputFilePath, file.mimetype);
+    } else if (media_type === "image") {
+      const compressedImagePath = `uploads/compressed_${Date.now()}${originalExtension}`;
+      fs.renameSync(filePath, compressedImagePath);
+
+      // Upload the image to S3
+      s3Url = await uploadToS3(compressedImagePath, file.mimetype);
+      console.log(s3Url);
+
+      // Clean up local files
+      fs.unlinkSync(compressedImagePath);
+    }
+
+    // Save Ad data in the database
+    await prisma.ad.create({
       data: {
         company_name: name,
         media_type,
@@ -133,18 +162,16 @@ export const addAd = async (req: Request, res: Response) => {
         target_state: state,
         target_city: city,
         cost,
-        media_link:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/1200px-User_icon_2.svg.png",
+        media_link: s3Url,
       },
     });
 
-    res.json({
-      message: "Ad added successfully",
-    });
+    // Clean up local files
+    fs.unlinkSync(filePath);
+    fs.unlinkSync(completeOutputFilePath);
+    res.json({ message: "Ad added successfully" });
   } catch (error) {
-    console.error("Error adding reporter:", error);
-    res.status(500).json({
-      message: "Internal server error",
-    });
+    console.error("Error adding ad:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

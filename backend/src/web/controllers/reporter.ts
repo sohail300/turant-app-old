@@ -4,8 +4,18 @@ import { searchUserSchema } from "../zod/user/searchUser";
 import { addReporterSchema } from "../zod/user/addReporter";
 import { states } from "../../utils/locations";
 import axios from "axios";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 const prisma = new PrismaClient();
+
+// Configure AWS S3
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
 
 export const getTotalReporters = async (req: Request, res: Response) => {
   try {
@@ -104,6 +114,17 @@ export const addReporter = async (req: Request, res: Response) => {
       return;
     }
 
+    // Upload image to S3
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: `reporters/${Date.now()}_${image.originalname}`, // Path in the S3 bucket
+      Body: image.buffer,
+      ContentType: image.mimetype,
+      ACL: "private", // Keep the file private
+    });
+
+    await s3Client.send(command);
+
     const reporter = await prisma.reporter.create({
       data: {
         name,
@@ -111,8 +132,7 @@ export const addReporter = async (req: Request, res: Response) => {
         state,
         district,
         block,
-        image:
-          "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/User_icon_2.svg/1200px-User_icon_2.svg.png",
+        image: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${image.filename}`,
       },
     });
 
