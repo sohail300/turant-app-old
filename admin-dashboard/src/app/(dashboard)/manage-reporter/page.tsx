@@ -138,8 +138,6 @@ const Page = () => {
     manualPagination: true,
   });
 
-  if (isLoading) return <Loader />;
-
   return (
     <div className="bg-white">
       <div className="flex flex-col space-y-4 mb-4">

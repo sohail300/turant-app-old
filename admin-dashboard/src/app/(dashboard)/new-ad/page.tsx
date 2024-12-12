@@ -248,7 +248,7 @@ export default function Page() {
                 ref={fileInputRef}
                 onChange={handleFileUpload}
                 className="hidden"
-                accept="image/*"
+                accept="image/*,video/*"
               />
 
               {!file ? (

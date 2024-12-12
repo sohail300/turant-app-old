@@ -1,7 +1,7 @@
 // TableComponent.jsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -23,6 +23,8 @@ import { PopoverClose } from "@radix-ui/react-popover";
 import { toast } from "react-toastify";
 import { api } from "@/utils/config";
 import { Reporter } from "@/lib/interface";
+import Loader from "./Loader";
+import { LoaderContext } from "@/context/LoaderContext";
 
 export const createColumns = (
   fetchData,
@@ -71,7 +73,7 @@ export const createColumns = (
       cell: ({ row }) => (
         <div className="min-w-[200px] flex flex-row items-center gap-2">
           <Image
-            src={`/profile.jpg`}
+            src={row.original.image}
             width={40}
             height={40}
             alt="photo"

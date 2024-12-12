@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next/dist/server/config').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: ["turant-news-bucket.s3.ap-south-1.amazonaws.com"],
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
