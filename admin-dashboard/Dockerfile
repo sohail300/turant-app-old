@@ -7,7 +7,7 @@ EXPOSE 3000
 FROM base as builder
 WORKDIR /app
 COPY . .
-RUN npm install && npm run build
+RUN npm install --legacy-peer-deps && npm run build
 
 
 FROM base as production
