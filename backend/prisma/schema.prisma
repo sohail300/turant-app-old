@@ -98,7 +98,7 @@ model Post {
   title         String      @db.VarChar(255)
   type          MediaType?
   thumbnail     String?
-  photo         String?
+  photo         Photo[]
   video         String?
   content       String?
   snippet       String?
@@ -112,6 +112,13 @@ model Post {
   saved_posts   SavedPost[]
   post_likes    PostLike[]
   post_comments Comment[]
+}
+
+model Photo {
+  id      Int    @id @default(autoincrement())
+  post_id Int
+  url     String
+  post    Post   @relation(fields: [post_id], references: [post_id])
 }
 
 model SavedPost {

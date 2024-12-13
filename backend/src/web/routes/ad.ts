@@ -5,8 +5,7 @@ import { addAd, getTotalActiveAds, searchAds } from "../controllers/ad";
 
 const router = Router();
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ dest: "uploads/" });
 
 router.get("/total-active-ads", authenticate, getTotalActiveAds);
 

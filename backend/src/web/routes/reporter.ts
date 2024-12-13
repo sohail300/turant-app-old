@@ -12,14 +12,13 @@ import multer from "multer";
 
 const router = Router();
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ dest: "uploads/" });
 
 router.get("/total-reporters", authenticate, getTotalReporters);
 
 router.post("/search-reporters", authenticate, searchReporters);
 
-router.post("/add-reporter", authenticate, upload.single("image"), addReporter);
+router.post("/add-reporter", authenticate, upload.array("image"), addReporter);
 
 router.delete("/delete-reporter", authenticate, deleteReporter);
 
