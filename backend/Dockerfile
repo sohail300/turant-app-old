@@ -9,7 +9,7 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
+RUN npm run compile
 
 #Production stage
 FROM node:20.18-alpine AS production
