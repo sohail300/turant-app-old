@@ -16,6 +16,7 @@ import IconText from "@/components/IconText";
 import DisclaimerText from "@/components/DisclaimerText";
 import CommentBottomSheet from "@/components/CommentBottomSheet";
 import { ScrollView } from "react-native-gesture-handler";
+import card from "@/locales/card.json";
 
 const SingleNews = () => {
   const [showCommentSheet, setShowCommentSheet] = useState(false);
@@ -111,7 +112,7 @@ const SingleNews = () => {
                   <Subheading>{item.author}</Subheading>
                 </TouchableOpacity>
                 <Text>•</Text>
-                <RedText> {language === "english" ? "Follow" : "फॉलो"}</RedText>
+                <RedText> {card.follow[language]}</RedText>
               </View>
               <TouchableOpacity>
                 <Feather name="bookmark" size={24} color="black" />
@@ -188,12 +189,7 @@ const SingleNews = () => {
                 marginTop: 8,
               }}
             >
-              <DisclaimerText>
-                Disclaimer: This content/video has been published directly by
-                the user on TURANT, an intermediary platform. TURANT has neither
-                reviewed nor endorsed the content and holds no prior knowledge
-                of its details.
-              </DisclaimerText>
+              <DisclaimerText>{card.disclaimer[language]}</DisclaimerText>
             </View>
           </View>
         </ScrollView>

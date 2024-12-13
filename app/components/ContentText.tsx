@@ -6,6 +6,7 @@ import { useFontLoaded } from "@/context/FontContext";
 import RedText from "./RedText";
 import { useSelector } from "react-redux";
 import { router } from "expo-router";
+import card from "@/locales/card.json";
 
 const ContentText = ({
   children,
@@ -35,7 +36,7 @@ const ContentText = ({
             {children}
           </Text>
           <RedText onPress={() => router.push("/single-news")}>
-            {language === "english" ? "Read More" : "और पढ़ें"}
+            {card.readMore[language]}
           </RedText>
         </>
       )}

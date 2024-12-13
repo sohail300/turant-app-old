@@ -22,8 +22,13 @@ import { router } from "expo-router";
 import { OtpInput } from "react-native-otp-entry";
 import { baseURL } from "@/constants/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSelector } from "react-redux";
 
 export default function Signup() {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+
   const validate = Yup.object({
     otp: Yup.string()
       .required("OTP is required")

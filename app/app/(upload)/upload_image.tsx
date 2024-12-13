@@ -1,8 +1,9 @@
-import { View, Text, Dimensions } from "react-native";
+import { View, Text, Dimensions, Image, StyleSheet } from "react-native";
 import React, { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import {
+  FlatList,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -17,8 +18,18 @@ import {
 } from "react-native-pell-rich-editor";
 import RenderHtml from "react-native-render-html";
 import DropDownPicker from "react-native-dropdown-picker";
+import uploadPage from "@/locales/uploadPage.json";
+import { useSelector } from "react-redux";
+import { baseURL } from "@/constants/config";
+import { router } from "expo-router";
+import * as ImagePicker from "expo-image-picker";
 
 const UploadImage = () => {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+  const token = useSelector((state) => state.token.data);
+
   const [languageOpen, setLanguageOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [lanaguages, setLanaguages] = useState([
@@ -28,6 +39,7 @@ const UploadImage = () => {
 
   const [textEditorShow, setTextEditorShow] = useState(true);
 
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("<div><b>bsnjdjdjd</b></div>");
   const richText = useRef();
 
@@ -53,6 +65,86 @@ const UploadImage = () => {
     div: {
       marginBottom: 10,
     },
+  };
+
+  const [selectedImages, setSelectedImages] = useState([]);
+
+  const handleImagePick = async () => {
+    // Request permission to access photos
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert("Permission to access media library is required!");
+      return;
+    }
+
+    // Open the image picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsMultipleSelection: true,
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const newImages = result.assets.map((asset) => ({
+        uri: asset.uri,
+        name: asset.fileName || `image-${Date.now()}.jpg`,
+        type: "image/jpeg",
+      }));
+
+      // Add new images to the selectedImages state
+      setSelectedImages((prev) => [...prev, ...newImages].slice(0, 5)); // Limit to 5 images
+    }
+  };
+
+  const handleRemoveImage = (index) => {
+    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (selectedImages.length === 0) {
+      alert("Please select at least one image!");
+      return;
+    }
+
+    const formData = new FormData();
+
+    // Append article data
+    formData.append("title", "Your Article Title");
+    formData.append("content", "Your article description");
+    formData.append("language", language);
+
+    // Append selected images
+    selectedImages.forEach((image, index) => {
+      formData.append(`image_${index}`, {
+        uri: image.uri,
+        name: image.name,
+        type: image.type,
+      });
+    });
+
+    try {
+      const response = await fetch(`${baseURL}/upload/article`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData, // Send as multipart form
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("Article uploaded successfully!");
+        setSelectedImages([]); // Clear selected images
+      } else {
+        console.error(result);
+        alert("Failed to upload article. Please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -90,7 +182,7 @@ const UploadImage = () => {
                   color: Colors.light.subheading,
                 }}
               >
-                Post an Image
+                {uploadPage.postImage[language]}
               </Text>
             </View>
             <View
@@ -116,21 +208,22 @@ const UploadImage = () => {
                     alignItems: "center",
                     padding: 24,
                     borderStyle: "dashed",
-                    borderColor: Colors.light.border,
+                    borderColor: "#ccc",
                     borderWidth: 1,
                     borderRadius: 5,
                   }}
                 >
                   <Text
                     style={{
-                      ...styles.Subheading2,
-                      color: Colors.light.subheading,
+                      fontSize: 16,
+                      color: "#777",
                       textAlign: "center",
                     }}
                   >
-                    Drag and drop an image or browse to upload
+                    {uploadPage.browse[language]}
                   </Text>
                   <TouchableOpacity
+                    onPress={handleImagePick}
                     style={{
                       paddingVertical: 12,
                       paddingHorizontal: 24,
@@ -138,7 +231,6 @@ const UploadImage = () => {
                       marginTop: 16,
                       flexDirection: "row",
                       alignItems: "center",
-                      gap: 8,
                     }}
                   >
                     <Feather
@@ -148,21 +240,45 @@ const UploadImage = () => {
                     />
                     <Text
                       style={{
-                        ...styles.button2,
+                        fontSize: 16,
                         color: Colors.light.accent,
+                        marginLeft: 8,
                       }}
                     >
-                      Upload
+                      {uploadPage.upload[language]}
                     </Text>
                   </TouchableOpacity>
                 </View>
+
+                {/* Preview Section */}
+                <FlatList
+                  data={selectedImages}
+                  horizontal
+                  keyExtractor={(item, index) => index.toString()}
+                  contentContainerStyle={{ marginTop: 16 }}
+                  renderItem={({ item, index }) => (
+                    <View style={fileStyles.imagePreview}>
+                      <Image
+                        source={{ uri: item.uri }}
+                        style={fileStyles.image}
+                        resizeMode="cover"
+                      />
+                      <TouchableOpacity
+                        style={fileStyles.removeIcon}
+                        onPress={() => handleRemoveImage(index)}
+                      >
+                        <Feather name="x" size={16} color="white" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                />
               </View>
               <View style={{ marginVertical: 12 }}>
                 <Text style={{ ...styles.details, textAlign: "center" }}>
-                  Supported formats: JPG, JPEG, PNG
+                  {uploadPage.imageSupportedFormats[language]}
                 </Text>
                 <Text style={{ ...styles.details, textAlign: "center" }}>
-                  Maximum file size: 300 KB
+                  {uploadPage.imageMaximumFileSize[language]}
                 </Text>
               </View>
               <View style={{ marginTop: 12 }}>
@@ -180,6 +296,8 @@ const UploadImage = () => {
                     style={styles.ContentText}
                     placeholder="Title"
                     placeholderTextColor={Colors.light.details}
+                    value={title}
+                    onChangeText={(text) => setTitle(text)}
                   />
                 </View>
               </View>
@@ -321,6 +439,7 @@ const UploadImage = () => {
                   borderRadius: 8,
                   marginVertical: 24,
                 }}
+                onPress={() => handleSubmit()}
               >
                 <Text
                   style={{ color: Colors.light.white, textAlign: "center" }}
@@ -337,3 +456,25 @@ const UploadImage = () => {
 };
 
 export default UploadImage;
+
+const fileStyles = StyleSheet.create({
+  imagePreview: {
+    position: "relative",
+    width: 80,
+    height: 80,
+    marginRight: 8,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 8,
+  },
+  removeIcon: {
+    position: "absolute",
+    top: 4,
+    right: 4,
+    backgroundColor: "red",
+    borderRadius: 12,
+    padding: 4,
+  },
+});

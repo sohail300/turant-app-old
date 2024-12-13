@@ -17,11 +17,17 @@ import {
 } from "react-native-pell-rich-editor";
 import RenderHtml from "react-native-render-html";
 import DropDownPicker from "react-native-dropdown-picker";
+import uploadPage from "@/locales/uploadPage.json";
+import { useSelector } from "react-redux";
 
 const UploadVideo = () => {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+
   const [languageOpen, setLanguageOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
-  const [lanaguages, setLanaguages] = useState([
+  const [languages, setLanguages] = useState([
     { label: "English", value: "English" },
     { label: "Hindi", value: "Hindi" },
   ]);
@@ -90,7 +96,7 @@ const UploadVideo = () => {
                   color: Colors.light.subheading,
                 }}
               >
-                Share a Video
+                {uploadPage.shareVideo[language]}
               </Text>
             </View>
             <View
@@ -128,7 +134,7 @@ const UploadVideo = () => {
                       textAlign: "center",
                     }}
                   >
-                    Drag and drop a video or browse to upload
+                    {uploadPage.browse[language]}
                   </Text>
                   <TouchableOpacity
                     style={{
@@ -152,20 +158,20 @@ const UploadVideo = () => {
                         color: Colors.light.accent,
                       }}
                     >
-                      Upload
+                      {uploadPage.upload[language]}
                     </Text>
                   </TouchableOpacity>
                 </View>
               </View>
               <View style={{ marginVertical: 12 }}>
                 <Text style={{ ...styles.details, textAlign: "center" }}>
-                  The video duration should be between 1 and 5 minutes
+                  {uploadPage.videoDuration[language]}
                 </Text>
                 <Text style={{ ...styles.details, textAlign: "center" }}>
-                  Supported formats: MP4
+                  {uploadPage.videoSupportedFormats[language]}
                 </Text>
                 <Text style={{ ...styles.details, textAlign: "center" }}>
-                  Maximum file size: 10 MB
+                  {uploadPage.videoMaximumFileSize[language]}
                 </Text>
               </View>
               <View style={{ marginTop: 12 }}>
@@ -181,7 +187,7 @@ const UploadVideo = () => {
                 >
                   <TextInput
                     style={styles.ContentText}
-                    placeholder="Title"
+                    placeholder={uploadPage.title[language]}
                     placeholderTextColor={Colors.light.details}
                   />
                 </View>
@@ -203,7 +209,7 @@ const UploadVideo = () => {
                       initialHeight={300}
                       onChange={handleContentChange}
                       value={description}
-                      placeholder="Description"
+                      placeholder={uploadPage.description[language]}
                       style={{
                         maxHeight: 300,
                         borderColor: Colors.light.border,
@@ -250,7 +256,7 @@ const UploadVideo = () => {
                     onPress={() => setTextEditorShow(false)}
                   >
                     <Text style={{ color: Colors.light.subheading }}>
-                      Hide Text Editor
+                      {uploadPage.hideTextEditor[language]}
                     </Text>
                     <Feather
                       name="chevron-down"
@@ -269,7 +275,7 @@ const UploadVideo = () => {
                     onPress={() => setTextEditorShow(true)}
                   >
                     <Text style={{ color: Colors.light.subheading }}>
-                      Show Text Editor
+                      {uploadPage.showTextEditor[language]}
                     </Text>
                     <Feather
                       name="chevron-up"
@@ -298,10 +304,10 @@ const UploadVideo = () => {
                 }}
                 open={languageOpen}
                 value={selectedLanguage}
-                items={lanaguages}
+                items={languages}
                 setOpen={setLanguageOpen}
                 setValue={setSelectedLanguage}
-                setItems={setLanaguages}
+                setItems={setLanguages}
                 placeholder="Select Language"
                 zIndex={2000}
                 zIndexInverse={1000}
@@ -328,7 +334,7 @@ const UploadVideo = () => {
                 <Text
                   style={{ color: Colors.light.white, textAlign: "center" }}
                 >
-                  Save
+                  {uploadPage.save[language]}
                 </Text>
               </TouchableOpacity>
             </View>

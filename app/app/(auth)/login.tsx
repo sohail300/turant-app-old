@@ -25,6 +25,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { changeAuth } from "@/store/AuthSlice";
 import { changeToken } from "@/store/TokenSlice";
+import loginPage from "@/locales/loginPage.json";
 
 export default function Signup() {
   const [language, setLanguage] = useState(
@@ -110,7 +111,7 @@ export default function Signup() {
                     textAlign: "center",
                   }}
                 >
-                  Login
+                  {loginPage.login[language]}
                 </Text>
 
                 <Text
@@ -123,7 +124,7 @@ export default function Signup() {
                     color: "#6d6d6d",
                   }}
                 >
-                  Welcome back! Please enter your detail
+                  {loginPage.welcomeBack[language]}
                 </Text>
               </View>
 
@@ -185,14 +186,14 @@ export default function Signup() {
                   <View style={{ gap: 16 }}>
                     <View style={{ gap: 8 }}>
                       <Text style={{ ...styles.Subheading2, fontSize: 16 }}>
-                        Email or Phone
+                        {loginPage.identifier[language]}
                       </Text>
                       <TextInput
                         value={values.identifier}
                         keyboardType="default"
                         onChangeText={handleChange("identifier")}
                         onBlur={handleBlur("identifier")}
-                        placeholder="Enter your email or phone"
+                        placeholder={loginPage.enterIdentifier[language]}
                         placeholderTextColor={Colors.light.details}
                         autoCapitalize="none" // Added to help with email validation
                         autoCorrect={false}
@@ -216,14 +217,14 @@ export default function Signup() {
 
                     <View style={{ gap: 8 }}>
                       <Text style={{ ...styles.Subheading2, fontSize: 16 }}>
-                        Password
+                        {loginPage.password[language]}
                       </Text>
                       <TextInput
                         value={values.password}
                         keyboardType="default"
                         onChangeText={handleChange("password")}
                         onBlur={handleBlur("password")}
-                        placeholder="Enter your password"
+                        placeholder={loginPage.enterPassword[language]}
                         placeholderTextColor={Colors.light.details}
                         secureTextEntry={true}
                         style={[
@@ -259,7 +260,7 @@ export default function Signup() {
                           router.push("/signup");
                         }}
                       >
-                        Sign up
+                        {loginPage.signup[language]}
                       </RedText>
                       <RedText
                         style={{ textAlign: "right" }}
@@ -267,7 +268,7 @@ export default function Signup() {
                           router.push("/forgot-password");
                         }}
                       >
-                        Forgot Password?
+                        {loginPage.forgotPassword[language]}
                       </RedText>
                     </View>
 
@@ -276,7 +277,9 @@ export default function Signup() {
                       style={styles.buttonContainer}
                       onPress={handleSubmit}
                     >
-                      <Text style={styles.button}>Log In</Text>
+                      <Text style={styles.button}>
+                        {loginPage.login[language]}
+                      </Text>
                       {/* <Feather name="arrow-right-circle" size={24} color="#fff" /> */}
                     </TouchableOpacity>
                   </View>
@@ -308,7 +311,7 @@ export default function Signup() {
                   color: Colors.light.white,
                 }}
               >
-                Powered By:
+                {loginPage.poweredBy[language]}
               </Text>
               <Text
                 style={{
@@ -318,7 +321,7 @@ export default function Signup() {
                   color: Colors.light.white,
                 }}
               >
-                Lok Vishwa Bharti
+                {loginPage.company[language]}
               </Text>
             </View>
           </ScrollView>

@@ -1,5 +1,5 @@
 import { View, Text, Dimensions, Share } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
@@ -7,8 +7,14 @@ import { styles } from "@/constants/styles";
 import { router } from "expo-router";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSelector } from "react-redux";
+import uploadPage from "@/locales/uploadPage.json";
 
 const About = () => {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+
   return (
     <SafeAreaView
       style={{
@@ -39,7 +45,7 @@ const About = () => {
               color: Colors.light.subheading,
             }}
           >
-            Share Your Content
+            {uploadPage.shareContent[language]}
           </Text>
         </View>
         <View
@@ -61,7 +67,9 @@ const About = () => {
               style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
             >
               <Feather name="play-circle" size={24} color="#fff" />
-              <Text style={styles.button2}>Share A Video</Text>
+              <Text style={styles.button2}>
+                {uploadPage.shareVideo[language]}
+              </Text>
             </View>
             <Feather name="chevron-right" size={24} color="white" />
           </TouchableOpacity>
@@ -78,7 +86,9 @@ const About = () => {
               style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
             >
               <Feather name="image" size={24} color="#fff" />
-              <Text style={styles.button2}>Post an Image</Text>
+              <Text style={styles.button2}>
+                {uploadPage.postImage[language]}
+              </Text>
             </View>
             <Feather name="chevron-right" size={24} color="white" />
           </TouchableOpacity>
@@ -96,7 +106,9 @@ const About = () => {
             >
               {/* <Feather name="play-circle" size={24} color="#fff" /> */}
               <Ionicons name="text-sharp" size={24} color="#fff" />
-              <Text style={styles.button2}>Write an Article</Text>
+              <Text style={styles.button2}>
+                {uploadPage.writeArticle[language]}
+              </Text>
             </View>
             <Feather name="chevron-right" size={24} color="white" />
           </TouchableOpacity>

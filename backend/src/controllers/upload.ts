@@ -5,6 +5,7 @@ import { checkIfBlocked } from "../utils/checkIfBlocked";
 import { uploadToS3 } from "../utils/uploadToS3";
 import fs from "fs";
 import { compressVideo } from "../utils/compressVideo";
+import { checkPostLimit } from "../utils/limitReached";
 
 const prisma = new PrismaClient();
 
@@ -34,6 +35,8 @@ export const isBlockedHandler = async (
   }
 };
 
+// If the last 3 posts from the user are made on the same day, then block them from uploading more posts
+
 export const uploadArticle = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers;
@@ -43,6 +46,14 @@ export const uploadArticle = async (req: Request, res: Response) => {
     if (blocked) {
       res.status(403).json({
         message: "You are blocked from uploading articles.",
+      });
+      return;
+    }
+
+    const reachedPostLimit = await checkPostLimit(Number(userId));
+    if (reachedPostLimit) {
+      res.status(403).json({
+        message: "You have reached the post limit.",
       });
       return;
     }
@@ -100,6 +111,14 @@ export const uploadImage = async (req: Request, res: Response) => {
     if (blocked) {
       res.status(403).json({
         message: "You are blocked from uploading images.",
+      });
+      return;
+    }
+
+    const reachedPostLimit = await checkPostLimit(Number(userId));
+    if (reachedPostLimit) {
+      res.status(403).json({
+        message: "You have reached the post limit.",
       });
       return;
     }
@@ -193,6 +212,14 @@ export const uploadVideo = async (req: Request, res: Response) => {
     if (blocked) {
       res.status(403).json({
         message: "You are blocked from uploading videos.",
+      });
+      return;
+    }
+
+    const reachedPostLimit = await checkPostLimit(Number(userId));
+    if (reachedPostLimit) {
+      res.status(403).json({
+        message: "You have reached the post limit.",
       });
       return;
     }

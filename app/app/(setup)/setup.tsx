@@ -19,7 +19,6 @@ import { changeLanguage } from "@/store/LanguageSlice";
 import setupPage from "@/locales/setupPage.json";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { changeLocation } from "@/store/LocationSlice";
-import { baseURL } from "@/constants/config";
 
 const setup = () => {
   const language = useSelector((state) => state.language.data);
@@ -88,8 +87,9 @@ const setup = () => {
   //   );
   //   const data = await response.json();
   //   console.log(data);
-  //   setCities(data);
+  //   // setCities(data);
   // };
+
   // useEffect(() => {
   //   getData();
   // }, [selectedState]);
@@ -233,7 +233,7 @@ const setup = () => {
                 marginBottom: 8,
               }}
             >
-              {setupPage.chooseYourlanguage[language]}
+              {setupPage.state[language]}
             </Text>
             <DropDownPicker
               open={stateOpen}
@@ -266,7 +266,7 @@ const setup = () => {
                 marginBottom: 8,
               }}
             >
-              {setupPage.chooseYourlanguage[language]}
+              {setupPage.city[language]}
             </Text>
             <DropDownPicker
               open={cityOpen}
@@ -293,8 +293,7 @@ const setup = () => {
 
           <Pressable
             style={styles.buttonContainer}
-            onPress={async () => {
-              AsyncStorage.setItem("", "true");
+            onPress={() => {
               AsyncStorage.setItem("isAppSetup", "true");
               router.replace("/");
             }}

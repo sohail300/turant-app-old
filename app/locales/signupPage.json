@@ -1,0 +1,66 @@
+{
+  "createYourAccount": {
+    "english": "Create Your Account",
+    "hindi": "अपना अकाउंट बनाएं"
+  },
+  "fullName": {
+    "english": "Full Name",
+    "hindi": "पूरा नाम"
+  },
+  "username": {
+    "english": "Username",
+    "hindi": "यूसरनेम"
+  },
+  "email": {
+    "english": "Email",
+    "hindi": "ईमेल"
+  },
+  "phone": {
+    "english": "Phone",
+    "hindi": "फ़ोन"
+  },
+  "password": {
+    "english": "Password",
+    "hindi": "पासवर्ड"
+  },
+  "confirmPassword": {
+    "english": "Confirm Password",
+    "hindi": "पासवर्ड पुष्टि करें"
+  },
+  "agreement": {
+    "english": "I agree to follow the terms and conditions and avoid uploading adult content.",
+    "hindi": "मैं नियम और शर्तों का पालन करने और वयस्क सामग्री अपलोड करने से बचने के लिए सहमत हूं।"
+  },
+  "termsAndConditions": {
+    "english": "terms and conditions",
+    "hindi": "नियम और शर्तों"
+  },
+  "submit": {
+    "english": "Submit",
+    "hindi": "सबमिट करे"
+  },
+  "enterFullName": {
+    "english": "Enter your name",
+    "hindi": "अपना नाम दर्ज करें"
+  },
+  "enterUsername": {
+    "english": "Enter your username",
+    "hindi": "अपना यूसरनेम दर्ज करें"
+  },
+  "enterEmail": {
+    "english": "Enter your email",
+    "hindi": "अपना ईमेल दर्ज करें"
+  },
+  "enterPhone": {
+    "english": "Enter your phone number",
+    "hindi": "अपना फ़ोन नंबर दर्ज करें"
+  },
+  "enterPassword": {
+    "english": "Enter your password",
+    "hindi": "अपना पासवर्ड दर्ज करें"
+  },
+  "enterCPassword": {
+    "english": "Enter your password",
+    "hindi": "अपना पासवर्ड दर्ज करें"
+  }
+}

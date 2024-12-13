@@ -1,0 +1,30 @@
+{
+  "follow": {
+    "english": "Follow",
+    "hindi": "फॉलो करें"
+  },
+  "unfollow": {
+    "english": "Unfollow",
+    "hindi": "अनफॉलो करें"
+  },
+  "readMore": {
+    "english": "Read More",
+    "hindi": "और पढ़ें"
+  },
+  "disclaimer": {
+    "english": "Disclaimer: This content/video has been published directly by the user on TURANT, an intermediary platform. TURANT has neither reviewed nor endorsed the content and holds no prior knowledge of its details.",
+    "hindi": "अस्वीकरण: यह सामग्री/वीडियो सीधे उपयोगकर्ता द्वारा तुरंत, एक मध्यस्थ मंच पर प्रकाशित किया गया है। तुरंत ने न तो सामग्री की समीक्षा की है और न ही इसका समर्थन किया है और इसके विवरण के बारे में कोई पूर्व ज्ञान नहीं रखता है।"
+  },
+  "comments": {
+    "english": "Comments",
+    "hindi": "टिप्पणियाँ"
+  },
+  "postYourComment": {
+    "english": "Post Your Comment",
+    "hindi": "अपनी टिप्पणी जोड़ें"
+  },
+  "post": {
+    "english": "Post",
+    "hindi": "पोस्ट"
+  }
+}

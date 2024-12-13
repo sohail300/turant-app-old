@@ -17,8 +17,14 @@ import RedText from "@/components/RedText";
 import { OtpInput } from "react-native-otp-entry";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { baseURL } from "@/constants/config";
+import { useSelector } from "react-redux";
+import verifyPage from "@/locales/verifyPage.json";
 
 export default function Signup() {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+
   const [mailOTP, setMailOTP] = useState("");
   const [phoneOTP, setPhoneOTP] = useState("");
 
@@ -78,7 +84,7 @@ export default function Signup() {
                   textAlign: "center",
                 }}
               >
-                Verify Your Mail And Phone
+                {verifyPage.verifyMailPhone[language]}
               </Text>
 
               <Text
@@ -89,13 +95,14 @@ export default function Signup() {
                   textAlign: "center",
                 }}
               >
-                We've sent a 4-digit code to shubham@gmail.com and (+91) 99999
-                99999
+                {verifyPage.sentOTP[language]}
               </Text>
             </View>
 
             <View style={{ gap: 8 }}>
-              <Text style={styles.Subheading2}>Mail OTP</Text>
+              <Text style={styles.Subheading2}>
+                {verifyPage.mailOTP[language]}
+              </Text>
               <OtpInput
                 numberOfDigits={4}
                 focusColor={Colors.light.border}
@@ -115,11 +122,15 @@ export default function Signup() {
                   },
                 }}
               />
-              <RedText style={{ textAlign: "right" }}>Resend OTP</RedText>
+              <RedText style={{ textAlign: "right" }}>
+                {verifyPage.resend[language]}
+              </RedText>
             </View>
 
             <View style={{ gap: 8 }}>
-              <Text style={styles.Subheading2}>Phone OTP</Text>
+              <Text style={styles.Subheading2}>
+                {verifyPage.phoneOTP[language]}
+              </Text>
               <OtpInput
                 numberOfDigits={4}
                 focusColor={Colors.light.border}
@@ -139,7 +150,9 @@ export default function Signup() {
                   },
                 }}
               />
-              <RedText style={{ textAlign: "right" }}>Resend OTP</RedText>
+              <RedText style={{ textAlign: "right" }}>
+                {verifyPage.resend[language]}
+              </RedText>
             </View>
 
             <View>
@@ -148,7 +161,7 @@ export default function Signup() {
                 onPress={() => router.push("/")}
               >
                 <Text style={styles.button} onPress={() => handleSubmit()}>
-                  Verify
+                  {verifyPage.verify[language]}
                 </Text>
                 <Feather name="arrow-right-circle" size={24} color="#fff" />
               </TouchableOpacity>
