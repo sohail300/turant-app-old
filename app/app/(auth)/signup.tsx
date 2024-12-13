@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -19,17 +19,32 @@ import ErrorText from "@/components/ErrorText";
 import CheckBox from "react-native-check-box";
 import { router } from "expo-router";
 import RedText from "@/components/RedText";
+import { useDispatch, useSelector } from "react-redux";
+import { changeAuth } from "@/store/AuthSlice";
+import { baseURL } from "@/constants/config";
+import { changeToken } from "@/store/TokenSlice";
 
 export default function Signup() {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+  const [location, setLocation] = useState(
+    useSelector((state) => state.location.data)
+  );
+  const dispatch = useDispatch();
+  console.log("language", language);
+  console.log("location", location);
+
   const validate = Yup.object({
     name: Yup.string().required("Name is required"),
+    username: Yup.string().required("Username is required"),
     email: Yup.string().email("Email is invalid").required("Email is required"),
     phone: Yup.string()
       .required("Phone is required")
       .min(10, "Phone number must be 10 digits")
       .max(10, "Phone number must be 10 digits"),
     password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
+      .min(8, "Password must be at least 8 characters")
       .required("Password is required"),
     cpassword: Yup.string()
       .oneOf([Yup.ref("password"), null], "Passwords must match")
@@ -72,6 +87,7 @@ export default function Signup() {
             <Formik
               initialValues={{
                 name: "",
+                username: "",
                 email: "",
                 phone: "",
                 password: "",
@@ -79,10 +95,36 @@ export default function Signup() {
                 agreement: false,
               }}
               validationSchema={validate}
-              onSubmit={(values, { setSubmitting }) => {
-                console.log(values);
-                setSubmitting(false);
-                router.push("/verify");
+              onSubmit={async (values, { setSubmitting }) => {
+                try {
+                  const response = await fetch(`${baseURL}/auth/signup`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      display_name: values.name,
+                      username: values.username,
+                      email: values.email,
+                      phone: values.phone,
+                      password: values.password,
+                      state: location.countryState,
+                      city: location.city,
+                      app_language: language,
+                    }),
+                  });
+
+                  const data = await response.json(); // Parse the
+                  console.log("data", data);
+                  console.log("token in signup", data.accessToken);
+
+                  dispatch(changeAuth("yes"));
+                  dispatch(changeToken(data.accessToken));
+                  setSubmitting(false);
+                  router.push("/verify");
+                } catch (error) {
+                  console.log(error);
+                }
               }}
             >
               {({
@@ -118,6 +160,33 @@ export default function Signup() {
                     />
                     {touched.name && errors.name && (
                       <ErrorText>{errors.name}</ErrorText>
+                    )}
+                  </View>
+
+                  <View style={{ gap: 8 }}>
+                    <Text style={styles.Subheading2}>Username</Text>
+                    <TextInput
+                      value={values.username}
+                      keyboardType="default"
+                      onChangeText={handleChange("username")}
+                      onBlur={handleBlur("username")}
+                      placeholder="Enter your username"
+                      placeholderTextColor={Colors.light.details}
+                      style={[
+                        styles.ContentText,
+                        {
+                          borderColor: Colors.light.border,
+                          borderWidth: 1,
+                          borderRadius: 5,
+                          padding: 10,
+                        },
+                        touched.username && errors.username
+                          ? style.inputError
+                          : {},
+                      ]}
+                    />
+                    {touched.username && errors.username && (
+                      <ErrorText>{errors.username}</ErrorText>
                     )}
                   </View>
 

@@ -31,9 +31,9 @@ router.post("/own-posts", authenticate, getOwnPosts);
 
 router.post("/saved-posts", authenticate, getUserSavedPosts);
 
-router.post("/follow", authenticate, userFollow);
+router.post("/follow/:targetUserId", authenticate, userFollow);
 
-router.post("/unfollow", authenticate, userUnfollow);
+// router.post("/unfollow", authenticate, userUnfollow);
 
 router.post("/following", authenticate, getUserFollowing);
 

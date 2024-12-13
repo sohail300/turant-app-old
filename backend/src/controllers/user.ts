@@ -185,18 +185,25 @@ export const getOtherUserPosts = async (req: Request, res: Response) => {
         user_id: Number(userId),
       },
       select: {
-        user_id: true,
         posts: {
           select: {
-            user_id: true,
             post_id: true,
-            thumbnail: true,
+            type: true,
             title: true,
             snippet: true,
             likes: true,
             comments: true,
             shares: true,
+            video_views: true,
             created_at: true,
+            thumbnail: true,
+            user: {
+              select: {
+                user_id: true,
+                display_name: true,
+                image: true,
+              },
+            },
           },
         },
       },
@@ -358,7 +365,7 @@ export const getUserSavedPosts = async (req: Request, res: Response) => {
 export const userFollow = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers; // Logged-in user's ID (from middleware/auth)
-    const { targetUserId } = req.body; // The user to be followed
+    const { targetUserId } = req.params; // The user to be followed
 
     if (!targetUserId) {
       res.status(400).json({
@@ -396,9 +403,36 @@ export const userFollow = async (req: Request, res: Response) => {
       },
     });
 
+    // If already following, then unfollow
     if (existingFollow) {
-      res.status(400).json({
-        message: "You are already following this user",
+      await prisma.follower.delete({
+        where: {
+          follower_id_following_id: {
+            follower_id: Number(userId),
+            following_id: Number(targetUserId),
+          },
+        },
+      });
+
+      // Decrement the following count of the current user
+      await prisma.user.update({
+        where: { user_id: Number(userId) },
+        data: {
+          following_count: { decrement: 1 },
+        },
+      });
+
+      // Decrement the follower count of the target user
+      await prisma.user.update({
+        where: { user_id: Number(targetUserId) },
+        data: {
+          follower_count: { decrement: 1 },
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "User unfollowed successfully",
       });
       return;
     }

@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(cors());
 
 app.get("/", (req, res) => {
-  res.send("Healthy Server!");
+  res.json({ msg: "Healthy Server!" });
 });
 
 app.get("/api/web/me", authenticate, (req, res) => {

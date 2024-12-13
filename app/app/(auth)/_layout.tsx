@@ -40,6 +40,64 @@ const AuthLayout = () => {
           },
         }}
       />
+      <Stack.Screen
+        name="forgot-password-email"
+        options={{
+          headerShown: true,
+          headerTitle: "",
+          headerTransparent: true,
+          headerLeft: () => {
+            return (
+              <Pressable onPress={() => router.back()}>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  <Ionicons
+                    name="chevron-back"
+                    size={24}
+                    color={Colors.light.white}
+                  />
+                  <RedText style={{ color: Colors.light.white }}>Back</RedText>
+                </View>
+              </Pressable>
+            );
+          },
+        }}
+      />
+      <Stack.Screen
+        name="forgot-password-phone"
+        options={{
+          headerShown: true,
+          headerTitle: "",
+          headerTransparent: true,
+          headerLeft: () => {
+            return (
+              <Pressable onPress={() => router.back()}>
+                <View
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                >
+                  <Ionicons
+                    name="chevron-back"
+                    size={24}
+                    color={Colors.light.white}
+                  />
+                  <RedText style={{ color: Colors.light.white }}>Back</RedText>
+                </View>
+              </Pressable>
+            );
+          },
+        }}
+      />
     </Stack>
   );
 };

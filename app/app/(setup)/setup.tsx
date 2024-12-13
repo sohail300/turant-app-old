@@ -5,7 +5,7 @@ import {
   Platform,
   Pressable,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import Feather from "@expo/vector-icons/Feather";
 import { styles } from "@/constants/styles";
@@ -19,6 +19,7 @@ import { changeLanguage } from "@/store/LanguageSlice";
 import setupPage from "@/locales/setupPage.json";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { changeLocation } from "@/store/LocationSlice";
+import { baseURL } from "@/constants/config";
 
 const setup = () => {
   const language = useSelector((state) => state.language.data);
@@ -71,33 +72,7 @@ const setup = () => {
     { label: "Jammu and Kashmir", value: "jammu_and_kashmir" },
   ]);
 
-  const [cities, setCities] = useState([
-    { label: "Ranchi", value: "ranchi" },
-    { label: "Jamshedpur", value: "jamshedpur" },
-    { label: "Dhanbad", value: "dhanbad" },
-    { label: "Bokaro", value: "bokaro" },
-    { label: "Deoghar", value: "deoghar" },
-    { label: "Hazaribagh", value: "hazaribagh" },
-    { label: "Giridih", value: "giridih" },
-    { label: "Ramgarh", value: "ramgarh" },
-    { label: "Phusro", value: "phusro" },
-    { label: "Gumia", value: "gumia" },
-    { label: "Chatra", value: "chatra" },
-    { label: "Koderma", value: "koderma" },
-    { label: "Simdega", value: "simdega" },
-    { label: "Chaibasa", value: "chaibasa" },
-    { label: "Medininagar", value: "medininagar" },
-    { label: "Lohardaga", value: "lohardaga" },
-    { label: "Pakur", value: "pakur" },
-    { label: "Sahibganj", value: "sahibganj" },
-    { label: "Jhumri Telaiya", value: "jhumri_telaiya" },
-    { label: "Ghatshila", value: "ghatshila" },
-    { label: "Daltonganj", value: "daltonganj" },
-    { label: "Khunti", value: "khunti" },
-    { label: "Latehar", value: "latehar" },
-    { label: "Dumka", value: "dumka" },
-    { label: "Gharwa", value: "gharwa" },
-  ]);
+  const [cities, setCities] = useState([{ label: "sas", value: "sasas" }]);
 
   const onStateOpen = () => {
     setCityOpen(false);
@@ -106,6 +81,18 @@ const setup = () => {
   const onCityOpen = () => {
     setStateOpen(false);
   };
+
+  // const getData = async () => {
+  //   const response = await fetch(
+  //     `${baseURL}/info/get-cities?state=${selectedState}`
+  //   );
+  //   const data = await response.json();
+  //   console.log(data);
+  //   setCities(data);
+  // };
+  // useEffect(() => {
+  //   getData();
+  // }, [selectedState]);
 
   return (
     <SafeAreaView
@@ -307,8 +294,9 @@ const setup = () => {
           <Pressable
             style={styles.buttonContainer}
             onPress={async () => {
+              AsyncStorage.setItem("", "true");
               AsyncStorage.setItem("isAppSetup", "true");
-              router.replace("/welcome");
+              router.replace("/");
             }}
           >
             <Text style={styles.button}>
@@ -317,8 +305,8 @@ const setup = () => {
             <Feather name="arrow-right-circle" size={24} color="#fff" />
           </Pressable>
 
-          {/* <Text>{location.countryState}</Text> */}
-          {/* <Text>{location.city}</Text> */}
+          <Text>{location.countryState}</Text>
+          <Text>{location.city}</Text>
           <View style={{ paddingBottom: 100 }} />
         </ScrollView>
       </KeyboardAvoidingView>

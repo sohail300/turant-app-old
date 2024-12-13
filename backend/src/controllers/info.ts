@@ -43,6 +43,7 @@ export const getCities = async (req: Request, res: Response) => {
 
     if (!state) {
       res.status(400).json({ message: "State is required" });
+      return;
     }
 
     const response = await axios.post(
@@ -54,8 +55,18 @@ export const getCities = async (req: Request, res: Response) => {
     );
 
     console.log(response.data.data);
+    const formattedCities = response.data.data.map((city) => ({
+      label: city,
+      value: city
+        .toLowerCase()
+        .normalize("NFD") // Normalize to decompose diacritics
+        .replace(/[\u0300-\u036f]/g, "") // Remove diacritic marks
+        .replace(/\s+/g, "_"), // Replace spaces with underscores
+    }));
 
-    res.json({ cities: response.data.data });
+    console.log(formattedCities);
+
+    res.json({ cities: formattedCities });
   } catch (error) {
     console.error("Error fetching reporters:", error);
     res.status(500).json({

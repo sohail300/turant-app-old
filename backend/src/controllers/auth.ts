@@ -146,6 +146,7 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const { identifier, password, state, city, app_language } = inputData.data;
+    console.log(identifier, password, state, city, app_language);
 
     // Find the user by either email or phone
     const user = await prisma.user.findFirst({

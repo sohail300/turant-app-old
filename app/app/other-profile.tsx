@@ -1,55 +1,128 @@
 import { View, Text, Dimensions, Image } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { ScrollView, TouchableOpacity } from "react-native-gesture-handler";
 import { styles } from "@/constants/styles";
 import CardFlatlistComponent from "@/components/CardFlatlistComponent";
+import { baseURL } from "@/constants/config";
+import { useSelector } from "react-redux";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OtherProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
+  const token = useSelector((state) => state.token.data); // Token from AsyncStorage
+  const [data, setData] = useState([]);
+  const [limit, setLimit] = useState(10); // Limit for each request
+  const [offset, setOffset] = useState(0); // Offset for pagination
+  const [loading, setLoading] = useState(false); // To avoid duplicate requests
+  const [hasMore, setHasMore] = useState(true); // To stop fetching if no more data
 
-  const data = [
-    {
-      id: 1,
-      heading:
-        "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-      imageUrl:
-        "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-      author: "Rahul Kumar",
-      authorImage:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      content:
-        "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
-      details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-    },
-    {
-      id: 2,
-      heading:
-        "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-      imageUrl:
-        "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-      author: "Rahul Kumar",
-      authorImage:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      content:
-        "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
-      details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-    },
-    {
-      id: 3,
-      heading:
-        "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-      imageUrl:
-        "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-      author: "Rahul Kumar",
-      authorImage:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      content:
-        "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
-      details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-    },
-  ];
+  const [profile, setProfile] = useState({});
+
+  async function getData(initialLoad = false) {
+    if (loading || !hasMore) return; // Avoid fetching if already loading or no more data
+    setLoading(true);
+
+    try {
+      const authorId = await AsyncStorage.getItem("authorId");
+      console.log("authorId", authorId);
+
+      const response = await fetch(`${baseURL}/user/others-posts`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: authorId?.replaceAll('"', ""),
+          limit: 10,
+          offset: 0,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const posts = await response.json();
+      console.log("posts", posts.posts[0].posts);
+      if (posts.length === 0) {
+        setHasMore(false); // No more data to load
+      } else {
+        setData((prevData) =>
+          initialLoad
+            ? posts.posts[0].posts
+            : [...prevData, posts.posts[0].posts]
+        );
+        setOffset((prevOffset) => prevOffset + limit); // Increment offset for next fetch
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function getProfile() {
+    try {
+      const authorId = await AsyncStorage.getItem("authorId");
+      console.log("authorId", authorId);
+
+      const response = await fetch(`${baseURL}/user/others-profile/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: authorId?.replaceAll('"', ""),
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const profile = await response.json();
+      setProfile(profile);
+      console.log("profile", profile);
+      setProfile(profile);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    getProfile();
+    getData(true); // Initial load
+  }, []);
+
+  const handleFollow = async () => {
+    try {
+      const authorId = await AsyncStorage.getItem("authorId");
+      console.log(authorId);
+
+      const response = await fetch(
+        `${baseURL}/user/follow/${authorId?.replaceAll('"', "")}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      const data = await response.json();
+      console.log("data", data);
+
+      setProfile((prevProfile) => ({
+        ...prevProfile,
+        user: {
+          ...prevProfile.user,
+          isFollowing: !prevProfile.user.isFollowing,
+        },
+      }));
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
 
   return (
     <SafeAreaView
@@ -84,7 +157,7 @@ const OtherProfile = () => {
                   color: Colors.light.subheading,
                 }}
               >
-                Rahul Kumar
+                {profile?.user?.display_name}
               </Text>
               <Text
                 style={{
@@ -95,7 +168,7 @@ const OtherProfile = () => {
                   marginBottom: 16,
                 }}
               >
-                @rahulkumar001
+                {profile?.user?.username}
               </Text>
 
               <View
@@ -119,7 +192,7 @@ const OtherProfile = () => {
                       color: Colors.light.subheading,
                     }}
                   >
-                    2.2k
+                    {profile?.user?.follower_count}
                   </Text>
                   <Text
                     style={{
@@ -146,7 +219,7 @@ const OtherProfile = () => {
                       color: Colors.light.subheading,
                     }}
                   >
-                    20
+                    {profile?.user?.following_count}
                   </Text>
                   <Text
                     style={{
@@ -164,7 +237,7 @@ const OtherProfile = () => {
 
             <Image
               source={{
-                uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+                uri: profile?.user?.image,
               }}
               style={{
                 width: 72,
@@ -175,7 +248,7 @@ const OtherProfile = () => {
           </View>
 
           {/* Follow Button */}
-          {isFollowing ? (
+          {profile?.user?.isFollowing ? (
             <TouchableOpacity
               style={{
                 backgroundColor: Colors.light.white,
@@ -187,7 +260,7 @@ const OtherProfile = () => {
                 alignSelf: "flex-start",
                 marginTop: 8,
               }}
-              onPress={() => setIsFollowing(false)}
+              onPress={() => handleFollow()}
             >
               <Text style={{ ...styles.buttonReverse }}>Following</Text>
             </TouchableOpacity>
@@ -203,7 +276,7 @@ const OtherProfile = () => {
                 alignSelf: "flex-start",
                 marginTop: 8,
               }}
-              onPress={() => setIsFollowing(true)}
+              onPress={() => handleFollow()}
             >
               <Text style={{ ...styles.button }}>Follow</Text>
             </TouchableOpacity>

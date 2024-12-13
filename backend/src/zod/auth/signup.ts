@@ -20,10 +20,6 @@ export const signupSchema = z.object({
       message: "App language must be either 'english' or 'hindi'",
     }),
   }),
-  state: z.enum(states, {
-    errorMap: () => ({
-      message: "States must be within the options provided",
-    }),
-  }),
+  state: z.string().min(1, "State must be at least 1 characters"),
   city: z.string().min(1, "City must be at least 1 characters"),
 });

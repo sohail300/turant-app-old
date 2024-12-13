@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -19,8 +19,10 @@ import { styles } from "@/constants/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { Link, router } from "expo-router";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { changeBottomSheetState } from "@/store/CommentBottomSheetSlice";
+import { baseURL } from "@/constants/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CommentBottomSheet = ({
   isSingle = false,
@@ -32,56 +34,15 @@ const CommentBottomSheet = ({
   const bottomSheetRef = useRef<BottomSheet>(null);
   const dispatch = useDispatch();
 
-  const comments = [
-    {
-      id: 1,
-      name: "Rahul Kumar",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      comment:
-        "India and China reached an agreement on patrolling arrangements along the LAC.",
-    },
-    {
-      id: 2,
-      name: "Rahul Kumar",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      comment:
-        "India and China reached an agreement on patrolling arrangements along the LAC.",
-    },
-    {
-      id: 3,
-      name: "Rahul Kumar",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      comment:
-        "India and China reached an agreement on patrolling arrangements along the LAC.",
-    },
-    {
-      id: 4,
-      name: "Rahul Kumar",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      comment:
-        "India and China reached an agreement on patrolling arrangements along the LAC.",
-    },
-    {
-      id: 5,
-      name: "Rahul Kumar",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      comment:
-        "India and China reached an agreement on patrolling arrangements along the LAC.",
-    },
-    {
-      id: 6,
-      name: "Rahul Kumar",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      comment:
-        "India and China reached an agreement on patrolling arrangements along the LAC.",
-    },
-  ];
+  const [comment, setComment] = useState("");
+
+  const [comments, setComments] = useState([]);
+  const [limit, setLimit] = useState(10); // Limit for each request
+  const [offset, setOffset] = useState(0); // Offset for pagination
+  const [loading, setLoading] = useState(false); // To avoid duplicate requests
+  const [hasMore, setHasMore] = useState(true); // To stop fetching if no more data
+
+  const token = useSelector((state) => state.token.data); // Token from AsyncStorage
 
   const handleClose = () => {
     console.log(isSingle, close);
@@ -91,6 +52,78 @@ const CommentBottomSheet = ({
       dispatch(changeBottomSheetState(false));
     }
   };
+
+  async function getComments(initialLoad = false) {
+    if (loading || !hasMore) return; // Avoid fetching if already loading or no more data
+    setLoading(true);
+
+    try {
+      const postId = await AsyncStorage.getItem("postId");
+      console.log("postId", postId);
+      console.log("token", token);
+      const response = await fetch(
+        `${baseURL}/post/comment?postId=2&limit=10&offset=0`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const comments = await response.json();
+      console.log("comments", comments.comments.post_comments);
+      if (comments.length === 0) {
+        setHasMore(false); // No more data to load
+      } else {
+        setComments((prevData) =>
+          initialLoad
+            ? comments.comments.post_comments
+            : [...prevData, comments.comments.post_comments]
+        );
+        setOffset((prevOffset) => prevOffset + limit); // Increment offset for next fetch
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handlePost() {
+    try {
+      const postId = await AsyncStorage.getItem("postId");
+      console.log("postId", postId);
+      console.log("token", token);
+      console.log("comment", comment);
+      const response = await fetch(`${baseURL}/post/comment/${postId}`, {
+        method: "POST",
+        body: JSON.stringify({
+          comment: comment,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      setComment("");
+      const comments = await response.json();
+      console.log("comments", comments);
+      getComments(true);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  useEffect(() => {
+    getComments(true);
+
+    console.log("comments", comments);
+  }, []);
 
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -146,12 +179,12 @@ const CommentBottomSheet = ({
           </View>
           <FlatList
             data={comments}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item.created_at}
             renderItem={({ item }) => (
               <CommentCard
-                name={item.name}
-                image={item.image}
                 comment={item.comment}
+                name={item.user.display_name}
+                image={item.user.image}
               />
             )}
             style={{
@@ -189,25 +222,27 @@ const CommentBottomSheet = ({
                 paddingLeft: 16,
               }}
               multiline={true}
+              value={comment}
               placeholder="Add your comment"
               placeholderTextColor={"#A8A8A8"}
+              onChangeText={(text) => setComment(text)}
             ></TextInput>
-            <Link href="/signup">
-              <TouchableOpacity
-                style={{
-                  width: 80,
-                  borderRadius: 4,
-                  borderColor: Colors.light.accent,
-                  borderWidth: 1,
-                  padding: 8,
-                }}
-                onPress={() => {}}
-              >
-                <Text style={{ ...styles.button, color: Colors.light.accent }}>
-                  Post
-                </Text>
-              </TouchableOpacity>
-            </Link>
+            <TouchableOpacity
+              style={{
+                width: 80,
+                borderRadius: 4,
+                borderColor: Colors.light.accent,
+                borderWidth: 1,
+                padding: 8,
+              }}
+              onPress={() => {
+                handlePost();
+              }}
+            >
+              <Text style={{ ...styles.button, color: Colors.light.accent }}>
+                Post
+              </Text>
+            </TouchableOpacity>
           </View>
         </BottomSheetView>
       </BottomSheet>
@@ -223,7 +258,9 @@ function CommentCard({ name, image, comment }) {
       style={{
         display: "flex",
         flexDirection: "row",
-        padding: 16,
+        justifyContent: "flex-start",
+        paddingVertical: 16,
+        paddingHorizontal: 6,
         gap: 12,
         borderBottomColor: "#DBDBDB",
         borderBottomWidth: 1,
@@ -237,7 +274,11 @@ function CommentCard({ name, image, comment }) {
           borderRadius={50}
         />
       </Pressable>
-      <View style={{ display: "flex", marginTop: 8, paddingRight: 32 }}>
+      <View
+        style={{
+          display: "flex",
+        }}
+      >
         <Pressable onPress={() => router.push("/other-profile")}>
           <Text style={styles.Subheading}>{name}</Text>
         </Pressable>

@@ -8,17 +8,27 @@ import { useEffect, useState } from "react";
 import { router } from "expo-router";
 import { initializeLocation } from "@/store/LocationSlice";
 import CardFlatlistComponent from "@/components/CardFlatlistComponent";
+import { initializeAuth } from "@/store/AuthSlice";
+import { baseURL } from "@/constants/config";
+import { initializeToken } from "@/store/TokenSlice";
 
 export default function HomeScreen() {
   const dispatch = useDispatch();
   initializeLanguage(dispatch);
   initializeLocation(dispatch);
+  initializeAuth(dispatch);
+  initializeToken(dispatch);
+
+  const [data, setData] = useState([]);
+  const [limit, setLimit] = useState(10); // Limit for each request
+  const [offset, setOffset] = useState(0); // Offset for pagination
+  const [loading, setLoading] = useState(false); // To avoid duplicate requests
+  const [hasMore, setHasMore] = useState(true); // To stop fetching if no more data
 
   useEffect(() => {
     async function getIsAppSetup() {
       try {
         const value = await AsyncStorage.getItem("isAppSetup");
-
         if (value !== "true") {
           router.replace("/setup");
         }
@@ -26,51 +36,37 @@ export default function HomeScreen() {
         console.error("Error getting isAppSetup:", error);
       }
     }
-
     getIsAppSetup();
   }, []);
 
-  const data = [
-    {
-      id: 1,
-      heading:
-        "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-      imageUrl:
-        "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-      author: "Rahul Kumar",
-      authorImage:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      content:
-        "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
-      details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-    },
-    {
-      id: 2,
-      heading:
-        "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-      imageUrl:
-        "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-      author: "Rahul Kumar",
-      authorImage:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      content:
-        "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
-      details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-    },
-    {
-      id: 3,
-      heading:
-        "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-      imageUrl:
-        "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-      author: "Rahul Kumar",
-      authorImage:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      content:
-        "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
-      details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-    },
-  ];
+  async function getData(initialLoad = false) {
+    if (loading || !hasMore) return; // Avoid fetching if already loading or no more data
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        `${baseURL}/post/show-posts?limit=${limit}&offset=${offset}`
+      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const posts = await response.json();
+      if (posts.length === 0) {
+        setHasMore(false); // No more data to load
+      } else {
+        setData((prevData) => (initialLoad ? posts : [...prevData, ...posts]));
+        setOffset((prevOffset) => prevOffset + limit); // Increment offset for next fetch
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    getData(true); // Initial load
+  }, []);
 
   return (
     <SafeAreaView
@@ -80,7 +76,11 @@ export default function HomeScreen() {
         paddingBottom: 24,
       }}
     >
-      <CardFlatlistComponent data={data} />
+      <CardFlatlistComponent
+        data={data}
+        onEndReachedThreshold={0.5} // Load more when 50% of the list is scrolled
+        onEndReached={() => getData()} // Fetch more data
+      />
     </SafeAreaView>
   );
 }

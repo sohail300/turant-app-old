@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -15,8 +15,42 @@ import { styles } from "@/constants/styles";
 import { router } from "expo-router";
 import RedText from "@/components/RedText";
 import { OtpInput } from "react-native-otp-entry";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { baseURL } from "@/constants/config";
 
 export default function Signup() {
+  const [mailOTP, setMailOTP] = useState("");
+  const [phoneOTP, setPhoneOTP] = useState("");
+
+  const handleSubmit = async () => {
+    try {
+      const phone = await AsyncStorage.getItem("phone");
+
+      const response = await fetch(`${baseURL}/auth/verify-register-otp`, {
+        method: "POST", // Use POST method for the request
+        headers: {
+          "Content-Type": "application/json", // Ensure the request is sent as JSON
+        },
+        body: JSON.stringify({
+          email: mailOTP,
+          phone: phoneOTP,
+        }),
+      });
+
+      if (!response.ok) {
+        // Handle any errors (non-2xx responses)
+        const errorText = await response.text(); // Read the response body as text
+        console.error("Error:", errorText);
+        throw new Error("Request failed with status " + response.status);
+      }
+
+      const data = await response.json();
+      router.push("/");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.light.white }}>
       <KeyboardAvoidingView
@@ -66,7 +100,7 @@ export default function Signup() {
                 numberOfDigits={4}
                 focusColor={Colors.light.border}
                 focusStickBlinkingDuration={500}
-                onTextChange={(text) => console.log(text)}
+                onTextChange={(text) => setMailOTP(text)}
                 onFilled={(text) => console.log(`OTP is ${text}`)}
                 textInputProps={{
                   accessibilityLabel: "One-Time Password",
@@ -90,7 +124,7 @@ export default function Signup() {
                 numberOfDigits={4}
                 focusColor={Colors.light.border}
                 focusStickBlinkingDuration={500}
-                onTextChange={(text) => console.log(text)}
+                onTextChange={(text) => setPhoneOTP(text)}
                 onFilled={(text) => console.log(`OTP is ${text}`)}
                 textInputProps={{
                   accessibilityLabel: "One-Time Password",
@@ -113,12 +147,14 @@ export default function Signup() {
                 style={styles.buttonContainer}
                 onPress={() => router.push("/")}
               >
-                <Text style={styles.button}>Verify</Text>
+                <Text style={styles.button} onPress={() => handleSubmit()}>
+                  Verify
+                </Text>
                 <Feather name="arrow-right-circle" size={24} color="#fff" />
               </TouchableOpacity>
-              <RedText style={{ textAlign: "right" }}>
+              {/* <RedText style={{ textAlign: "right" }}>
                 Change email or phone
-              </RedText>
+              </RedText> */}
             </View>
           </View>
         </ScrollView>

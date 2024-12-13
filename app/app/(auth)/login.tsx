@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -19,8 +19,24 @@ import ErrorText from "@/components/ErrorText";
 import logo from "@/assets/images/logo-red.png";
 import RedText from "@/components/RedText";
 import { router } from "expo-router";
+import { baseURL } from "@/constants/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { changeAuth } from "@/store/AuthSlice";
+import { changeToken } from "@/store/TokenSlice";
 
 export default function Signup() {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+  const [location, setLocation] = useState(
+    useSelector((state) => state.location.data)
+  );
+  const dispatch = useDispatch();
+  console.log("language", language);
+  console.log("location", location);
+
   const validate = Yup.object({
     identifier: Yup.string()
       .required("Email or Phone is required")
@@ -117,10 +133,44 @@ export default function Signup() {
                   password: "",
                 }}
                 validationSchema={validate}
-                onSubmit={(values, { setSubmitting }) => {
-                  console.log(values);
-                  setSubmitting(false);
-                  router.push("/");
+                onSubmit={async (values, { setSubmitting }) => {
+                  try {
+                    console.log(values);
+                    // Wait for the AsyncStorage values to resolve
+                    console.log(language);
+                    console.log(location);
+                    const response = await fetch(`${baseURL}/auth/login`, {
+                      method: "POST", // Use POST method for the request
+                      headers: {
+                        "Content-Type": "application/json", // Ensure the request is sent as JSON
+                      },
+                      body: JSON.stringify({
+                        identifier: values.identifier,
+                        password: values.password,
+                        state: location.countryState,
+                        city: location.city,
+                        app_language: language,
+                      }),
+                    });
+
+                    if (!response.ok) {
+                      // Handle any errors (non-2xx responses)
+                      const errorText = await response.text(); // Read the response body as text
+                      console.error("Error:", errorText);
+                      throw new Error(
+                        "Request failed with status " + response.status
+                      );
+                    }
+
+                    const data = await response.json(); // Parse the
+                    dispatch(changeAuth("yes"));
+                    dispatch(changeToken(data.user.accessToken));
+                    console.log("token in login", data.user.accessToken);
+                    setSubmitting(false);
+                    router.push("/");
+                  } catch (error) {
+                    console.log(error);
+                  }
                 }}
               >
                 {({

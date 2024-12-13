@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -20,19 +20,62 @@ import logo from "@/assets/images/logo-red.png";
 import RedText from "@/components/RedText";
 import { router } from "expo-router";
 import { OtpInput } from "react-native-otp-entry";
+import { baseURL } from "@/constants/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Signup() {
-  const validate = Yup.object({
-    otp: Yup.string()
-      .required("OTP is required")
-      .length(4, "OTP must be 4 digits"),
-    password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
-    cpassword: Yup.string()
-      .oneOf([Yup.ref("password"), null], "Passwords must match")
-      .required("Confirm Password is required"),
-  });
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [selectedMedium, setSelectedMedium] = useState<string | null>(null); // This will store the selected medium: 'phone' or 'email'
+
+  const handleSubmit = async () => {
+    try {
+      let bodyObject;
+      if (selectedMedium === "phone") {
+        bodyObject = {
+          medium: "phone",
+          phone: phone,
+        };
+      } else {
+        bodyObject = {
+          medium: "email",
+          email: email,
+        };
+      }
+
+      const response = await fetch(`${baseURL}/auth/send-forgot-password-otp`, {
+        method: "POST", // Use POST method for the request
+        headers: {
+          "Content-Type": "application/json", // Ensure the request is sent as JSON
+        },
+        body: JSON.stringify(bodyObject),
+      });
+
+      if (!response.ok) {
+        // Handle any errors (non-2xx responses)
+        const errorText = await response.text(); // Read the response body as text
+        console.error("Error:", errorText);
+        throw new Error("Request failed with status " + response.status);
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      if (selectedMedium === "phone") {
+        await AsyncStorage.setItem("phone", JSON.stringify(phone));
+      } else if (selectedMedium === "email") {
+        await AsyncStorage.setItem("email", JSON.stringify(email));
+      }
+
+      if (selectedMedium === "phone") {
+        router.push("/forgot-password-phone");
+      } else {
+        router.push("/forgot-password-email");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <SafeAreaView style={style.container}>
@@ -50,119 +93,112 @@ export default function Signup() {
             <View style={style.headerContainer}>
               <Image source={logo} style={style.logo} />
               <Text style={style.title}>Change Password</Text>
-              <Text style={style.subtitle}>
-                We have send 4 digit code to nikhil@gmail.com
-              </Text>
-              <View style={style.spamContainer}>
-                <Text style={style.cantFindText}>Can't find?</Text>
-                <Text style={style.spamText}>Check in spam folder</Text>
+              <Text style={style.subtitle}>Choose a medium to send OTP</Text>
+            </View>
+
+            {/* There will be two radio buttons for phone and email */}
+            <View style={style.formContainer}>
+              <View style={style.inputGroup}>
+                <Text style={style.inputLabel}>Choose Medium</Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <TouchableOpacity
+                    style={[
+                      style.radioButton,
+                      selectedMedium === "phone" && style.selectedRadioButton,
+                    ]}
+                    onPress={() => setSelectedMedium("phone")}
+                  >
+                    <Text style={style.radioText}>Phone</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      style.radioButton,
+                      selectedMedium === "email" && style.selectedRadioButton,
+                    ]}
+                    onPress={() => setSelectedMedium("email")}
+                  >
+                    <Text style={style.radioText}>Email</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
 
-            <Formik
-              initialValues={{ otp: "", password: "", cpassword: "" }}
-              validationSchema={validate}
-              onSubmit={(values, { setSubmitting }) => {
-                console.log(values);
-                setSubmitting(false);
-                router.push("/");
-              }}
-            >
-              {({
-                setFieldValue,
-                handleChange,
-                handleBlur,
-                handleSubmit,
-                values,
-                errors,
-                touched,
-                isSubmitting,
-              }) => (
-                <View style={style.formContainer}>
-                  <View style={style.inputGroup}>
-                    <Text style={style.inputLabel}>Enter OTP</Text>
-                    <OtpInput
-                      numberOfDigits={4}
-                      autoFocus={false}
-                      focusColor={Colors.light.border}
-                      focusStickBlinkingDuration={500}
-                      onTextChange={(text) => setFieldValue("otp", text)}
-                      onFilled={(text) => setFieldValue("otp", text)}
-                      textInputProps={{
-                        accessibilityLabel: "One-Time Password",
-                      }}
-                      theme={{
-                        pinCodeContainerStyle: {
-                          ...style.otpInput,
-                          borderColor:
-                            touched.otp && errors.otp
-                              ? "red"
-                              : Colors.light.border,
-                        },
-                      }}
-                    />
-                    {touched.otp && errors.otp && (
-                      <ErrorText>{errors.otp}</ErrorText>
-                    )}
-                  </View>
+            {selectedMedium === "phone" && (
+              <View style={style.inputGroup}>
+                <Text style={style.inputLabel}>Phone</Text>
 
-                  <View style={style.inputGroup}>
-                    <Text style={style.inputLabel}>Password</Text>
-                    <TextInput
-                      value={values.password}
-                      keyboardType="default"
-                      onChangeText={handleChange("password")}
-                      onBlur={handleBlur("password")}
-                      placeholder="Enter your password"
-                      placeholderTextColor={Colors.light.details}
-                      secureTextEntry={true}
-                      style={[
-                        style.textInput,
-                        touched.password && errors.password && style.inputError,
-                      ]}
-                    />
-                    {touched.password && errors.password && (
-                      <ErrorText>{errors.password}</ErrorText>
-                    )}
-                  </View>
-
-                  <View style={style.inputGroup}>
-                    <Text style={style.inputLabel}>Confirm Password</Text>
-                    <TextInput
-                      value={values.cpassword}
-                      keyboardType="default"
-                      onChangeText={handleChange("cpassword")}
-                      onBlur={handleBlur("cpassword")}
-                      placeholder="Enter your password"
-                      placeholderTextColor={Colors.light.details}
-                      secureTextEntry={true}
-                      style={[
-                        style.textInput,
-                        touched.cpassword &&
-                          errors.cpassword &&
-                          style.inputError,
-                      ]}
-                    />
-                    {touched.cpassword && errors.cpassword && (
-                      <ErrorText>{errors.cpassword}</ErrorText>
-                    )}
-                  </View>
-
-                  <TouchableOpacity
-                    disabled={isSubmitting}
-                    style={styles.buttonContainer}
-                    onPress={handleSubmit}
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View
+                    style={{
+                      padding: 10,
+                      borderWidth: 1,
+                      borderColor: Colors.light.border,
+                      borderTopLeftRadius: 5,
+                      borderBottomLeftRadius: 5,
+                      marginRight: -1,
+                    }}
                   >
-                    <Text style={styles.button}>Reset Password</Text>
-                  </TouchableOpacity>
-
-                  <View style={style.resendContainer}>
-                    <Text style={style.resendText}>Not received OTP?</Text>
-                    <RedText style={style.resendButton}>Resend Now</RedText>
+                    <Text
+                      style={[styles.ContentText, { color: Colors.light.text }]}
+                    >
+                      +91
+                    </Text>
                   </View>
+                  <TextInput
+                    value={phone}
+                    keyboardType="numeric"
+                    onChangeText={setPhone}
+                    placeholder="Enter your phone"
+                    placeholderTextColor={Colors.light.details}
+                    style={[
+                      styles.ContentText,
+                      {
+                        flex: 1,
+                        borderColor: Colors.light.border,
+                        borderWidth: 1,
+                        borderTopRightRadius: 5,
+                        borderBottomRightRadius: 5,
+                        padding: 10,
+                      },
+                    ]}
+                  />
                 </View>
-              )}
-            </Formik>
+              </View>
+            )}
+
+            {selectedMedium === "email" && (
+              <View style={style.inputGroup}>
+                <Text style={style.inputLabel}>Email</Text>
+                <TextInput
+                  value={email}
+                  keyboardType="email-address"
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  placeholderTextColor={Colors.light.details}
+                  style={[
+                    styles.ContentText,
+                    {
+                      borderColor: Colors.light.border,
+                      borderWidth: 1,
+                      borderRadius: 5,
+                      padding: 10,
+                    },
+                  ]}
+                />
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={styles.buttonContainer}
+              onPress={() => handleSubmit()}
+            >
+              <Text style={styles.button}>Send OTP</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={style.footer}>
@@ -222,6 +258,24 @@ const style = StyleSheet.create({
     textAlign: "center",
     color: "#6d6d6d",
     marginTop: 8,
+  },
+  radioButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 5,
+    paddingHorizontal: 40,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+  },
+  selectedRadioButton: {
+    backgroundColor: Colors.light.accent, // Change to your selected button color
+    color: Colors.light.white, // Change to your selected button text color
+  },
+  radioText: {
+    fontFamily: "HindVadodara500",
+    fontSize: 16,
+    color: Colors.light.text,
   },
   spamContainer: {
     flexDirection: "row",
@@ -289,6 +343,10 @@ const style = StyleSheet.create({
   footer: {
     flexDirection: "row",
     gap: 8,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     alignItems: "center",
     justifyContent: "center",
     borderTopColor: Colors.light.border,

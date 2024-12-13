@@ -20,6 +20,10 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#B22A2C"
       },
+      "networkConfig": {
+        "cleartextTrafficPermitted": true
+      },
+      "permissions": ["android.permission.INTERNET"],
       "package": "com.sohail300.app"
     },
     "web": {

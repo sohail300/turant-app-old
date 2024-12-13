@@ -1,14 +1,49 @@
 import { PrismaClient } from "@prisma/client";
 import { postCommentSchema } from "../zod/post/postComment";
 import { Request, Response } from "express";
+import fs from "fs";
+import path from "path";
 
 const prisma = new PrismaClient();
 
-export const showPost = (req: Request, res: Response) => {
-  res.json({ msg: "Show Post" });
+export const showPosts = async (req: Request, res: Response) => {
+  try {
+    const { limit, offset } = req.query;
+    const posts = await prisma.post.findMany({
+      select: {
+        post_id: true,
+        user_id: true,
+        title: true,
+        type: true,
+        thumbnail: true,
+        snippet: true,
+        created_at: true,
+        likes: true, // Directly select the scalar field
+        shares: true, // Directly select the scalar field
+        comments: true, // Directly select the scalar field
+        video_views: true, // Directly select the scalar field
+        user: {
+          select: {
+            user_id: true,
+            display_name: true,
+            image: true,
+          },
+        },
+      },
+      take: Number(limit),
+      skip: Number(offset),
+    });
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
 };
 
-export const showSinglePost = async (req: Request, res: Response) => {
+export const showImagePost = async (req: Request, res: Response) => {
   try {
     const { postId } = req.params;
     const post = await prisma.post.findUnique({
@@ -18,13 +53,13 @@ export const showSinglePost = async (req: Request, res: Response) => {
       select: {
         user_id: true,
         photo: true,
-        video: true,
         content: true,
       },
     });
 
     if (!post) {
       res.status(404).json({ message: "Post not found" });
+      return;
     }
 
     res.json({
@@ -38,11 +73,130 @@ export const showSinglePost = async (req: Request, res: Response) => {
   }
 };
 
-export const getVideo = async (req: Request, res: Response) => {};
+export const showVideoPost = async (req: Request, res: Response) => {
+  try {
+    const { postId } = req.params;
+    const post = await prisma.post.findUnique({
+      where: {
+        post_id: Number(postId),
+      },
+      select: {
+        user_id: true,
+        video: true,
+        content: true,
+      },
+    });
+
+    if (!post) {
+      res.status(404).json({ message: "Post not found" });
+      return;
+    }
+
+    res.json({
+      post,
+    });
+  } catch (error) {
+    console.error("Error fetching single post:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const video = async (req: Request, res: Response) => {
+  const videoPath = "/film.mkv";
+
+  // Check if file exists
+  if (!fs.existsSync(videoPath)) {
+    console.error("Video file not found:", videoPath);
+    return res.status(404).send("Video not found");
+  }
+
+  // Get video stats
+  let videoStat;
+  try {
+    videoStat = fs.statSync(videoPath);
+  } catch (err) {
+    console.error("Error reading video stats:", err);
+    return res.status(500).send("Error reading video");
+  }
+
+  const fileSize = videoStat.size;
+  const range = req.headers.range;
+
+  if (range) {
+    try {
+      const parts = range.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+
+      // Validate range
+      if (start >= fileSize || end >= fileSize) {
+        console.error("Invalid range requested:", range);
+        return res.status(416).send("Requested range not satisfiable");
+      }
+
+      const chunksize = end - start + 1;
+      const stream = fs.createReadStream(videoPath, { start, end });
+
+      const head = {
+        "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": chunksize,
+        "Content-Type": "video/mp4",
+      };
+
+      res.writeHead(206, head);
+
+      // Handle stream errors
+      stream.on("error", (err) => {
+        console.error("Stream error:", err);
+        if (!res.headersSent) {
+          res.status(500).send("Error streaming video");
+        }
+      });
+
+      stream.pipe(res);
+
+      // Log successful range request
+      console.log(`Serving bytes ${start}-${end}/${fileSize}`);
+    } catch (err) {
+      console.error("Error handling range request:", err);
+      res.status(500).send("Error processing video request");
+    }
+  } else {
+    try {
+      const head = {
+        "Content-Length": fileSize,
+        "Content-Type": "video/mp4",
+      };
+
+      res.writeHead(200, head);
+      const stream = fs.createReadStream(videoPath);
+
+      // Handle stream errors
+      stream.on("error", (err) => {
+        console.error("Stream error:", err);
+        if (!res.headersSent) {
+          res.status(500).send("Error streaming video");
+        }
+      });
+
+      stream.pipe(res);
+
+      // Log full file request
+      console.log(`Serving full video file: ${fileSize} bytes`);
+    } catch (err) {
+      console.error("Error streaming full video:", err);
+      res.status(500).send("Error streaming video");
+    }
+  }
+};
 
 export const getComments = async (req: Request, res: Response) => {
   try {
-    const { postId } = req.params;
+    const { postId, limit, offset } = req.query;
+
     const comments = await prisma.post.findUnique({
       where: {
         post_id: Number(postId),
@@ -60,13 +214,11 @@ export const getComments = async (req: Request, res: Response) => {
               },
             },
           },
+          take: Number(limit),
+          skip: Number(offset),
         },
       },
     });
-
-    if (!comments) {
-      res.status(404).json({ message: "Comments not found" });
-    }
 
     res.json({
       comments,
@@ -204,30 +356,45 @@ export const likePost = async (req: Request, res: Response) => {
   }
 };
 
-export const hasLikedPost = async (req: Request, res: Response) => {
+export const hasLikedSavedFollowingPost = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const { postId } = req.params; // Get the post ID from the URL parameters
+    const { postId, authorId } = req.query; // Get the post ID from the URL parameters
     const { userId } = req.headers; // Assume `userId` is added to the request by middleware after authentication
+    console.log(userId);
 
     // Check if the user has liked the post
     const existingLike = await prisma.postLike.findFirst({
       where: {
-        post_id: parseInt(postId, 10),
+        post_id: Number(postId),
         user_id: Number(userId),
       },
     });
 
-    if (existingLike) {
-      res.json({
-        hasLiked: true,
-        message: "User has liked the post.",
-      });
-    } else {
-      res.json({
-        hasLiked: false,
-        message: "User has not liked the post.",
-      });
-    }
+    const savedPost = await prisma.savedPost.findFirst({
+      where: {
+        user_id: Number(userId),
+        post_id: Number(postId),
+      },
+    });
+
+    // See if the user is following the author of the post
+    const isFollowing = await prisma.follower.findUnique({
+      where: {
+        follower_id_following_id: {
+          follower_id: Number(userId),
+          following_id: Number(authorId),
+        },
+      },
+    });
+
+    res.json({
+      hasLiked: existingLike ? true : false,
+      hasSaved: savedPost ? true : false,
+      isFollowing: isFollowing ? true : false,
+    });
   } catch (error) {
     console.error("Error checking if post has been liked:", error);
     res.status(500).json({
@@ -247,11 +414,11 @@ export const sharePost = async (req: Request, res: Response) => {
       },
     });
 
-    if (post) {
-      res.status(400).json({
-        message: "You have already shared this post",
-      });
-    }
+    // if (post) {
+    //   res.status(400).json({
+    //     message: "You have already shared this post",
+    //   });
+    // }
 
     await prisma.post.update({
       where: {
@@ -316,38 +483,6 @@ export const savePost = async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error("Error saving post:", error);
-    res.status(500).json({
-      message: "Internal server error",
-    });
-  }
-};
-
-export const hasSavedPost = async (req: Request, res: Response) => {
-  try {
-    const { postId } = req.params; // Get the post ID from request params
-    const { userId } = req.headers; // Assume `userId` is added by middleware after authentication
-
-    // Check if the user has already saved the post
-    const savedPost = await prisma.savedPost.findFirst({
-      where: {
-        user_id: Number(userId),
-        post_id: parseInt(postId, 10),
-      },
-    });
-
-    if (savedPost) {
-      res.status(200).json({
-        message: "Post has been saved.",
-        saved: true,
-      });
-    } else {
-      res.status(200).json({
-        message: "Post has not been saved.",
-        saved: false,
-      });
-    }
-  } catch (error) {
-    console.error("Error checking if post has been saved:", error);
     res.status(500).json({
       message: "Internal server error",
     });

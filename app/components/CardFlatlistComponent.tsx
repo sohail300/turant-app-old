@@ -1,23 +1,39 @@
 import { View, Text } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { FlatList } from "react-native-gesture-handler";
 import Card from "./Card";
 
 const CardFlatlistComponent = ({ data, ...props }) => {
+  if (!data || data.length === 0) {
+    return (
+      <View style={{ padding: 16, alignItems: "center" }}>
+        <Text>No posts available.</Text>
+      </View>
+    );
+  }
+
   return (
     <View>
       <FlatList
         {...props}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.post_id.toString()} // Updated to use `post_id`
         data={data}
         renderItem={({ item }) => (
           <Card
-            heading={item.heading}
-            imageUrl={item.imageUrl}
-            content={item.content}
-            author={item.author}
-            authorImage={item.authorImage}
-            details={item.details}
+            post_id={item.post_id}
+            type={item.type}
+            title={item.title}
+            snippet={item.snippet}
+            likes={item.likes}
+            comments={item.comments}
+            shares={item.shares}
+            views={item.video_views}
+            created_at={item.created_at}
+            thumbnail={item.thumbnail}
+            authorId={item.user.user_id}
+            author={item.user.display_name}
+            authorImage={item.user.image}
+            // details={item.details}
             full={false}
           />
         )}
