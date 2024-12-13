@@ -96,7 +96,9 @@ export default function Signup() {
               }}
               validationSchema={validate}
               onSubmit={async (values, { setSubmitting }) => {
+                console.log(values);
                 try {
+                  console.log('fetched');
                   const response = await fetch(`${baseURL}/auth/signup`, {
                     method: "POST",
                     headers: {

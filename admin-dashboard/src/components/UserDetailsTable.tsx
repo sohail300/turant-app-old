@@ -169,7 +169,7 @@ export const createColumns = (
       header: "Joined Date",
       cell: ({ row }) => (
         <div className="min-w-[160px]">
-          {formatDate(row.original.created_at)}
+          {/* {formatDate(row.original.created_at)} */}
         </div>
       ),
     },

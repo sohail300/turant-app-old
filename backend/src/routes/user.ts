@@ -14,6 +14,7 @@ import {
   searchUserFollowers,
   searchUserFollowings,
   isUsernameAvailable,
+  sendEditProfileOtp,
 } from "../controllers/user";
 import { authenticate } from "../middlewares/authenticate";
 
@@ -44,6 +45,8 @@ router.post("/search-followers", authenticate, searchUserFollowers);
 router.post("/search-following", authenticate, searchUserFollowings);
 
 router.put("/edit-profile", authenticate, editUserProfile);
+
+router.post("/send-edit-profile-otp", authenticate, sendEditProfileOtp);
 
 router.post("/available-username", authenticate, isUsernameAvailable);
 

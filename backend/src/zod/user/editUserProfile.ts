@@ -16,4 +16,5 @@ export const editUserProfileSchema = z.object({
   app_language: z.enum(["english", "hindi"]),
   state: z.enum(["delhi", "bihar", "punjab", "haryana", "kerala"]),
   city: z.string().min(1, "City must be at least 1 characters"),
+  otp: z.string().min(4).max(4)
 });

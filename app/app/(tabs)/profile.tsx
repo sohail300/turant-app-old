@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import RedText from "@/components/RedText";
@@ -20,9 +20,32 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useDispatch } from "react-redux";
 import { changeFollowersBottomSheetState } from "@/store/FollowersBottomSheetSlice";
+import { baseURL } from "@/constants/config";
+import { useSelector } from "react-redux";
 
 const profile = () => {
   const [tab, setTab] = useState(1);
+  const [profileData, setProfileData] = useState({"display_name": "Aditya2", "follower_count": 0, "following_count": 0, "image": "", "user_id": 21, "username": "adityakumar5155"})
+  const token = useSelector((state) => state.token.data); 
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch(`${baseURL}/user/own-profile`,{
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      console.log(data)
+      setProfileData(data.user);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  useEffect(()=>{
+    fetchProfile()
+  },[])
 
   const dispatch = useDispatch();
 
@@ -60,7 +83,7 @@ const profile = () => {
                   color: Colors.light.subheading,
                 }}
               >
-                Rahul Kumar
+                {profileData?.display_name}
               </Text>
               <Text
                 style={{
@@ -71,7 +94,7 @@ const profile = () => {
                   marginBottom: 16,
                 }}
               >
-                @rahulkumar001
+                @{profileData?.username}
               </Text>
 
               <View
@@ -99,7 +122,7 @@ const profile = () => {
                       color: Colors.light.subheading,
                     }}
                   >
-                    2.2k
+                    {profileData?.follower_count}
                   </Text>{" "}
                   Followers
                 </Text>
@@ -122,7 +145,7 @@ const profile = () => {
                       color: Colors.light.subheading,
                     }}
                   >
-                    20
+                    {profileData?.following_count}
                   </Text>{" "}
                   Following
                 </Text>
@@ -149,7 +172,7 @@ const profile = () => {
                   }}
                 />
               </Pressable>
-              <RedText onPress={() => router.push("/edit-profile")}>
+              <RedText onPress={() => router.push("/login")}>
                 Edit Profile
               </RedText>
             </View>
