@@ -1,4 +1,4 @@
-export function formatDate(timestamp) {
+export function formatDate(timestamp = "2024-12-10T07:22:01.536Z") {
   // Convert the timestamp string into a Date object
   const date = new Date(timestamp);
 

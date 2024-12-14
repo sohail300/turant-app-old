@@ -65,7 +65,7 @@ const AddReporter = ({
 
     const data = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value);
+      data.append(key, value as string);
     });
     data.append("image", file);
 
@@ -156,7 +156,9 @@ const AddReporter = ({
             placeholder="Enter Reporter Name"
           />
           {errors.name && (
-            <p className="text-red-500 text-sm">{errors.name.message}</p>
+            <p className="text-red-500 text-sm">
+              {errors.name.message as string}
+            </p>
           )}
         </div>
 
@@ -229,7 +231,9 @@ const AddReporter = ({
             />
           </div>
           {errors.phone && (
-            <p className="text-red-500 text-sm">{errors.phone.message}</p>
+            <p className="text-red-500 text-sm">
+              {errors.phone.message as string}
+            </p>
           )}
         </div>
 
@@ -253,7 +257,9 @@ const AddReporter = ({
             ))}
           </select>
           {errors.state && (
-            <p className="text-red-500 text-sm">{errors.state.message}</p>
+            <p className="text-red-500 text-sm">
+              {errors.state.message as string}
+            </p>
           )}
         </div>
 
@@ -272,7 +278,9 @@ const AddReporter = ({
             placeholder="Enter District"
           />
           {errors.district && (
-            <p className="text-red-500 text-sm">{errors.district.message}</p>
+            <p className="text-red-500 text-sm">
+              {errors.district.message as string}
+            </p>
           )}
         </div>
 
@@ -291,7 +299,9 @@ const AddReporter = ({
             placeholder="Enter Block"
           />
           {errors.block && (
-            <p className="text-red-500 text-sm">{errors.block.message}</p>
+            <p className="text-red-500 text-sm">
+              {errors.block.message as string}
+            </p>
           )}
         </div>
 

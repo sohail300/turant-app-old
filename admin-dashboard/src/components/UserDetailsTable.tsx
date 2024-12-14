@@ -169,7 +169,7 @@ export const createColumns = (
       header: "Joined Date",
       cell: ({ row }) => (
         <div className="min-w-[160px]">
-          {/* {formatDate(row.original.created_at)} */}
+          {formatDate(row.original.created_at)}
         </div>
       ),
     },
@@ -203,11 +203,11 @@ export const createColumns = (
             <PopoverContent
               className="w-auto p-0"
               align="start"
-              onPointerDownOutside={(e) => {
-                if (e.target.closest("textarea")) {
-                  e.preventDefault(); // Prevent closing on textarea interaction
-                }
-              }}
+              // onPointerDownOutside={(e) => {
+              //   if (e.target.closest("textarea")) {
+              //     e.preventDefault(); // Prevent closing on textarea interaction
+              //   }
+              // }}
             >
               <div className=" py-4 px-6">
                 <div className=" flex justify-end">

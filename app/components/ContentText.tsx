@@ -12,6 +12,19 @@ const ContentText = ({
   children,
   style,
   full,
+  title,
+  post_id,
+  type,
+  thumbnail,
+  snippet,
+  created_at,
+  author,
+  authorImage,
+  authorId,
+  currentLikes,
+  currentComments,
+  currentShares,
+  currentViews,
   ...props
 }: {
   children: React.ReactNode;
@@ -35,7 +48,28 @@ const ContentText = ({
           >
             {children}
           </Text>
-          <RedText onPress={() => router.push("/single-news")}>
+          <RedText
+            onPress={() =>
+              router.push({
+                pathname: "/single-news",
+                params: {
+                  title,
+                  post_id,
+                  type,
+                  thumbnail,
+                  snippet,
+                  created_at,
+                  author,
+                  authorImage,
+                  authorId,
+                  currentLikes,
+                  currentComments,
+                  currentShares,
+                  currentViews,
+                },
+              })
+            }
+          >
             {card.readMore[language]}
           </RedText>
         </>

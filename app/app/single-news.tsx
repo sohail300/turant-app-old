@@ -1,9 +1,9 @@
 import { View, Text, Dimensions } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { Image, Share } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, router } from "expo-router";
 import Heading from "@/components/Heading";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
@@ -25,10 +25,18 @@ import { ScrollView } from "react-native-gesture-handler";
 import card from "@/locales/card.json";
 import { useLocalSearchParams } from "expo-router";
 import { formatDate } from "@/utils/formatDate";
-import { handleLike, handleSave } from "@/utils/postActions";
+import {
+  handleCommentPress,
+  handleFollow,
+  handleLike,
+  handleOtherProfile,
+  handleSave,
+} from "@/utils/postActions";
+import { baseURL } from "@/constants/config";
 
 const SingleNews = () => {
   const [showCommentSheet, setShowCommentSheet] = useState(false);
+  const dispatch = useDispatch();
 
   const {
     title,
@@ -48,29 +56,50 @@ const SingleNews = () => {
     setCurrentComments,
   } = useLocalSearchParams();
 
-  const item = {
-    id: 2,
-    heading:
-      "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-    imageUrl:
-      "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-    author: "Rahul Kumar",
-    authorImage:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-    content:
-      "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books. A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books. A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books. A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books.",
-    details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-  };
-
   const language = useSelector((state) => state.language.data);
   const isUserLoggedIn = useSelector((state) => state.auth.data);
   const token = useSelector((state) => state.token.data);
+
+  const [content, setContent] = useState("");
 
   const [status, setStatus] = useState({
     hasLiked: false,
     hasSaved: false,
     isFollowing: false,
   });
+
+  async function getData() {
+    try {
+      if (type === "video") {
+        const response = await fetch(
+          `${baseURL}/post/single-video/${post_id}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+        setContent(data.post.content);
+      } else {
+        const response = await fetch(
+          `${baseURL}/post/single-image/${post_id}`,
+          {
+            method: "GET",
+          }
+        );
+        const data = await response.json();
+        setContent(data.post.content);
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
+
+  useEffect(() => {
+    getData();
+  }, [isUserLoggedIn]);
 
   return (
     <>
@@ -98,17 +127,28 @@ const SingleNews = () => {
               gap: 8,
             }}
           >
-            <Image
-              source={{
-                uri: item.imageUrl,
-              }}
-              width={"100%"}
-              height={200}
-              borderRadius={8}
-            />
-            <Link href={"/single-news"}>
-              <Heading>{title}</Heading>
-            </Link>
+            {type === "image" ? (
+              <Image
+                source={{
+                  uri: "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
+                }}
+                width={"100%"}
+                height={200}
+                borderRadius={8}
+              />
+            ) : type === "video" ? (
+              <Image
+                source={{
+                  uri: "https://d3i5efosrgchej.cloudfront.net/misc/video.jpg",
+                }}
+                width={"100%"}
+                height={200}
+                borderRadius={8}
+              />
+            ) : (
+              ""
+            )}
+            <Heading>{title}</Heading>
             <View
               style={{
                 display: "flex",
@@ -133,25 +173,39 @@ const SingleNews = () => {
                     flexDirection: "row",
                     gap: 8,
                     alignItems: "center",
-                    justifyContent: "center",
                   }}
-                  onPress={() => router.push("/other-profile")}
+                  onPress={() =>
+                    handleOtherProfile({
+                      isUserLoggedIn,
+                    })
+                  }
                 >
                   <Image
                     source={{
                       uri:
-                        authorImage && authorImage !== ""
+                        authorImage !== ""
                           ? authorImage
                           : "https://d3i5efosrgchej.cloudfront.net/misc/profile-pic.png",
                     }}
-                    height={40}
-                    width={40}
-                    borderRadius={50}
+                    style={{
+                      height: 40,
+                      width: 40,
+                      borderRadius: 50,
+                      objectFit: "cover",
+                    }}
                   />
                   <Subheading>{author}</Subheading>
                 </TouchableOpacity>
                 <Text>•</Text>
-                <RedText> {card.follow[language]}</RedText>
+                <RedText
+                  onPress={() =>
+                    handleFollow({ post_id, isUserLoggedIn, token, setStatus })
+                  }
+                >
+                  {status.isFollowing
+                    ? card.unfollow[language]
+                    : card.follow[language]}
+                </RedText>
               </View>
               <TouchableOpacity
                 onPress={() =>
@@ -166,7 +220,7 @@ const SingleNews = () => {
               </TouchableOpacity>
             </View>
             <ContentText full={true}>{snippet}</ContentText>
-            <Details>{formatDate(created_at)}</Details>
+            <Details>{formatDate(created_at!)}</Details>
             <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
               <TouchableOpacity
                 style={{
@@ -176,13 +230,21 @@ const SingleNews = () => {
                   justifyContent: "center",
                   alignItems: "center",
                 }}
-                // onPress={() => handleLike()}
+                onPress={() =>
+                  handleLike({
+                    post_id,
+                    isUserLoggedIn,
+                    token,
+                    setStatus,
+                    setCurrentLikes,
+                  })
+                }
               >
-                {/* <FontAwesome
+                <FontAwesome
                   name={status.hasLiked ? "heart" : "heart-o"} // 'heart' is filled, 'heart-o' is outlined
                   size={24}
                   color={status.hasLiked ? "red" : "black"} // Set color to red when liked
-                /> */}
+                />
                 <IconText>{currentLikes}</IconText>
               </TouchableOpacity>
               <TouchableOpacity
@@ -194,7 +256,15 @@ const SingleNews = () => {
                   alignItems: "center",
                 }}
                 onPress={() => {
-                  setShowCommentSheet(true);
+                  {
+                    handleCommentPress({
+                      post_id,
+                      isUserLoggedIn,
+                      setShowCommentSheet,
+                      full: true,
+                      dispatch,
+                    });
+                  }
                 }}
               >
                 <FontAwesome5 name="comment" size={24} color="black" />

@@ -203,7 +203,7 @@ const UserDetailsDashboard = () => {
     manualPagination: true,
   });
 
-  if (isLoading) return <Loader />;
+  // if (isLoading) return <Loader />;
 
   return (
     <div className="bg-white">
