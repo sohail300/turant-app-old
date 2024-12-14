@@ -51,7 +51,7 @@ export const createColumns = (
       header: "Start Date",
       cell: ({ row }) => (
         <div className="min-w-[200px]">
-          {formatDate(row.getValue("start_date"))}
+          {/* {formatDate(row.getValue("start_date"))} */}
         </div>
       ),
     },
@@ -60,7 +60,7 @@ export const createColumns = (
       header: "End Date",
       cell: ({ row }) => (
         <div className="min-w-[160px]">
-          {formatDate(row.getValue("end_date"))}
+          {/* {formatDate(row.getValue("end_date"))} */}
         </div>
       ),
     },

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Text,
   View,
@@ -17,8 +17,12 @@ import ErrorText from "@/components/ErrorText";
 import { router } from "expo-router";
 import RedText from "@/components/RedText";
 import { OtpInput } from "react-native-otp-entry";
+import { useSelector } from "react-redux";
+import { baseURL } from "@/constants/config";
 
 export default function Signup() {
+  const token = useSelector((state)=>state.token.data)
+  const location = useSelector((state) => state.location.data)
   const languages = [
     { label: "Hindi", value: "hindi" },
     { label: "English", value: "english" },
@@ -35,7 +39,7 @@ export default function Signup() {
     otp: Yup.string()
       .required("OTP is required")
       .length(4, "OTP must be 4 digits"),
-    langauge: Yup.string().required("Language is required"),
+    language: Yup.string().required("Language is required")
   });
 
   return (
@@ -93,10 +97,32 @@ export default function Signup() {
                 language: "english",
               }}
               validationSchema={validate}
-              onSubmit={(values, { setSubmitting }) => {
+              onSubmit={async (values, { setSubmitting }) => {
                 console.log(values);
+                const request = await fetch(`${baseURL}/user/edit-profile`,{
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    display_name: values.name,
+                    username: values.username,
+                    email: values.email,
+                    phone: values.phone,
+                    otp: values.otp,
+                    state: 'bihar',
+                    city: 'delhi',
+                    app_language: "english",
+                    password: "required",
+                  }),
+                })
                 setSubmitting(false);
-                router.push("/profile");
+                const response = await request.json();
+                console.log(response);
+                if(request.ok){
+                  router.push("/profile")
+                }
               }}
             >
               {({
@@ -108,7 +134,25 @@ export default function Signup() {
                 errors,
                 touched,
                 isSubmitting,
-              }) => (
+              }) => {
+                const sendOTP = async (phone : any) => {
+                  const otpRequest = await fetch(`${baseURL}/user/send-edit-profile-otp`,{
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      "Authorization": `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ phone: phone }),
+                  })
+                  const response = await otpRequest.json();
+                  console.log(response)
+                };
+                useEffect(()=>{
+                  if (values.phone.length == 10){
+                    sendOTP(values.phone);
+                  }
+                },[values.phone])
+                return (
                 <View
                   style={{
                     gap: 16,
@@ -296,7 +340,6 @@ export default function Signup() {
                       <ErrorText>{errors.email}</ErrorText>
                     )}
                   </View>
-
                   <View style={{ gap: 8 }}>
                     <Text style={styles.Subheading2}>Selected Language</Text>
                     <View
@@ -369,7 +412,7 @@ export default function Signup() {
                     <Text style={styles.button}>Save</Text>
                   </TouchableOpacity>
                 </View>
-              )}
+              )}}
             </Formik>
           </View>
         </ScrollView>

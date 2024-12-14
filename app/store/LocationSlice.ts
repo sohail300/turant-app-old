@@ -5,8 +5,8 @@ export const LocationSlice = createSlice({
   name: "location",
   initialState: {
     data: {
-      countryState: "bihar",
-      city: "skaska",
+      countryState: 'Bihar',
+      city: 'Motihari'
     },
   },
   reducers: {

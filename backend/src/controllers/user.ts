@@ -5,6 +5,8 @@ import { editUserProfileSchema } from "../zod/user/editUserProfile";
 import { Request, Response } from "express";
 import { paginationSchema } from "../zod/user/pagination";
 import bcrypt from "bcrypt";
+import { sendEditProfileOtpSchema } from "../zod/user/sendEditProfileOtp";
+import otpGenerator from "otp-generator";
 
 const prisma = new PrismaClient();
 
@@ -791,6 +793,63 @@ export const searchUserFollowings = async (req: Request, res: Response) => {
   }
 };
 
+export const sendEditProfileOtp = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.headers; // Assuming `req.userId` holds the logged-in user's ID
+    const inputData = sendEditProfileOtpSchema.safeParse(req.body);
+    
+    if (!inputData.success) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
+      return;
+    }
+    
+    const { phone } = inputData.data;
+
+    const otp = otpGenerator.generate(4, {
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+      digits: true,
+    });
+
+    if (!phone) {
+      res
+        .status(400)
+        .json({ message: "Phone Number is required for OTP generation" });
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { user_id: Number(userId) },
+    });
+
+    if (!user) {
+      res.status(400).json({ message: "User not found" });
+      return;
+    }
+
+    // ! TODO: Send OTP to phone
+
+    await prisma.otp.create({
+      data: {
+        user_id: user.user_id,
+        related: "forgot_password", // OTP type
+        otp,
+        expires_at: new Date(Date.now() + 10 * 60 * 1000),
+      },
+    });
+
+    console.log(`Sending phone OTP to ${phone}: ${otp}`);
+    res.json({ success: true, message: "OTP sent successfully" });
+  } catch (err) {
+    console.error("Error sending OTP:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export const editUserProfile = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers; // Logged-in user's ID (from middleware/auth)
@@ -814,7 +873,39 @@ export const editUserProfile = async (req: Request, res: Response) => {
       app_language,
       state,
       city,
+      otp
     } = inputData.data;
+
+    const user = await prisma.user.findUnique({
+      where: { user_id : Number(userId) },
+    });
+
+    if (!user) {
+          res.status(404).json({ message: "User not found" });
+          return;
+        }
+    
+        // Find OTP record for the user
+        const otpRecord = await prisma.otp.findFirst({
+          where: {
+            user_id: user.user_id,
+            related: "forgot_password",
+            otp,
+          },
+        });
+    
+        if (!otpRecord) {
+          res.status(400).json({ message: "Invalid OTP" });
+          return;
+        }
+    
+        // Check if OTP is expired
+        if (new Date(otpRecord.expires_at) < new Date()) {
+          res.status(400).json({ message: "OTP has expired" });
+          return;
+        }
+    
+        // Update the user's password
 
     const hashedPassword = await bcrypt.hash(password, 10);
 

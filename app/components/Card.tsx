@@ -83,7 +83,7 @@ const Card = ({
 
   const token = useSelector((state) => state.token.data); // Token from AsyncStorage
   const auth = useSelector((state) => state.auth.data); // Auth from AsyncStorage
-  console.log("token", token);
+  // console.log("token", token);
 
   async function getData() {
     try {
@@ -311,7 +311,7 @@ const Card = ({
         </TouchableOpacity>
       </View>
       <ContentText full={false}>{snippet}</ContentText>
-      <Details>{formatDate(created_at!)}</Details>
+      {/* <Details>{formatDate(created_at!)}</Details> */}
       <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
         <TouchableOpacity
           style={{
