@@ -135,6 +135,7 @@ export const getOtherUserProfile = async (req: Request, res: Response) => {
 export const getOwnProfile = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers;
+    console.log(userId);
 
     const user = await prisma.user.findUnique({
       where: {
@@ -147,8 +148,12 @@ export const getOwnProfile = async (req: Request, res: Response) => {
         follower_count: true,
         following_count: true,
         image: true,
+        phone: true,
+        email: true,
       },
     });
+
+    console.log(user);
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
@@ -895,13 +900,16 @@ export const sendEditProfileOtp = async (req: Request, res: Response) => {
     });
 
     console.log(`Sending phone OTP to ${phone}: ${otp}`);
-    const request = await fetch(`https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${process.env.MESSAGE_CENTRAL_CUSTOMER_ID}&flowType=SMS&mobileNumber=${phone}`,{
-      method: 'POST',
-      headers: {
-        'authToken': `${process.env.MESSAGE_CENTRAL_AUTH_TOKEN}`
+    const request = await fetch(
+      `https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${process.env.MESSAGE_CENTRAL_CUSTOMER_ID}&flowType=SMS&mobileNumber=${phone}`,
+      {
+        method: "POST",
+        headers: {
+          authToken: `${process.env.MESSAGE_CENTRAL_AUTH_TOKEN}`,
+        },
       }
-    })
-    if (!request.ok){
+    );
+    if (!request.ok) {
       throw new Error(`Error sending OTP to ${phone}: ${request.statusText}`);
     }
     const response = await request.json();
@@ -911,11 +919,20 @@ export const sendEditProfileOtp = async (req: Request, res: Response) => {
     console.error("Error sending OTP:", err);
     res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 export const editUserProfile = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers; // Logged-in user's ID (from middleware/auth)
+
+    const user = await prisma.user.findUnique({
+      where: { user_id: Number(userId) },
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
 
     const inputData = editUserProfileSchema.safeParse(req.body);
 
@@ -927,50 +944,36 @@ export const editUserProfile = async (req: Request, res: Response) => {
       return;
     }
 
-    const {
-      display_name,
-      username,
-      phone,
-      email,
-      password,
-      app_language,
-      state,
-      city,
-      otp
-    } = inputData.data;
+    const { display_name, username, email, app_language, state, city } =
+      inputData.data;
 
-    const user = await prisma.user.findUnique({
-      where: { user_id: Number(userId) },
-    });
+    console.log(display_name, username, email, app_language, state, city);
 
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
+    // const usernameAlreadyTaken = await prisma.user.findFirst({
+    //   where: {
+    //     username,
+    //   },
+    // });
 
-    // Find OTP record for the user
-    const otpRecord = await prisma.otp.findFirst({
-      where: {
-        user_id: user.user_id,
-        related: "forgot_password",
-        otp,
-      },
-    });
+    // if (usernameAlreadyTaken) {
+    //   res.status(400).json({
+    //     message: "Username already taken",
+    //   });
+    //   return;
+    // }
 
-    if (!otpRecord) {
-      res.status(400).json({ message: "Invalid OTP" });
-      return;
-    }
+    // const emailAlreadyTaken = await prisma.user.findFirst({
+    //   where: {
+    //     email,
+    //   },
+    // });
 
-    // Check if OTP is expired
-    if (new Date(otpRecord.expires_at) < new Date()) {
-      res.status(400).json({ message: "OTP has expired" });
-      return;
-    }
-
-    // Update the user's password
-
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // if (emailAlreadyTaken) {
+    //   res.status(400).json({
+    //     message: "Email already taken",
+    //   });
+    //   return;
+    // }
 
     // Update the user's profile
     await prisma.user.update({
@@ -981,8 +984,6 @@ export const editUserProfile = async (req: Request, res: Response) => {
         display_name,
         username,
         email,
-        phone,
-        password: hashedPassword,
         app_language,
         state,
         city,

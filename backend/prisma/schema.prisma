@@ -46,6 +46,7 @@ model User {
   comments                 Comment[]
   ad_views                 AdView[]
   ad_clicks                AdClick[]
+  PhoneOtp                 PhoneOtp[]
 }
 
 model Admin {
@@ -71,6 +72,15 @@ model Otp {
   otp        String
   expires_at DateTime
   user       User     @relation(fields: [user_id], references: [user_id])
+}
+
+model PhoneOtp {
+  phone_otp_id Int      @id @default(autoincrement())
+  user_id      Int
+  phone        String
+  otp          String
+  expires_at   DateTime
+  user         User     @relation(fields: [user_id], references: [user_id])
 }
 
 model Reporter {

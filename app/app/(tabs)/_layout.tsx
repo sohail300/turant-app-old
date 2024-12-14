@@ -10,12 +10,15 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import CommentBottomSheet from "@/components/CommentBottomSheet";
 import { useSelector } from "react-redux";
 import FollowersBottomSheet from "@/components/FollowersBottomSheet";
+import { baseURL } from "@/constants/config";
 
 export default function TabLayout() {
   const [showRestrictedBottomSheet, setShowRestrictedBottomSheet] =
     useState(false);
-
   const [showSearchBar, setShowSearchBar] = useState(false);
+
+  const isUserLoggedIn = useSelector((state) => state.auth.data);
+  const token = useSelector((state) => state.token.data);
 
   const commentSheetState = useSelector(
     (state) => state.commentBottomSheet.data
@@ -23,6 +26,38 @@ export default function TabLayout() {
   const followersSheetState = useSelector(
     (state) => state.followersBottomSheet.data
   );
+
+  async function handleTabPress() {
+    if (isUserLoggedIn === "no") {
+      router.push("/login");
+    } else {
+      try {
+        const isBlocked = await handleIsBlocked();
+        if (isBlocked) {
+          setShowRestrictedBottomSheet(true);
+          return;
+        }
+        router.push("/(upload)/upload");
+      } catch (error) {
+        console.error("Error checking block status:", error);
+      }
+    }
+  }
+
+  async function handleIsBlocked() {
+    try {
+      const response = await fetch(`${baseURL}/upload/is-blocked`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+      return data.blocked;
+    } catch (error) {
+      console.error("Error checking if user is blocked:", error);
+    }
+  }
 
   return (
     <>
@@ -57,7 +92,12 @@ export default function TabLayout() {
           listeners={{
             tabPress: (e) => {
               e.preventDefault();
-              setShowSearchBar(true);
+
+              if (isUserLoggedIn === "no") {
+                router.push("/login");
+              } else {
+                setShowSearchBar(true);
+              }
             },
           }}
           options={{
@@ -77,8 +117,7 @@ export default function TabLayout() {
           listeners={{
             tabPress: (e) => {
               e.preventDefault();
-              router.push("/(upload)/upload");
-              // setShowRestrictedBottomSheet(true);
+              handleTabPress();
             },
           }}
           options={{
@@ -95,6 +134,17 @@ export default function TabLayout() {
         />
         <Tabs.Screen
           name="profile"
+          listeners={{
+            tabPress: (e) => {
+              e.preventDefault();
+
+              if (isUserLoggedIn === "no") {
+                router.push("/login");
+              } else {
+                router.push("/profile");
+              }
+            },
+          }}
           options={{
             title: "Profile",
             tabBarActiveTintColor: Colors.light.accent,

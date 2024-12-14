@@ -61,22 +61,31 @@ export const AdCard = ({
         </Pressable>
       )}
       {video && videoUrl !== "" && (
-        <Pressable onPress={() => router.push("https://www.zomato.com/")}>
-          <View style={fileStyles.container}>
-            <Video
-              ref={video}
-              style={fileStyles.video}
-              source={{
-                uri: "https://d3i5efosrgchej.cloudfront.net/media/sample.mp4",
-              }}
-              useNativeControls
-              resizeMode={ResizeMode.CONTAIN}
-              onPlaybackStatusUpdate={(videoStatus) =>
-                setVideoStatus(() => videoStatus)
-              }
-            />
-          </View>
-        </Pressable>
+        <View style={fileStyles.container}>
+          {/* Video Component */}
+          <Video
+            ref={video}
+            style={fileStyles.video}
+            source={{
+              uri:
+                videoUrl ||
+                "https://d3i5efosrgchej.cloudfront.net/media/sample.mp4",
+            }}
+            useNativeControls
+            resizeMode={ResizeMode.CONTAIN}
+            onPlaybackStatusUpdate={(status) => setVideoStatus(status)}
+          />
+
+          {/* Transparent Overlay Pressable */}
+          <Pressable
+            style={StyleSheet.absoluteFill} // Makes the Pressable fill the entire Video component
+            onPress={async () =>
+              await WebBrowser.openBrowserAsync(
+                target_url || "https://www.zomato.com/"
+              )
+            }
+          />
+        </View>
       )}
     </SafeAreaView>
   );

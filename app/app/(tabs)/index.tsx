@@ -54,9 +54,9 @@ export default function HomeScreen() {
     },
     {
       ad_id: 2,
-      target_url: "https://www.zomato.com/",
-      image: "https://d3i5efosrgchej.cloudfront.net/media/zomato.jpg",
-      videoUrl: "",
+      target_url: "https://www.youtube.com/@turantnewshindi",
+      image: "",
+      videoUrl: "https://d3i5efosrgchej.cloudfront.net/media/sample.mp4",
     },
     {
       ad_id: 3,
@@ -99,6 +99,7 @@ export default function HomeScreen() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const posts = await response.json();
+
       if (posts.length === 0) {
         setHasMore(false); // No more data to load
       } else {

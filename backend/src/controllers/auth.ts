@@ -14,6 +14,8 @@ import { verifyForgotPasswordOtpSchema } from "../zod/auth/verifyForgotPasswordO
 import { verifyRegisterOtpSchema } from "../zod/auth/verifyRegisterOtp";
 import { Request, Response } from "express";
 import { transporter } from "../utils/sendEmail";
+import { sendChangePhoneOtpSchema } from "../zod/auth/sendChangePhoneOtp";
+import { verifyChangePhoneOtpSchema } from "../zod/auth/verifyChangePhoneOtp";
 
 const prisma = new PrismaClient();
 
@@ -252,11 +254,11 @@ export const sendForgotPasswordOtp = async (req: Request, res: Response) => {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: `${email}`,
-        subject: 'OTP For Forgot Password',
-        text: `OTP : ${otp}`
+        subject: "OTP For Forgot Password",
+        text: `OTP : ${otp}`,
       };
-    
-      await transporter.sendMail(mailOptions)
+
+      await transporter.sendMail(mailOptions);
     } else if (medium == "phone") {
       if (!phone) {
         res
@@ -497,6 +499,167 @@ export const verifyRegisterOtp = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("OTP verification error:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const sendChangePhoneOtp = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.headers;
+
+    const user = await prisma.user.findUnique({
+      where: { user_id: Number(userId) },
+    });
+
+    if (!user) {
+      res.status(400).json({ message: "User not found" });
+      return;
+    }
+
+    const inputData = sendChangePhoneOtpSchema.safeParse(req.body);
+
+    if (inputData.success === false) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const { phone } = inputData.data;
+
+    if (!phone) {
+      res
+        .status(400)
+        .json({ message: "Phone Number is required for OTP generation" });
+      return;
+    }
+
+    const otp = otpGenerator.generate(4, {
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+      digits: true,
+    });
+
+    console.log(`Sending phone OTP to ${phone}: ${otp}`);
+
+    // ! TODO: Send OTP to phone
+
+    const phoneAlreadyPresent = await prisma.phoneOtp.findFirst({
+      where: {
+        phone,
+        user_id: user.user_id,
+      },
+    });
+
+    if (phoneAlreadyPresent) {
+      await prisma.phoneOtp.update({
+        where: {
+          phone_otp_id: phoneAlreadyPresent.phone_otp_id,
+        },
+        data: {
+          otp,
+          expires_at: new Date(Date.now() + 10 * 60 * 1000),
+        },
+      });
+    } else {
+      await prisma.phoneOtp.create({
+        data: {
+          user_id: user.user_id,
+          phone,
+          otp,
+          expires_at: new Date(Date.now() + 10 * 60 * 1000),
+        },
+      });
+    }
+
+    // const mailOptions = {
+    //   from: process.env.EMAIL_USER,
+    //   to: `${phone}`,
+    //   subject: "OTP For Changing Phone Number",
+    //   text: `OTP : ${otp}`,
+    // };
+
+    // await transporter.sendMail(mailOptions);
+
+    res.json({ success: true, message: "OTP sent successfully" });
+  } catch (error) {
+    console.error("Error sending change phone OTP:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const verifyChangePhoneOtp = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.headers;
+
+    const user = await prisma.user.findUnique({
+      where: { user_id: Number(userId) },
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const inputData = verifyChangePhoneOtpSchema.safeParse(req.body);
+
+    if (!inputData.success) {
+      res.status(400).json({
+        message: "Validation error",
+        errors: inputData.error.flatten().fieldErrors,
+      });
+      return;
+    }
+
+    const { otp, phone } = inputData.data;
+
+    // Validate phone number
+    const phoneOtpRecord = await prisma.phoneOtp.findFirst({
+      where: {
+        phone: phone,
+        user_id: user.user_id,
+      },
+    });
+
+    if (!phoneOtpRecord) {
+      res.status(400).json({ message: "Invalid Phone Number" });
+      return;
+    }
+
+    if (new Date(phoneOtpRecord.expires_at) < new Date()) {
+      res.status(400).json({ message: "OTP has expired" });
+      return;
+    }
+
+    if (phoneOtpRecord.otp !== otp) {
+      res.status(400).json({ message: "Invalid OTP" });
+      return;
+    }
+
+    await prisma.user.update({
+      where: { user_id: user.user_id },
+      data: { phone: phoneOtpRecord.phone },
+    });
+
+    // Clean up OTPs
+    await prisma.phoneOtp.delete({
+      where: {
+        phone_otp_id: phoneOtpRecord.phone_otp_id,
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "Phone number updated successfully",
+    });
+  } catch (error) {
+    console.error("Error verifying change phone OTP:", error);
     res.status(500).json({
       message: "Internal server error",
     });
