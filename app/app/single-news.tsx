@@ -9,7 +9,13 @@ import Heading from "@/components/Heading";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import Subheading from "@/components/Subheading";
 import RedText from "@/components/RedText";
-import { Feather, FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
+import {
+  Feather,
+  FontAwesome,
+  FontAwesome5,
+  FontAwesome6,
+  Ionicons,
+} from "@expo/vector-icons";
 import ContentText from "@/components/ContentText";
 import Details from "@/components/Details";
 import IconText from "@/components/IconText";
@@ -17,9 +23,30 @@ import DisclaimerText from "@/components/DisclaimerText";
 import CommentBottomSheet from "@/components/CommentBottomSheet";
 import { ScrollView } from "react-native-gesture-handler";
 import card from "@/locales/card.json";
+import { useLocalSearchParams } from "expo-router";
+import { formatDate } from "@/utils/formatDate";
+import { handleLike, handleSave } from "@/utils/postActions";
 
 const SingleNews = () => {
   const [showCommentSheet, setShowCommentSheet] = useState(false);
+
+  const {
+    title,
+    post_id,
+    type,
+    snippet,
+    created_at,
+    author,
+    authorImage,
+    thumbnail,
+    currentLikes,
+    currentComments,
+    currentShares,
+    currentViews,
+    authorId,
+    setCurrentLikes,
+    setCurrentComments,
+  } = useLocalSearchParams();
 
   const item = {
     id: 2,
@@ -36,6 +63,14 @@ const SingleNews = () => {
   };
 
   const language = useSelector((state) => state.language.data);
+  const isUserLoggedIn = useSelector((state) => state.auth.data);
+  const token = useSelector((state) => state.token.data);
+
+  const [status, setStatus] = useState({
+    hasLiked: false,
+    hasSaved: false,
+    isFollowing: false,
+  });
 
   return (
     <>
@@ -72,7 +107,7 @@ const SingleNews = () => {
               borderRadius={8}
             />
             <Link href={"/single-news"}>
-              <Heading>{item.heading}</Heading>
+              <Heading>{title}</Heading>
             </Link>
             <View
               style={{
@@ -98,28 +133,40 @@ const SingleNews = () => {
                     flexDirection: "row",
                     gap: 8,
                     alignItems: "center",
+                    justifyContent: "center",
                   }}
                   onPress={() => router.push("/other-profile")}
                 >
                   <Image
                     source={{
-                      uri: item.authorImage,
+                      uri:
+                        authorImage && authorImage !== ""
+                          ? authorImage
+                          : "https://d3i5efosrgchej.cloudfront.net/misc/profile-pic.png",
                     }}
                     height={40}
                     width={40}
                     borderRadius={50}
                   />
-                  <Subheading>{item.author}</Subheading>
+                  <Subheading>{author}</Subheading>
                 </TouchableOpacity>
                 <Text>•</Text>
                 <RedText> {card.follow[language]}</RedText>
               </View>
-              <TouchableOpacity>
-                <Feather name="bookmark" size={24} color="black" />
+              <TouchableOpacity
+                onPress={() =>
+                  handleSave({ post_id, isUserLoggedIn, token, setStatus })
+                }
+              >
+                <Ionicons
+                  name={status.hasSaved ? "bookmark-outline" : "bookmark"} // 'heart' is filled, 'heart-o' is outlined
+                  size={24}
+                  color={status.hasLiked ? "black" : "black"}
+                />
               </TouchableOpacity>
             </View>
-            <ContentText full={true}>{item.content}</ContentText>
-            <Details>{item.details}</Details>
+            <ContentText full={true}>{snippet}</ContentText>
+            <Details>{formatDate(created_at)}</Details>
             <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
               <TouchableOpacity
                 style={{
@@ -129,10 +176,14 @@ const SingleNews = () => {
                   justifyContent: "center",
                   alignItems: "center",
                 }}
-                onPress={() => router.push("/login")}
+                // onPress={() => handleLike()}
               >
-                <FontAwesome5 name="heart" size={24} color="black" />
-                <IconText>23.9k</IconText>
+                {/* <FontAwesome
+                  name={status.hasLiked ? "heart" : "heart-o"} // 'heart' is filled, 'heart-o' is outlined
+                  size={24}
+                  color={status.hasLiked ? "red" : "black"} // Set color to red when liked
+                /> */}
+                <IconText>{currentLikes}</IconText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
@@ -147,7 +198,7 @@ const SingleNews = () => {
                 }}
               >
                 <FontAwesome5 name="comment" size={24} color="black" />
-                <IconText>23.9k</IconText>
+                <IconText>{currentComments}</IconText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
@@ -159,7 +210,7 @@ const SingleNews = () => {
                 }}
               >
                 <Feather name="eye" size={26} color="black" />
-                <IconText>60k</IconText>
+                <IconText>{currentViews}</IconText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
@@ -178,7 +229,7 @@ const SingleNews = () => {
                 }
               >
                 <FontAwesome6 name="share-square" size={22} color="black" />
-                <IconText>214</IconText>
+                <IconText>{currentShares}</IconText>
               </TouchableOpacity>
             </View>
             <View
