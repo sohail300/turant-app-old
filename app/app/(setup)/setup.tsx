@@ -19,6 +19,7 @@ import { changeLanguage } from "@/store/LanguageSlice";
 import setupPage from "@/locales/setupPage.json";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { changeLocation } from "@/store/LocationSlice";
+import { baseURL } from "@/constants/config";
 
 const setup = () => {
   const language = useSelector((state) => state.language.data);
@@ -71,7 +72,33 @@ const setup = () => {
     { label: "Jammu and Kashmir", value: "jammu_and_kashmir" },
   ]);
 
-  const [cities, setCities] = useState([{ label: "sas", value: "sasas" }]);
+  const [cities, setCities] = useState([
+    { label: "Ranchi", value: "ranchi" },
+    { label: "Jamshedpur", value: "jamshedpur" },
+    { label: "Dhanbad", value: "dhanbad" },
+    { label: "Bokaro", value: "bokaro" },
+    { label: "Deoghar", value: "deoghar" },
+    { label: "Hazaribagh", value: "hazaribagh" },
+    { label: "Giridih", value: "giridih" },
+    { label: "Ramgarh", value: "ramgarh" },
+    { label: "Phusro", value: "phusro" },
+    { label: "Gumia", value: "gumia" },
+    { label: "Chatra", value: "chatra" },
+    { label: "Koderma", value: "koderma" },
+    { label: "Simdega", value: "simdega" },
+    { label: "Chaibasa", value: "chaibasa" },
+    { label: "Medininagar", value: "medininagar" },
+    { label: "Lohardaga", value: "lohardaga" },
+    { label: "Pakur", value: "pakur" },
+    { label: "Sahibganj", value: "sahibganj" },
+    { label: "Jhumri Telaiya", value: "jhumri_telaiya" },
+    { label: "Ghatshila", value: "ghatshila" },
+    { label: "Daltonganj", value: "daltonganj" },
+    { label: "Khunti", value: "khunti" },
+    { label: "Latehar", value: "latehar" },
+    { label: "Dumka", value: "dumka" },
+    { label: "Gharwa", value: "gharwa" },
+  ]);
 
   const onStateOpen = () => {
     setCityOpen(false);
@@ -81,18 +108,18 @@ const setup = () => {
     setStateOpen(false);
   };
 
-  // const getData = async () => {
-  //   const response = await fetch(
-  //     `${baseURL}/info/get-cities?state=${selectedState}`
-  //   );
-  //   const data = await response.json();
-  //   console.log(data);
-  //   // setCities(data);
-  // };
+  const getData = async () => {
+    const response = await fetch(
+      `${baseURL}/info/get-cities?state=${selectedState}`
+    );
+    const data = await response.json();
+    console.log(data);
+    // setCities(data);
+  };
 
-  // useEffect(() => {
-  //   getData();
-  // }, [selectedState]);
+  useEffect(() => {
+    getData();
+  }, [selectedState]);
 
   return (
     <SafeAreaView

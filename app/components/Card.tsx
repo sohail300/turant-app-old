@@ -125,6 +125,7 @@ const Card = ({
         gap: 8,
       }}
     >
+      <Text onPress={() => router.push("/setup")}>Redirect</Text>
       <Image
         source={{
           uri:

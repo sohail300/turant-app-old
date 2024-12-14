@@ -1,30 +1,37 @@
 {
-  "Login": {
-    "english": "Login",
-    "hindi": "लॉग इन करें"
+  "chooseYourlanguage": {
+    "english": "Choose Your Language",
+    "hindi": "भाषा चुनें",
+    "bengali": "ভাষা নির্বাচন করুন"
   },
-  "welcomeBack": {
-    "english": "Welcome back! please enter your detail",
-    "hindi": "आपका स्वागत है! कृपया अपना विवरण दर्ज करें"
+  "selectYourLocation": {
+    "english": "Select Your Location",
+    "hindi": "अपने स्थान का चयन करें",
+    "bengali": "আপনার অবস্থান নির্বাচন করুন"
   },
-  "identifier": {
-    "english": "Email or Phone ",
-    "hindi": "ईमेल या फ़ोन"
+  "state": {
+    "english": "State",
+    "hindi": "राज्य",
+    "bengali": "রাজ্য"
   },
-  "password": {
-    "english": "Password",
-    "hindi": "पासवर्ड"
+  "city": {
+    "english": "City",
+    "hindi": "शहर",
+    "bengali": "শহর"
   },
-  "forgotPassword": {
-    "english": "Forgot Password?",
-    "hindi": "पासवर्ड भूल गए?"
+  "selectYourState": {
+    "english": "Select Your State",
+    "hindi": "अपने राज्य का चयन करें",
+    "bengali": "আপনার রাজ্য নির্বাচন করুন"
   },
-  "poweredBy": {
-    "english": "Powered By: ",
-    "hindi": "द्वारा संचालित: "
+  "selectYourCity": {
+    "english": "Select Your City",
+    "hindi": "अपने शहर का चयन करें",
+    "bengali": "আপনার শহর নির্বাচন করুন"
   },
-  "company": {
-    "english": "Lok Vishwa Bharti",
-    "hindi": "लोक विश्व भारती"
+  "next": {
+    "english": "Next",
+    "hindi": "अगला",
+    "bengali": "পরবর্তী"
   }
 }
