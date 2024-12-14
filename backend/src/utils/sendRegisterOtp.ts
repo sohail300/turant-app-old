@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import otpGenerator from "otp-generator";
+import { transporter } from "./sendEmail";
 
 const prisma = new PrismaClient();
 
@@ -28,6 +29,15 @@ export const sendRegisterMailOtp = async (email) => {
       expires_at: new Date(Date.now() + 10 * 60 * 1000),
     },
   });
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: `${email}`,
+    subject: 'OTP For registration',
+    text: `OTP : ${otp}`
+  };
+
+  await transporter.sendMail(mailOptions)
 
   // Simulate sending the OTP (Replace this with an email service integration)
   console.log(`Sending email OTP to ${email}: ${otp}`);
