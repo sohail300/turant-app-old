@@ -1,8 +1,16 @@
-import { View, Text, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  Pressable,
+  Image,
+  StyleSheet,
+} from "react-native";
 import React, { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import {
+  FlatList,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -19,11 +27,16 @@ import RenderHtml from "react-native-render-html";
 import DropDownPicker from "react-native-dropdown-picker";
 import uploadPage from "@/locales/uploadPage.json";
 import { useSelector } from "react-redux";
+import { AntDesign } from "@expo/vector-icons";
+import { baseURL } from "@/constants/config";
+import * as ImagePicker from "expo-image-picker";
 
 const UploadVideo = () => {
   const [language, setLanguage] = useState(
     useSelector((state) => state.language.data)
   );
+
+  const token = useSelector((state) => state.token.data);
 
   const [languageOpen, setLanguageOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
@@ -59,6 +72,78 @@ const UploadVideo = () => {
     div: {
       marginBottom: 10,
     },
+  };
+
+  const [selectedVideo, setSelectedVideo] = useState(null);
+
+  const handleVideoPick = async () => {
+    // Request permission to access media library
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert("Permission to access media library is required!");
+      return;
+    }
+
+    // Open the video picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos, // Allow only videos
+      allowsMultipleSelection: false, // Only one video
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const video = result.assets[0]; // Get the selected video
+      setSelectedVideo({
+        uri: video.uri,
+        name: video.fileName || `video-${Date.now()}.mp4`,
+        type: "video/mp4",
+      });
+    }
+  };
+
+  const handleRemoveVideo = () => {
+    setSelectedVideo(null); // Clear the selected video
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedVideo) {
+      alert("Please select a video to upload!");
+      return;
+    }
+
+    const formData = new FormData();
+
+    // Append article data
+    formData.append("title", "Your Article Title");
+    formData.append("content", "Your article description");
+    formData.append("language", language);
+
+    // Append the selected video
+    formData.append("video", selectedVideo);
+
+    try {
+      const response = await fetch(`${baseURL}/upload/video`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData, // Send as multipart form
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("Video uploaded successfully!");
+        setSelectedVideo(null); // Clear selected video
+      } else {
+        console.error(result);
+        alert("Failed to upload video. Please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -146,6 +231,7 @@ const UploadVideo = () => {
                       alignItems: "center",
                       gap: 8,
                     }}
+                    onPress={() => handleVideoPick()}
                   >
                     <Feather
                       name="upload"
@@ -162,6 +248,21 @@ const UploadVideo = () => {
                     </Text>
                   </TouchableOpacity>
                 </View>
+
+                {/* Preview Section */}
+                {selectedVideo && (
+                  <View style={{ alignItems: "center", marginTop: 16 }}>
+                    <Text style={{ fontSize: 16, marginBottom: 8 }}>
+                      {selectedVideo.name}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={handleRemoveVideo}
+                      style={{ marginTop: 8 }}
+                    >
+                      <AntDesign name="closecircle" size={24} color="red" />
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
               <View style={{ marginVertical: 12 }}>
                 <Text style={{ ...styles.details, textAlign: "center" }}>
@@ -330,6 +431,7 @@ const UploadVideo = () => {
                   borderRadius: 8,
                   marginVertical: 24,
                 }}
+                onPress={() => handleSubmit()}
               >
                 <Text
                   style={{ color: Colors.light.white, textAlign: "center" }}
@@ -346,3 +448,25 @@ const UploadVideo = () => {
 };
 
 export default UploadVideo;
+
+const fileStyles = StyleSheet.create({
+  imagePreview: {
+    width: 80,
+    height: 80,
+    marginRight: 8,
+    position: "relative", // Ensure the parent container has position set
+  },
+  image: {
+    width: "100%", // Adjust to fill the container fully
+    height: "100%", // Adjust to fill the container fully
+    borderRadius: 8,
+  },
+  removeIcon: {
+    position: "absolute",
+    top: 0, // Slightly outside the image for better visibility
+    right: 0, // Slightly outside the image for better visibility
+    borderRadius: 12,
+    padding: 4,
+    zIndex: 50,
+  },
+});

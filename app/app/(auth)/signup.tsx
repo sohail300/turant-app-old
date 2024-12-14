@@ -38,7 +38,9 @@ export default function Signup() {
 
   const validate = Yup.object({
     name: Yup.string().required("Name is required"),
-    username: Yup.string().required("Username is required"),
+    username: Yup.string()
+      .min(4, "Username must be at least 4 characters")
+      .max(20, "Username must be at most 20 characters"),
     email: Yup.string().email("Email is invalid").required("Email is required"),
     phone: Yup.string()
       .required("Phone is required")
@@ -115,16 +117,20 @@ export default function Signup() {
                     }),
                   });
 
-                  const data = await response.json(); // Parse the
-                  console.log("data", data);
-                  console.log("token in signup", data.accessToken);
+                  const data = await response.json();
 
-                  dispatch(changeAuth("yes"));
-                  dispatch(changeToken(data.accessToken));
-                  setSubmitting(false);
-                  router.push("/verify");
+                  if (response.ok) {
+                    dispatch(changeAuth("yes"));
+                    dispatch(changeToken(data.accessToken));
+                    setSubmitting(false);
+                    router.push("/verify");
+                  } else {
+                    console.error(data);
+                    alert("Enter the correct details");
+                  }
                 } catch (error) {
                   console.log(error);
+                  alert("An error occurred. Please try again.");
                 }
               }}
             >

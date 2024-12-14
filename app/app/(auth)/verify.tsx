@@ -21,6 +21,8 @@ import { useSelector } from "react-redux";
 import verifyPage from "@/locales/verifyPage.json";
 
 export default function Signup() {
+  const token = useSelector((state) => state.token.data);
+
   const [language, setLanguage] = useState(
     useSelector((state) => state.language.data)
   );
@@ -30,12 +32,21 @@ export default function Signup() {
 
   const handleSubmit = async () => {
     try {
-      const phone = await AsyncStorage.getItem("phone");
+      if (
+        mailOTP === "" ||
+        phoneOTP === "" ||
+        mailOTP.length !== 4 ||
+        phoneOTP.length !== 4
+      ) {
+        alert("Please enter OTP");
+        return;
+      }
 
       const response = await fetch(`${baseURL}/auth/verify-register-otp`, {
-        method: "POST", // Use POST method for the request
+        method: "POST",
         headers: {
-          "Content-Type": "application/json", // Ensure the request is sent as JSON
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           email: mailOTP,
@@ -43,17 +54,16 @@ export default function Signup() {
         }),
       });
 
-      if (!response.ok) {
-        // Handle any errors (non-2xx responses)
-        const errorText = await response.text(); // Read the response body as text
-        console.error("Error:", errorText);
-        throw new Error("Request failed with status " + response.status);
-      }
-
       const data = await response.json();
-      router.push("/");
+      if (response.ok) {
+        router.push("/");
+      } else {
+        console.error(data.message);
+        alert("Enter the correct OTP");
+      }
     } catch (error) {
       console.log(error);
+      alert("An error occurred. Please try again.");
     }
   };
 
@@ -106,6 +116,7 @@ export default function Signup() {
               <OtpInput
                 numberOfDigits={4}
                 focusColor={Colors.light.border}
+                autoFocus={false}
                 focusStickBlinkingDuration={500}
                 onTextChange={(text) => setMailOTP(text)}
                 onFilled={(text) => console.log(`OTP is ${text}`)}
@@ -135,6 +146,7 @@ export default function Signup() {
                 numberOfDigits={4}
                 focusColor={Colors.light.border}
                 focusStickBlinkingDuration={500}
+                autoFocus={false}
                 onTextChange={(text) => setPhoneOTP(text)}
                 onFilled={(text) => console.log(`OTP is ${text}`)}
                 textInputProps={{
@@ -158,7 +170,7 @@ export default function Signup() {
             <View>
               <TouchableOpacity
                 style={styles.buttonContainer}
-                onPress={() => router.push("/")}
+                onPress={() => handleSubmit()}
               >
                 <Text style={styles.button} onPress={() => handleSubmit()}>
                   {verifyPage.verify[language]}

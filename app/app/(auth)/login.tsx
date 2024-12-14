@@ -154,23 +154,20 @@ export default function Signup() {
                       }),
                     });
 
-                    if (!response.ok) {
-                      // Handle any errors (non-2xx responses)
-                      const errorText = await response.text(); // Read the response body as text
-                      console.error("Error:", errorText);
-                      throw new Error(
-                        "Request failed with status " + response.status
-                      );
-                    }
+                    const data = await response.json();
+                    if (response.ok) {
+                      dispatch(changeAuth("yes"));
+                      dispatch(changeToken(data.user.accessToken));
+                      setSubmitting(false);
 
-                    const data = await response.json(); // Parse the
-                    dispatch(changeAuth("yes"));
-                    dispatch(changeToken(data.user.accessToken));
-                    console.log("token in login", data.user.accessToken);
-                    setSubmitting(false);
-                    router.push("/");
+                      router.push("/");
+                    } else {
+                      console.error(data);
+                      alert("Enter the correct credentials");
+                    }
                   } catch (error) {
                     console.log(error);
+                    alert("An error occurred. Please try again.");
                   }
                 }}
               >

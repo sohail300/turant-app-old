@@ -248,7 +248,7 @@ const Card = ({
           objectFit: "contain",
         }}
       />
-      <Text onPress={() => router.push("/login")}>Login</Text>
+      <Text onPress={() => router.push("/forgot-password")}>Login</Text>
       <Link href={"/single-news"}>
         <Heading>{title}</Heading>
       </Link>

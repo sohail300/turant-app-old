@@ -1,4 +1,11 @@
-import { View, Text, Dimensions, Image, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  Image,
+  StyleSheet,
+  Pressable,
+} from "react-native";
 import React, { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
@@ -23,6 +30,7 @@ import { useSelector } from "react-redux";
 import { baseURL } from "@/constants/config";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const UploadImage = () => {
   const [language, setLanguage] = useState(
@@ -117,15 +125,11 @@ const UploadImage = () => {
 
     // Append selected images
     selectedImages.forEach((image, index) => {
-      formData.append(`image_${index}`, {
-        uri: image.uri,
-        name: image.name,
-        type: image.type,
-      });
+      formData.append(`image`, image);
     });
 
     try {
-      const response = await fetch(`${baseURL}/upload/article`, {
+      const response = await fetch(`${baseURL}/upload/image`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -258,17 +262,17 @@ const UploadImage = () => {
                   contentContainerStyle={{ marginTop: 16 }}
                   renderItem={({ item, index }) => (
                     <View style={fileStyles.imagePreview}>
+                      <Pressable
+                        style={fileStyles.removeIcon}
+                        onPress={() => handleRemoveImage(index)}
+                      >
+                        <AntDesign name="closecircle" size={16} color="red" />
+                      </Pressable>
                       <Image
                         source={{ uri: item.uri }}
                         style={fileStyles.image}
                         resizeMode="cover"
                       />
-                      <TouchableOpacity
-                        style={fileStyles.removeIcon}
-                        onPress={() => handleRemoveImage(index)}
-                      >
-                        <Feather name="x" size={16} color="white" />
-                      </TouchableOpacity>
                     </View>
                   )}
                 />
@@ -459,22 +463,22 @@ export default UploadImage;
 
 const fileStyles = StyleSheet.create({
   imagePreview: {
-    position: "relative",
     width: 80,
     height: 80,
     marginRight: 8,
+    position: "relative", // Ensure the parent container has position set
   },
   image: {
-    width: "100%",
-    height: "100%",
+    width: "100%", // Adjust to fill the container fully
+    height: "100%", // Adjust to fill the container fully
     borderRadius: 8,
   },
   removeIcon: {
     position: "absolute",
-    top: 4,
-    right: 4,
-    backgroundColor: "red",
+    top: 0, // Slightly outside the image for better visibility
+    right: 0, // Slightly outside the image for better visibility
     borderRadius: 12,
     padding: 4,
+    zIndex: 50,
   },
 });

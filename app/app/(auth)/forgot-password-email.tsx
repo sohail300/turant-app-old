@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -34,7 +34,7 @@ export default function Signup() {
       .required("OTP is required")
       .length(4, "OTP must be 4 digits"),
     password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
+      .min(8, "Password must be at least 8 characters")
       .required("Password is required"),
     cpassword: Yup.string()
       .oneOf([Yup.ref("password"), null], "Passwords must match")
@@ -72,10 +72,7 @@ export default function Signup() {
 
   return (
     <SafeAreaView style={style.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={style.keyboardView}
-      >
+      <KeyboardAvoidingView behavior="height" style={style.keyboardView}>
         <ScrollView
           style={style.scrollView}
           contentContainerStyle={style.scrollContent}
@@ -118,20 +115,18 @@ export default function Signup() {
                     }
                   );
 
-                  if (!response.ok) {
-                    // Handle any errors (non-2xx responses)
-                    const errorText = await response.text(); // Read the response body as text
-                    console.error("Error:", errorText);
-                    throw new Error(
-                      "Request failed with status " + response.status
-                    );
-                  }
-
                   const data = await response.json(); // Parse the
-                  setSubmitting(false);
-                  router.push("/login");
+                  console.log(data);
+
+                  if (response.ok) {
+                    setSubmitting(false);
+                    router.push("/login");
+                  } else {
+                    alert("Enter the correct OTP");
+                  }
                 } catch (error) {
-                  console.log(error);
+                  console.log("error", error);
+                  alert("An error occurred. Please try again.");
                 }
               }}
             >

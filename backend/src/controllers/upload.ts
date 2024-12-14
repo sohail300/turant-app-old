@@ -6,6 +6,7 @@ import { uploadToS3 } from "../utils/uploadToS3";
 import fs from "fs";
 import { compressVideo } from "../utils/compressVideo";
 import { checkPostLimit } from "../utils/limitReached";
+import { uploadToS3Video } from "../utils/uploadToS3Video";
 
 const prisma = new PrismaClient();
 
@@ -96,6 +97,8 @@ export const uploadArticle = async (req: Request, res: Response) => {
 export const uploadImage = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers;
+    console.log(userId);
+    console.log(req.files);
 
     // the number of imags cant be more than 5
     console.log(req.files.length);
@@ -134,6 +137,9 @@ export const uploadImage = async (req: Request, res: Response) => {
     }
 
     const { language, title, content } = inputData.data;
+    console.log(language);
+    console.log(title);
+    console.log(content);
 
     let imageUrls;
     // Upload the images to S3
@@ -206,6 +212,7 @@ export const uploadImage = async (req: Request, res: Response) => {
 export const uploadVideo = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers;
+    console.log(userId);
 
     // Check if the user is blocked from uploading images
     const blocked = await checkIfBlocked(Number(userId));
@@ -235,6 +242,9 @@ export const uploadVideo = async (req: Request, res: Response) => {
     }
 
     const { language, title, content } = inputData.data;
+    console.log(language);
+    console.log(title);
+    console.log(content);
 
     let s3Url;
     const file = req.file;

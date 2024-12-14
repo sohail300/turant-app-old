@@ -8,11 +8,7 @@ export const signupSchema = z.object({
   username: z
     .string()
     .min(4, "Username must be at least 4 characters")
-    .max(20, "Username must be at most 20 characters")
-    .regex(
-      /^[a-zA-Z0-9_]{4,20}$/,
-      "Username must contain only alphanumeric characters and underscores"
-    ),
+    .max(20, "Username must be at most 20 characters"),
   phone: z.string().regex(/^\d{10}$/, "Phone must be exactly 10 digits"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   app_language: z.enum(appLanguages, {

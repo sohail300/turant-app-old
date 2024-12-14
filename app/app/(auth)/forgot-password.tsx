@@ -51,36 +51,30 @@ export default function Signup() {
       }
 
       const response = await fetch(`${baseURL}/auth/send-forgot-password-otp`, {
-        method: "POST", // Use POST method for the request
+        method: "POST",
         headers: {
           "Content-Type": "application/json", // Ensure the request is sent as JSON
         },
         body: JSON.stringify(bodyObject),
       });
 
-      if (!response.ok) {
-        // Handle any errors (non-2xx responses)
-        const errorText = await response.text(); // Read the response body as text
-        console.error("Error:", errorText);
-        throw new Error("Request failed with status " + response.status);
-      }
-
       const data = await response.json();
       console.log(data);
 
-      if (selectedMedium === "phone") {
-        await AsyncStorage.setItem("phone", JSON.stringify(phone));
-      } else if (selectedMedium === "email") {
-        await AsyncStorage.setItem("email", JSON.stringify(email));
-      }
-
-      if (selectedMedium === "phone") {
-        router.push("/forgot-password-phone");
+      if (response.ok) {
+        if (selectedMedium === "phone") {
+          await AsyncStorage.setItem("phone", JSON.stringify(phone));
+          router.push("/forgot-password-phone");
+        } else if (selectedMedium === "email") {
+          await AsyncStorage.setItem("email", JSON.stringify(email));
+          router.push("/forgot-password-email");
+        }
       } else {
-        router.push("/forgot-password-email");
+        alert("Enter the correct details");
       }
     } catch (error) {
-      console.log(error);
+      alert("An error occurred. Please try again.");
+      console.log("error", error);
     }
   };
 
