@@ -1,7 +1,7 @@
 import { Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { initializeLanguage } from "@/store/LanguageSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
@@ -18,6 +18,8 @@ export default function HomeScreen() {
   initializeLocation(dispatch);
   initializeAuth(dispatch);
   initializeToken(dispatch);
+
+  const token = useSelector((state) => state.token.data);
 
   const [data, setData] = useState([]);
   const [limit, setLimit] = useState(10); // Limit for each request
@@ -49,7 +51,14 @@ export default function HomeScreen() {
 
     try {
       const response = await fetch(
-        `${baseURL}/post/show-posts?limit=${limit}&offset=${offset}`
+        `${baseURL}/post/show-posts?limit=${limit}&offset=${offset}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
