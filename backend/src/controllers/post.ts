@@ -14,126 +14,143 @@ export const showPosts = async (req: Request, res: Response) => {
     const { limit, offset } = req.query;
     console.log(req.query);
 
+    let token;
+
     const authHeader = req.headers.authorization;
 
     if (authHeader) {
-      const token = authHeader.split(" ")[1];
-
-      try {
-        const decoded = verifyAccessToken(token);
-
-        if (decoded) {
-          isLoggedIn = true;
-          userId = decoded.userId.toString();
-        }
-
-        if (isLoggedIn) {
-          // Fetch posts from followed users
-          const followedPosts = await prisma.post.findMany({
-            where: {
-              user: {
-                followers: { some: { follower_id: Number(userId) } }, // Only posts from followed users
-              },
-            },
-            orderBy: { created_at: "desc" },
-            select: {
-              post_id: true,
-              user_id: true,
-              title: true,
-              type: true,
-              thumbnail: true,
-              snippet: true,
-              created_at: true,
-              likes: true, // Directly select the scalar field
-              shares: true, // Directly select the scalar field
-              comments: true, // Directly select the scalar field
-              video_views: true, // Directly select the scalar field
-              user: {
-                select: {
-                  user_id: true,
-                  display_name: true,
-                  image: true,
-                },
-              },
-            },
-            take: Number(limit),
-            skip: Number(offset),
-          });
-
-          // Fetch posts from unfollowed users (excluding followed ones)
-          const unfollowedPosts = await prisma.post.findMany({
-            where: {
-              user: {
-                followers: { none: { follower_id: Number(userId) } }, // Exclude posts from followed users
-              },
-            },
-            orderBy: { created_at: "desc" },
-            select: {
-              post_id: true,
-              user_id: true,
-              title: true,
-              type: true,
-              thumbnail: true,
-              snippet: true,
-              created_at: true,
-              likes: true, // Directly select the scalar field
-              shares: true, // Directly select the scalar field
-              comments: true, // Directly select the scalar field
-              video_views: true, // Directly select the scalar field
-              user: {
-                select: {
-                  user_id: true,
-                  display_name: true,
-                  image: true,
-                },
-              },
-            },
-            take: Number(limit),
-            skip: Number(offset),
-          });
-
-          // Merge and sort posts
-          const posts = [...followedPosts, ...unfollowedPosts].sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
-          );
-
-          res.json(posts);
-          return;
-        } else {
-          // Fetch all posts for non-logged-in users
-          const posts = await prisma.post.findMany({
-            select: {
-              post_id: true,
-              user_id: true,
-              title: true,
-              type: true,
-              thumbnail: true,
-              snippet: true,
-              created_at: true,
-              likes: true, // Directly select the scalar field
-              shares: true, // Directly select the scalar field
-              comments: true, // Directly select the scalar field
-              video_views: true, // Directly select the scalar field
-              user: {
-                select: {
-                  user_id: true,
-                  display_name: true,
-                  image: true,
-                },
-              },
-            },
-            take: Number(limit),
-            skip: Number(offset),
-          });
-
-          res.status(200).json(posts);
-          return;
-        }
-      } catch (error) {
-        console.error("Error verifying token:", error);
+      token = authHeader.split(" ")[1];
+      const decoded = verifyAccessToken(token);
+      if (decoded) {
+        isLoggedIn = true;
+        userId = decoded.userId.toString();
       }
+    }
+
+    try {
+      if (isLoggedIn) {
+        // Fetch posts from followed users
+        const followedPosts = await prisma.post.findMany({
+          where: {
+            user: {
+              followers: { some: { follower_id: Number(userId) } }, // Only posts from followed users
+            },
+          },
+          orderBy: { created_at: "desc" },
+          select: {
+            post_id: true,
+            user_id: true,
+            title: true,
+            type: true,
+            thumbnail: true,
+            snippet: true,
+            created_at: true,
+            likes: true, // Directly select the scalar field
+            shares: true, // Directly select the scalar field
+            comments: true, // Directly select the scalar field
+            video_views: true, // Directly select the scalar field
+            post_likes: {
+              // Check if the post is liked by the user
+              select: {
+                like_id: true,
+              },
+              where: {
+                user_id: Number(userId),
+              },
+            },
+            saved_posts: {
+              // Check if the post is saved by the user
+              select: {
+                saved_post_id: true,
+              },
+              where: {
+                user_id: Number(userId),
+              },
+            },
+            user: {
+              select: {
+                user_id: true,
+                display_name: true,
+                image: true,
+              },
+            },
+          },
+          take: Number(limit),
+          skip: Number(offset),
+        });
+
+        // Fetch posts from unfollowed users (excluding followed ones)
+        const unfollowedPosts = await prisma.post.findMany({
+          where: {
+            user: {
+              followers: { none: { follower_id: Number(userId) } }, // Exclude posts from followed users
+            },
+          },
+          orderBy: { created_at: "desc" },
+          select: {
+            post_id: true,
+            user_id: true,
+            title: true,
+            type: true,
+            thumbnail: true,
+            snippet: true,
+            created_at: true,
+            likes: true, // Directly select the scalar field
+            shares: true, // Directly select the scalar field
+            comments: true, // Directly select the scalar field
+            video_views: true, // Directly select the scalar field
+            user: {
+              select: {
+                user_id: true,
+                display_name: true,
+                image: true,
+              },
+            },
+          },
+          take: Number(limit),
+          skip: Number(offset),
+        });
+
+        // Merge and sort posts
+        const posts = [...followedPosts, ...unfollowedPosts].sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+
+        res.json(posts);
+        return;
+      } else {
+        // Fetch all posts for non-logged-in users
+        const posts = await prisma.post.findMany({
+          select: {
+            post_id: true,
+            user_id: true,
+            title: true,
+            type: true,
+            thumbnail: true,
+            snippet: true,
+            created_at: true,
+            likes: true, // Directly select the scalar field
+            shares: true, // Directly select the scalar field
+            comments: true, // Directly select the scalar field
+            video_views: true, // Directly select the scalar field
+            user: {
+              select: {
+                user_id: true,
+                display_name: true,
+                image: true,
+              },
+            },
+          },
+          take: Number(limit),
+          skip: Number(offset),
+        });
+
+        res.status(200).json(posts);
+        return;
+      }
+    } catch (error) {
+      console.error("Error verifying token:", error);
     }
   } catch (error) {
     console.error("Error fetching posts:", error);

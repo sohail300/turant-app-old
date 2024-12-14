@@ -6,9 +6,27 @@ import { styles } from "@/constants/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { Colors } from "@/constants/Colors";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { useDispatch } from "react-redux";
+import { changeAuth } from "@/store/AuthSlice";
+import { changeToken } from "@/store/TokenSlice";
 
 const LogoutBottomSheet = ({ close }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const dispatch = useDispatch();
+
+  const handleLogout = async () => {
+    try {
+      dispatch(changeAuth("no"));
+      dispatch(changeToken(""));
+      await AsyncStorage.clear();
+      close();
+      router.replace("/");
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
+  };
 
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -75,7 +93,7 @@ const LogoutBottomSheet = ({ close }) => {
                 paddingVertical: 16,
               }}
             >
-              <TouchableOpacity onPress={close}>
+              <TouchableOpacity onPress={() => handleLogout()}>
                 <Text
                   style={{
                     ...styles.Subheading2,

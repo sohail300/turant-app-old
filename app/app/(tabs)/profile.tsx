@@ -25,11 +25,12 @@ import { useSelector } from "react-redux";
 
 const profile = () => {
   const [tab, setTab] = useState(1);
-  const [profileData, setProfileData] = useState({"display_name": "Aditya2", "follower_count": 0, "following_count": 0, "image": "", "user_id": 21, "username": "adityakumar5155"})
-  const token = useSelector((state) => state.token.data); 
+  const [profileData, setProfileData] = useState();
+  const token = useSelector((state) => state.token.data);
+
   const fetchProfile = async () => {
     try {
-      const response = await fetch(`${baseURL}/user/own-profile`,{
+      const response = await fetch(`${baseURL}/user/own-profile`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -37,15 +38,15 @@ const profile = () => {
         },
       });
       const data = await response.json();
-      console.log(data)
+      console.log(data);
       setProfileData(data.user);
     } catch (error) {
       console.error(error);
     }
-  }
-  useEffect(()=>{
-    fetchProfile()
-  },[])
+  };
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const dispatch = useDispatch();
 
@@ -160,10 +161,23 @@ const profile = () => {
                 gap: 8,
               }}
             >
-              <Pressable onPress={() => router.push("/edit-profile")}>
+              <Pressable
+                onPress={() =>
+                  router.push({
+                    pathname: "/edit-profile",
+                    params: {
+                      display_name: profileData?.display_name,
+                      username: profileData?.username,
+                      email: profileData?.email,
+                      phone: profileData?.phone,
+                      image: profileData?.image,
+                    },
+                  })
+                }
+              >
                 <Image
                   source={{
-                    uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+                    uri: profileData?.image,
                   }}
                   style={{
                     width: 72,
@@ -172,7 +186,20 @@ const profile = () => {
                   }}
                 />
               </Pressable>
-              <RedText onPress={() => router.push("/login")}>
+              <RedText
+                onPress={() =>
+                  router.push({
+                    pathname: "/edit-profile",
+                    params: {
+                      display_name: profileData?.display_name,
+                      username: profileData?.username,
+                      email: profileData?.email,
+                      phone: profileData?.phone,
+                      image: profileData?.image,
+                    },
+                  })
+                }
+              >
                 Edit Profile
               </RedText>
             </View>

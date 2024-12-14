@@ -2,7 +2,7 @@ import { Colors } from "@/constants/Colors";
 import { styles } from "@/constants/styles";
 import { View, Text, Image } from "react-native";
 
-const ContactCard = ({ name, number, state, district, block }) => {
+const ContactCard = ({ name, phone, state, district, block, image }) => {
   return (
     <View
       style={{
@@ -20,7 +20,10 @@ const ContactCard = ({ name, number, state, district, block }) => {
     >
       <Image
         source={{
-          uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-WDVXiZSuSUUeURxbBZl4SvMnwmDNdO65LA&s",
+          uri:
+            image && image !== ""
+              ? image
+              : "https://d3i5efosrgchej.cloudfront.net/misc/profile-pic.png",
         }}
         style={{ width: 100, height: 100, borderRadius: 50 }}
       />
@@ -47,7 +50,7 @@ const ContactCard = ({ name, number, state, district, block }) => {
             marginVertical: 2,
           }}
         >
-          {number}
+          {phone}
         </Text>
         <Text style={styles.ContentText2}>State- {state}</Text>
         <Text style={styles.ContentText2}>District- {district}</Text>

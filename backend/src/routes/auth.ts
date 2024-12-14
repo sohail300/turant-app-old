@@ -6,6 +6,8 @@ import {
   verifyForgotPasswordOtp,
   sendRegisterOtp,
   verifyRegisterOtp,
+  verifyChangePhoneOtp,
+  sendChangePhoneOtp,
 } from "../controllers/auth";
 import { authenticate } from "../middlewares/authenticate";
 
@@ -22,5 +24,9 @@ router.post("/verify-forgot-password-otp", verifyForgotPasswordOtp);
 router.get("/send-register-otp", authenticate, sendRegisterOtp);
 
 router.post("/verify-register-otp", authenticate, verifyRegisterOtp);
+
+router.post("/send-change-phone-otp", authenticate, sendChangePhoneOtp);
+
+router.post("/verify-change-phone-otp", authenticate, verifyChangePhoneOtp);
 
 export default router;

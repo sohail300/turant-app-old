@@ -1,49 +1,59 @@
 import { View, Text, Dimensions, StyleSheet } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { FlatList, ScrollView, TextInput } from "react-native-gesture-handler";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { styles } from "@/constants/styles";
 import ContactCard from "@/components/ContactCard";
+import { baseURL } from "@/constants/config";
 
 const Component = () => {
-  const contactList = [
-    {
-      id: 1,
-      name: "Rahul",
-      number: "(+91) 99999 99999",
-      state: "Jharkhand",
-      district: "Ranchi",
-      block: "Jainagar Block Office",
-    },
-    {
-      id: 2,
-      name: "Rahul",
-      number: "(+91) 99999 99999",
-      state: "Jharkhand",
-      district: "Ranchi",
-      block: "Jainagar Block Office",
-    },
-    {
-      id: 3,
-      name: "Rahul",
-      number: "(+91) 99999 99999",
-      state: "Jharkhand",
-      district: "Ranchi",
-      block: "Jainagar Block Office",
-    },
-    {
-      id: 4,
-      name: "Rahul",
-      number: "(+91) 99999 99999",
-      state: "Jharkhand",
-      district: "Ranchi",
-      block: "Jainagar Block Office",
-    },
-  ];
-
+  const [reporters, setReporters] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [filteredReporters, setFilteredReporters] = useState([]);
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  async function getData() {
+    try {
+      const response = await fetch(`${baseURL}/info/contact`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      setReporters(data.reporters);
+      setFilteredReporters(data.reporters); // Initially display all reporters
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  // Debounce logic
+  const debounceSearch = useCallback(() => {
+    const timer = setTimeout(() => {
+      if (searchText.trim() === "") {
+        setFilteredReporters(reporters); // Show all reporters if search text is empty
+      } else {
+        const filtered = reporters.filter((reporter) =>
+          reporter.name.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setFilteredReporters(filtered);
+      }
+    }, 300); // 300ms delay
+
+    return () => clearTimeout(timer);
+  }, [searchText, reporters]);
+
+  // Trigger debounce on text change
+  useEffect(() => {
+    debounceSearch();
+  }, [searchText]);
 
   const handleTextChange = (e) => {
     const newText = e.nativeEvent.text;
@@ -124,15 +134,16 @@ const Component = () => {
           </View>
           <FlatList
             scrollEnabled={false}
-            keyExtractor={(item) => String(item.id)}
-            data={contactList}
+            keyExtractor={(item) => String(item.reporter_id)}
+            data={filteredReporters}
             renderItem={({ item }) => (
               <ContactCard
-                name={"Ramesh Kumar"}
-                number={"(+91) 99999 99999"}
-                state={"Jharkhand"}
-                district={"Ranchi"}
-                block={"Jainagar Block Office"}
+                name={item.name}
+                state={item.state}
+                district={item.district}
+                block={item.block}
+                phone={item.phone}
+                image={item.image}
               />
             )}
           />
@@ -164,7 +175,7 @@ const fileStyles = StyleSheet.create({
   },
   closeIcon: {
     position: "absolute",
-    right: 72,
+    right: 16,
   },
   searchIcon: {
     position: "absolute",

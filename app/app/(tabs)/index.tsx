@@ -99,6 +99,7 @@ export default function HomeScreen() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const posts = await response.json();
+
       if (posts.length === 0) {
         setHasMore(false); // No more data to load
       } else {
