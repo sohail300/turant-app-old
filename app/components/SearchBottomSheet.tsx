@@ -8,126 +8,150 @@ import {
   Image,
 } from "react-native";
 import {
+  FlatList,
   ScrollView,
   TextInput,
   TouchableOpacity,
 } from "react-native-gesture-handler";
 import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import Feather from "@expo/vector-icons/Feather";
 import { styles } from "@/constants/styles";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
-import Feather from "@expo/vector-icons/Feather";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Link, router } from "expo-router";
+import { useDispatch, useSelector } from "react-redux";
+import { changeBottomSheetState } from "@/store/SearchBottomSheetSlice";
+import { baseURL } from "@/constants/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MaterialIcons } from "@expo/vector-icons";
 
-const SearchBottomSheet = ({ isOpen, close }) => {
+const SearchBottomSheet = ({
+  isSingle = false,
+  close,
+}: {
+  isSingle?: boolean;
+  close?: () => void;
+}) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const dispatch = useDispatch();
+
   const [searchText, setSearchText] = useState("");
-  const [isExpanded, setIsExpanded] = useState(false);
-  const snapPoints = isExpanded ? ["80%"] : ["11.5%"];
-
+  const [users, setUsers] = useState([])
+  // const [users, setUsers] = useState([
+  //   {
+  //     id: 1,
+  //     name: "Rahul Kumar",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Amit Singh",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Priya Sharma",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "Vikas Mehta",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  //   {
+  //     id: 5,
+  //     name: "Neha Gupta",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  //   {
+  //     id: 6,
+  //     name: "Neha Gupta",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  //   {
+  //     id: 7,
+  //     name: "Neha Gupta",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  //   {
+  //     id: 8,
+  //     name: "Neha Gupta",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  //   {
+  //     id: 9,
+  //     name: "Neha Gupta",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  //   {
+  //     id: 10,
+  //     name: "Neha Gupta",
+  //     image:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     username: "@rahulkumar001",
+  //   },
+  // ]);
+  const fetchUsers = async () =>{
+    const response = await fetch(`${baseURL}/user/search-users`,{
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        identifier: searchText,
+        limit: 10,
+        offset: 0,
+      })
+    })
+    const usersData = await response.json()
+    console.log("usersData")
+    console.log(usersData)
+    setUsers(usersData.users)
+  }
   useEffect(() => {
-    if (isOpen) {
-      bottomSheetRef.current?.expand();
+    if (searchText.length > 0){
+      fetchUsers()
+    }
+  },[searchText])
+
+  const [limit, setLimit] = useState(10); // Limit for each request
+
+  const token = useSelector((state) => state.token.data); // Token from AsyncStorage
+
+  const handleClose = () => {
+    console.log(isSingle, close);
+    if (isSingle && close) {
+      close();
     } else {
-      bottomSheetRef.current?.close();
+      dispatch(changeBottomSheetState(false));
     }
-  }, [isOpen]);
-
-  const users = [
-    {
-      id: 1,
-      name: "Rahul Kumar",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-    {
-      id: 2,
-      name: "Amit Singh",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-    {
-      id: 3,
-      name: "Priya Sharma",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-    {
-      id: 4,
-      name: "Vikas Mehta",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-    {
-      id: 5,
-      name: "Neha Gupta",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-    {
-      id: 6,
-      name: "Neha Gupta",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-    {
-      id: 7,
-      name: "Neha Gupta",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-    {
-      id: 8,
-      name: "Neha Gupta",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-    {
-      id: 9,
-      name: "Neha Gupta",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-    {
-      id: 10,
-      name: "Neha Gupta",
-      image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      username: "@rahulkumar001",
-    },
-  ];
-
-  const handleTextChange = (e) => {
-    const newText = e.nativeEvent.text;
-    setSearchText(newText);
-    if (newText) {
-      setIsExpanded(newText.length > 0);
-      // bottomSheetRef.current?.snapToIndex(0);
-    }
-  };
-
-  const handleClearText = () => {
-    setSearchText("");
-    setIsExpanded(false);
-    // bottomSheetRef.current?.snapToIndex(0);
   };
 
   return (
     <View style={StyleSheet.absoluteFill}>
       <BottomSheet
         ref={bottomSheetRef}
-        index={isOpen ? 0 : -1}
         overDragResistanceFactor={0}
-        snapPoints={snapPoints}
+        snapPoints={["70%"]}
         handleIndicatorStyle={{ display: "none" }}
         handleStyle={{
           height: 0,
@@ -136,71 +160,77 @@ const SearchBottomSheet = ({ isOpen, close }) => {
         }}
         containerHeight={Dimensions.get("window").height}
         enablePanDownToClose={true}
-        onClose={close}
+        onClose={handleClose}
         style={{
           backgroundColor: "#fff", // Ensure background is set
           shadowColor: "#000", // Shadow color
           shadowOffset: { width: 0, height: -2 }, // Top shadow with a negative height
           shadowOpacity: 0.5, // Opacity of the shadow
           shadowRadius: 4, // Blur radius
-          elevation: 16, // For Android
+          elevation: 12, // For Android
+          borderRadius: 10,
         }}
       >
         <BottomSheetView style={{ height: searchText ? "auto" : 90 }}>
-          {searchText !== "" ? (
-            <View style={fileStyles.expandedContent}>
-              <View style={fileStyles.headerContainer}>
-                <Text style={styles.Subheading2}>People</Text>
-              </View>
-              <ScrollView>
-                {users.map((item) => (
-                  <UserCard
-                    key={item.id}
-                    name={item.name}
-                    image={item.image}
-                    username={item.username}
-                  />
-                ))}
-              </ScrollView>
-            </View>
-          ) : null}
-
+          <View style={fileStyles.headerContainer}>
+            <Pressable onPress={handleClose}>
+              <Feather name="chevron-down" size={24} color="black" />
+            </Pressable>
+            <Text style={styles.Subheading2}>Search</Text>
+            <SafeAreaView />
+          </View>
           <View
-            style={[
-              fileStyles.searchContainer,
-              !searchText && fileStyles.searchContainerAbsolute,
-            ]}
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: 24,
+              gap: 4,
+              position: "",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              backgroundColor: "#fff", // Ensure background is set
+              // shadowColor: "#000", // Shadow color
+              // shadowOffset: { width: 0, height: -2 }, // Top shadow with a negative height
+              // shadowOpacity: 0.25, // Opacity of the shadow
+              // shadowRadius: 4, // Blur radius
+              // elevation: 8, // For Android
+            }}
           >
-            <Feather
-              name="chevron-left"
-              size={24}
-              color={Colors.light.accent}
-              onPress={close}
-            />
             <TextInput
-              style={fileStyles.searchInput}
-              multiline={true}
-              placeholder="Search"
-              placeholderTextColor={"#A8A8A8"}
+              style={{
+                borderColor: Colors.light.border,
+                borderWidth: 1,
+                width: '100%',
+                borderRadius: 4,
+                minHeight: 48,
+                paddingLeft: 16,
+              }}
+              multiline={false}
               value={searchText}
-              onChange={handleTextChange}
-            />
-            {searchText && (
-              <MaterialIcons
-                name="close"
-                size={24}
-                color={Colors.light.details}
-                style={fileStyles.closeIcon}
-                onPress={handleClearText}
+              placeholder="Add your comment"
+              placeholderTextColor={"#A8A8A8"}
+              onChangeText={(text) => setSearchText(text)}
+            ></TextInput>
+          </View>
+          <FlatList
+            data={users}
+            keyExtractor={(item) => item.created_at}
+            renderItem={({ item }) => (
+              <UserCard
+                key={item.username}
+                username={item.username}
+                name={item.display_name}
+                image={item.image}
               />
             )}
-            <Feather
-              name="search"
-              size={24}
-              color={Colors.light.accent}
-              style={fileStyles.searchIcon}
-            />
-          </View>
+            style={{
+              flexGrow: 0,
+              maxHeight: Dimensions.get("window").height * 0.54, // Constrain height
+            }}
+          />
         </BottomSheetView>
       </BottomSheet>
     </View>
