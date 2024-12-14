@@ -11,8 +11,6 @@ RUN apk add openssl
 
 COPY . .
 
-RUN ls
-
 RUN npm run build
 
 #Production stage
@@ -24,8 +22,6 @@ COPY package*.json .
 
 RUN npm ci --only=production
 
-COPY --from=build /app/dist ./dist
+COPY --from=build /app/dist .
 
-RUN ls
-
-CMD ["node", "./dist/index.js"]
+CMD ["node", "dist/index.js"]
