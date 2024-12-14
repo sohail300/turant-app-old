@@ -40,7 +40,7 @@ export const searchAds = async (req: Request, res: Response) => {
 
     const currentDate = new Date();
     // Define filters with correct Prisma type
-    const filters: Prisma.AdWhereInput = {
+    const filters: any = {
       company_name: {
         contains: identifier,
         mode: Prisma.QueryMode.insensitive, // Use Prisma.QueryMode for the `mode`
