@@ -9,7 +9,7 @@ RUN npm install
 
 RUN apk add openssl
 
-COPY ./src .
+COPY . .
 
 RUN npm run build
 
@@ -24,4 +24,4 @@ RUN npm ci --only=production
 
 COPY --from=build /app/dist ./dist
 
-CMD ["node", "./dist/index.js"]
+CMD ["node", "dist/src/index.js"]
