@@ -153,7 +153,7 @@ export const login = async (req: Request, res: Response) => {
       where: {
         OR: [
           { email: identifier }, // Check by email
-          { username: identifier }, // Check by phone
+          { phone: identifier }, // Check by phone
         ],
       },
     });
@@ -423,6 +423,7 @@ export const verifyRegisterOtp = async (req: Request, res: Response) => {
     }
 
     const { email, phone } = inputData.data;
+    console.log(email, phone);
 
     // Validate Email OTP
     const emailOtpRecord = await prisma.otp.findFirst({
@@ -460,7 +461,6 @@ export const verifyRegisterOtp = async (req: Request, res: Response) => {
       return;
     }
 
-    // Mark user as verified (if both OTPs are valid)
     const userId = emailOtpRecord.user_id; // Both OTPs should belong to the same user
     const phoneUserId = phoneOtpRecord.user_id;
 

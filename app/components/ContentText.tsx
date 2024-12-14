@@ -6,11 +6,25 @@ import { useFontLoaded } from "@/context/FontContext";
 import RedText from "./RedText";
 import { useSelector } from "react-redux";
 import { router } from "expo-router";
+import card from "@/locales/card.json";
 
 const ContentText = ({
   children,
   style,
   full,
+  title,
+  post_id,
+  type,
+  thumbnail,
+  snippet,
+  created_at,
+  author,
+  authorImage,
+  authorId,
+  currentLikes,
+  currentComments,
+  currentShares,
+  currentViews,
   ...props
 }: {
   children: React.ReactNode;
@@ -34,8 +48,29 @@ const ContentText = ({
           >
             {children}
           </Text>
-          <RedText onPress={() => router.push("/single-news")}>
-            {language === "english" ? "Read More" : "और पढ़ें"}
+          <RedText
+            onPress={() =>
+              router.push({
+                pathname: "/single-news",
+                params: {
+                  title,
+                  post_id,
+                  type,
+                  thumbnail,
+                  snippet,
+                  created_at,
+                  author,
+                  authorImage,
+                  authorId,
+                  currentLikes,
+                  currentComments,
+                  currentShares,
+                  currentViews,
+                },
+              })
+            }
+          >
+            {card.readMore[language]}
           </RedText>
         </>
       )}

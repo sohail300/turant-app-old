@@ -111,7 +111,9 @@ const LoginPage = () => {
                   {...register("email")}
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                  <p className="text-red-500 text-sm">
+                    {errors.email.message as string}
+                  </p>
                 )}
               </div>
 
@@ -132,7 +134,7 @@ const LoginPage = () => {
                 />
                 {errors.password && (
                   <p className="text-red-500 text-sm">
-                    {errors.password.message}
+                    {errors.password.message as string}
                   </p>
                 )}
               </div>

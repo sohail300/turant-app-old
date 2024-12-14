@@ -1,7 +1,7 @@
 import { Dimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { initializeLanguage } from "@/store/LanguageSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
@@ -19,25 +19,31 @@ export default function HomeScreen() {
   initializeAuth(dispatch);
   initializeToken(dispatch);
 
+  const token = useSelector((state) => state.token.data);
+
   const [data, setData] = useState([]);
   const [limit, setLimit] = useState(10); // Limit for each request
   const [offset, setOffset] = useState(0); // Offset for pagination
   const [loading, setLoading] = useState(false); // To avoid duplicate requests
   const [hasMore, setHasMore] = useState(true); // To stop fetching if no more data
 
-  useEffect(() => {
-    async function getIsAppSetup() {
-      try {
-        const value = await AsyncStorage.getItem("isAppSetup");
-        if (value !== "true") {
-          router.replace("/setup");
-        }
-      } catch (error) {
-        console.error("Error getting isAppSetup:", error);
-      }
-    }
-    getIsAppSetup();
-  }, []);
+  // useEffect(() => {
+  //   async function initializeApp() {
+  //     try {
+  //       let value = await AsyncStorage.getItem("isAppSetup");
+  //       if (value === null) {
+  //         await AsyncStorage.setItem("isAppSetup", "false");
+  //         value = "false";
+  //       }
+  //       if (value !== "true") {
+  //         router.replace("/setup");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error getting isAppSetup:", error.message || error);
+  //     }
+  //   }
+  //   initializeApp();
+  // }, []);
 
   async function getData(initialLoad = false) {
     if (loading || !hasMore) return; // Avoid fetching if already loading or no more data
@@ -45,7 +51,14 @@ export default function HomeScreen() {
 
     try {
       const response = await fetch(
-        `${baseURL}/post/show-posts?limit=${limit}&offset=${offset}`
+        `${baseURL}/post/show-posts?limit=${limit}&offset=${offset}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);

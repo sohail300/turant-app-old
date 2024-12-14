@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { LayoutDashboard, LogOut, Menu, X } from "lucide-react";
@@ -15,7 +15,11 @@ import { toast } from "react-toastify";
 
 const Navbar = ({ isOpen, setIsOpen }) => {
   const router = useRouter();
-  const pathname = window.location.pathname;
+
+  const [pathname, setPathname] = useState("");
+  if (typeof window !== "undefined") {
+    setPathname(window.location.pathname);
+  }
 
   // Create a single toggle handler to manage menu state
   const handleMenuToggle = () => {

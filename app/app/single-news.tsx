@@ -1,40 +1,105 @@
 import { View, Text, Dimensions } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { Image, Share } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, router } from "expo-router";
 import Heading from "@/components/Heading";
 import { TouchableOpacity } from "@gorhom/bottom-sheet";
 import Subheading from "@/components/Subheading";
 import RedText from "@/components/RedText";
-import { Feather, FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
+import {
+  Feather,
+  FontAwesome,
+  FontAwesome5,
+  FontAwesome6,
+  Ionicons,
+} from "@expo/vector-icons";
 import ContentText from "@/components/ContentText";
 import Details from "@/components/Details";
 import IconText from "@/components/IconText";
 import DisclaimerText from "@/components/DisclaimerText";
 import CommentBottomSheet from "@/components/CommentBottomSheet";
 import { ScrollView } from "react-native-gesture-handler";
+import card from "@/locales/card.json";
+import { useLocalSearchParams } from "expo-router";
+import { formatDate } from "@/utils/formatDate";
+import {
+  handleCommentPress,
+  handleFollow,
+  handleLike,
+  handleOtherProfile,
+  handleSave,
+} from "@/utils/postActions";
+import { baseURL } from "@/constants/config";
 
 const SingleNews = () => {
   const [showCommentSheet, setShowCommentSheet] = useState(false);
+  const dispatch = useDispatch();
 
-  const item = {
-    id: 2,
-    heading:
-      "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-    imageUrl:
-      "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-    author: "Rahul Kumar",
-    authorImage:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-    content:
-      "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books. A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books. A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books. A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books.",
-    details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-  };
+  const {
+    title,
+    post_id,
+    type,
+    snippet,
+    created_at,
+    author,
+    authorImage,
+    thumbnail,
+    currentLikes,
+    currentComments,
+    currentShares,
+    currentViews,
+    authorId,
+    setCurrentLikes,
+    setCurrentComments,
+  } = useLocalSearchParams();
 
   const language = useSelector((state) => state.language.data);
+  const isUserLoggedIn = useSelector((state) => state.auth.data);
+  const token = useSelector((state) => state.token.data);
+
+  const [content, setContent] = useState("");
+
+  const [status, setStatus] = useState({
+    hasLiked: false,
+    hasSaved: false,
+    isFollowing: false,
+  });
+
+  async function getData() {
+    try {
+      if (type === "video") {
+        const response = await fetch(
+          `${baseURL}/post/single-video/${post_id}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await response.json();
+        setContent(data.post.content);
+      } else {
+        const response = await fetch(
+          `${baseURL}/post/single-image/${post_id}`,
+          {
+            method: "GET",
+          }
+        );
+        const data = await response.json();
+        setContent(data.post.content);
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
+
+  useEffect(() => {
+    getData();
+  }, [isUserLoggedIn]);
 
   return (
     <>
@@ -62,17 +127,28 @@ const SingleNews = () => {
               gap: 8,
             }}
           >
-            <Image
-              source={{
-                uri: item.imageUrl,
-              }}
-              width={"100%"}
-              height={200}
-              borderRadius={8}
-            />
-            <Link href={"/single-news"}>
-              <Heading>{item.heading}</Heading>
-            </Link>
+            {type === "image" ? (
+              <Image
+                source={{
+                  uri: "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
+                }}
+                width={"100%"}
+                height={200}
+                borderRadius={8}
+              />
+            ) : type === "video" ? (
+              <Image
+                source={{
+                  uri: "https://d3i5efosrgchej.cloudfront.net/misc/video.jpg",
+                }}
+                width={"100%"}
+                height={200}
+                borderRadius={8}
+              />
+            ) : (
+              ""
+            )}
+            <Heading>{title}</Heading>
             <View
               style={{
                 display: "flex",
@@ -98,27 +174,53 @@ const SingleNews = () => {
                     gap: 8,
                     alignItems: "center",
                   }}
-                  onPress={() => router.push("/other-profile")}
+                  onPress={() =>
+                    handleOtherProfile({
+                      isUserLoggedIn,
+                    })
+                  }
                 >
                   <Image
                     source={{
-                      uri: item.authorImage,
+                      uri:
+                        authorImage !== ""
+                          ? authorImage
+                          : "https://d3i5efosrgchej.cloudfront.net/misc/profile-pic.png",
                     }}
-                    height={40}
-                    width={40}
-                    borderRadius={50}
+                    style={{
+                      height: 40,
+                      width: 40,
+                      borderRadius: 50,
+                      objectFit: "cover",
+                    }}
                   />
-                  <Subheading>{item.author}</Subheading>
+                  <Subheading>{author}</Subheading>
                 </TouchableOpacity>
                 <Text>•</Text>
-                <RedText> {language === "english" ? "Follow" : "फॉलो"}</RedText>
+                <RedText
+                  onPress={() =>
+                    handleFollow({ post_id, isUserLoggedIn, token, setStatus })
+                  }
+                >
+                  {status.isFollowing
+                    ? card.unfollow[language]
+                    : card.follow[language]}
+                </RedText>
               </View>
-              <TouchableOpacity>
-                <Feather name="bookmark" size={24} color="black" />
+              <TouchableOpacity
+                onPress={() =>
+                  handleSave({ post_id, isUserLoggedIn, token, setStatus })
+                }
+              >
+                <Ionicons
+                  name={status.hasSaved ? "bookmark-outline" : "bookmark"} // 'heart' is filled, 'heart-o' is outlined
+                  size={24}
+                  color={status.hasLiked ? "black" : "black"}
+                />
               </TouchableOpacity>
             </View>
-            <ContentText full={true}>{item.content}</ContentText>
-            <Details>{item.details}</Details>
+            <ContentText full={true}>{snippet}</ContentText>
+            <Details>{formatDate(created_at!)}</Details>
             <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
               <TouchableOpacity
                 style={{
@@ -128,10 +230,22 @@ const SingleNews = () => {
                   justifyContent: "center",
                   alignItems: "center",
                 }}
-                onPress={() => router.push("/login")}
+                onPress={() =>
+                  handleLike({
+                    post_id,
+                    isUserLoggedIn,
+                    token,
+                    setStatus,
+                    setCurrentLikes,
+                  })
+                }
               >
-                <FontAwesome5 name="heart" size={24} color="black" />
-                <IconText>23.9k</IconText>
+                <FontAwesome
+                  name={status.hasLiked ? "heart" : "heart-o"} // 'heart' is filled, 'heart-o' is outlined
+                  size={24}
+                  color={status.hasLiked ? "red" : "black"} // Set color to red when liked
+                />
+                <IconText>{currentLikes}</IconText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
@@ -142,11 +256,19 @@ const SingleNews = () => {
                   alignItems: "center",
                 }}
                 onPress={() => {
-                  setShowCommentSheet(true);
+                  {
+                    handleCommentPress({
+                      post_id,
+                      isUserLoggedIn,
+                      setShowCommentSheet,
+                      full: true,
+                      dispatch,
+                    });
+                  }
                 }}
               >
                 <FontAwesome5 name="comment" size={24} color="black" />
-                <IconText>23.9k</IconText>
+                <IconText>{currentComments}</IconText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
@@ -158,7 +280,7 @@ const SingleNews = () => {
                 }}
               >
                 <Feather name="eye" size={26} color="black" />
-                <IconText>60k</IconText>
+                <IconText>{currentViews}</IconText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{
@@ -177,7 +299,7 @@ const SingleNews = () => {
                 }
               >
                 <FontAwesome6 name="share-square" size={22} color="black" />
-                <IconText>214</IconText>
+                <IconText>{currentShares}</IconText>
               </TouchableOpacity>
             </View>
             <View
@@ -188,12 +310,7 @@ const SingleNews = () => {
                 marginTop: 8,
               }}
             >
-              <DisclaimerText>
-                Disclaimer: This content/video has been published directly by
-                the user on TURANT, an intermediary platform. TURANT has neither
-                reviewed nor endorsed the content and holds no prior knowledge
-                of its details.
-              </DisclaimerText>
+              <DisclaimerText>{card.disclaimer[language]}</DisclaimerText>
             </View>
           </View>
         </ScrollView>

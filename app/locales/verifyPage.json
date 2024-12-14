@@ -1,0 +1,26 @@
+{
+  "verifyMailPhone": {
+    "english": "Verify Your Mail And Phone",
+    "hindi": "अपना मेल और फ़ोन सत्यापित करें"
+  },
+  "sentOTP": {
+    "english": "We've sent a 4-digit code to",
+    "hindi": "पर 4 अंकों का कोड भेजा है"
+  },
+  "mailOTP": {
+    "english": "Mail OTP",
+    "hindi": "मेल ओटीपी"
+  },
+  "phoneOTP": {
+    "english": "Phone OTP",
+    "hindi": "फ़ोन ओटीपी"
+  },
+  "resend": {
+    "english": "Resend Now",
+    "hindi": "अभी दोबारा भेजें"
+  },
+  "verify": {
+    "english": "Verify",
+    "hindi": "सत्यापित करें"
+  }
+}

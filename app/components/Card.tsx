@@ -30,6 +30,16 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { baseURL } from "@/constants/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import card from "@/locales/card.json";
+import { useNavigation } from "expo-router";
+import {
+  handleCommentPress,
+  handleFollow,
+  handleLike,
+  handleOtherProfile,
+  handleSave,
+  handleShare,
+} from "@/utils/postActions";
 
 const Card = ({
   post_id,
@@ -65,6 +75,7 @@ const Card = ({
   authorId?: number;
 }) => {
   const language = useSelector((state) => state.language.data);
+  const token = useSelector((state) => state.token.data);
   const isUserLoggedIn = useSelector((state) => state.auth.data);
   const dispatch = useDispatch();
 
@@ -78,10 +89,6 @@ const Card = ({
     hasSaved: false,
     isFollowing: false,
   });
-
-  const token = useSelector((state) => state.token.data); // Token from AsyncStorage
-  const auth = useSelector((state) => state.auth.data); // Auth from AsyncStorage
-  // console.log("token", token);
 
   async function getData() {
     try {
@@ -105,120 +112,6 @@ const Card = ({
   useEffect(() => {
     getData();
   }, []);
-
-  const handleLike = async () => {
-    try {
-      if (isUserLoggedIn === "no") {
-        router.push("/login");
-      }
-
-      const response = await fetch(`${baseURL}/post/like/${post_id}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-
-      if (status.hasLiked) {
-        setCurrentLikes(currentLikes! - 1);
-      } else {
-        setCurrentLikes(currentLikes! + 1);
-      }
-      setStatus((prevStatus) => ({
-        ...prevStatus,
-        hasLiked: !prevStatus.hasLiked,
-      }));
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-
-  const handleSave = async () => {
-    try {
-      if (isUserLoggedIn === "no") {
-        router.push("/login");
-      }
-      const response = await fetch(`${baseURL}/post/save/${post_id}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      console.log("data", data);
-      setStatus((prevStatus) => ({
-        ...prevStatus,
-        hasSaved: !prevStatus.hasSaved,
-      }));
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-
-  const handleShare = async () => {
-    try {
-      const response = await fetch(`${baseURL}/post/share/${post_id}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      setCurrentShares(currentShares! + 1);
-
-      await Share.share({
-        message:
-          "Checkout TurantNews, I think you will like it. https://play.google.com/",
-        url: "Checkout TurantNews, I think you will like it. https://play.google.com/",
-      });
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-
-  const handleFollow = async () => {
-    try {
-      if (isUserLoggedIn === "no") {
-        router.push("/login");
-      }
-      const response = await fetch(`${baseURL}/user/follow/${authorId}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      console.log("data", data);
-
-      setStatus((prevStatus) => ({
-        ...prevStatus,
-        isFollowing: !prevStatus.isFollowing,
-      }));
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-
-  const handleCommentPress = () => {
-    if (isUserLoggedIn === "no") {
-      router.push("/login");
-    }
-    AsyncStorage.setItem("postId", post_id.toString());
-    full && setShowCommentSheet
-      ? setShowCommentSheet(true)
-      : dispatch(changeBottomSheetState(true));
-  };
-
-  const handleOtherProfile = () => {
-    if (isUserLoggedIn === "no") {
-      router.push("/login");
-    } else {
-      AsyncStorage.setItem("authorId", authorId!.toString());
-      router.push("/other-profile");
-    }
-  };
 
   return (
     <SafeAreaView
@@ -246,10 +139,31 @@ const Card = ({
           objectFit: "contain",
         }}
       />
-      <Text onPress={() => router.push("/login")}>Login</Text>
-      <Link href={"/single-news"}>
-        <Heading>{title}</Heading>
-      </Link>
+      {/* <Text onPress={() => router.push("/login")}>Login</Text> */}
+      <Heading
+        onPress={() =>
+          router.push({
+            pathname: "/single-news",
+            params: {
+              title,
+              post_id,
+              type,
+              thumbnail,
+              snippet,
+              created_at,
+              author,
+              authorImage,
+              authorId,
+              currentLikes,
+              currentComments,
+              currentShares,
+              currentViews,
+            },
+          })
+        }
+      >
+        {title}
+      </Heading>
       <View
         style={{
           display: "flex",
@@ -275,7 +189,9 @@ const Card = ({
               gap: 8,
               alignItems: "center",
             }}
-            onPress={() => handleOtherProfile()}
+            onPress={() =>
+              handleOtherProfile({ post_id, isUserLoggedIn, token, setStatus })
+            }
           >
             <Image
               source={{
@@ -294,11 +210,21 @@ const Card = ({
             <Subheading>{author}</Subheading>
           </TouchableOpacity>
           <Text>•</Text>
-          <RedText onPress={() => handleFollow()}>
-            {status.isFollowing ? "Unfollow" : "Follow"}
+          <RedText
+            onPress={() =>
+              handleFollow({ post_id, isUserLoggedIn, token, setStatus })
+            }
+          >
+            {status.isFollowing
+              ? card.unfollow[language]
+              : card.follow[language]}
           </RedText>
         </View>
-        <TouchableOpacity onPress={() => handleSave()}>
+        <TouchableOpacity
+          onPress={() =>
+            handleSave({ post_id, isUserLoggedIn, token, setStatus })
+          }
+        >
           <Ionicons
             name={status.hasSaved ? "bookmark-outline" : "bookmark"} // 'heart' is filled, 'heart-o' is outlined
             size={24}
@@ -306,8 +232,25 @@ const Card = ({
           />
         </TouchableOpacity>
       </View>
-      <ContentText full={false}>{snippet}</ContentText>
-      {/* <Details>{formatDate(created_at!)}</Details> */}
+      <ContentText
+        full={false}
+        title={title}
+        post_id={post_id}
+        type={type}
+        thumbnail={thumbnail}
+        snippet={snippet}
+        created_at={created_at}
+        author={author}
+        authorImage={authorImage}
+        authorId={authorId}
+        currentLikes={currentLikes}
+        currentComments={currentComments}
+        currentShares={currentShares}
+        currentViews={currentViews}
+      >
+        {snippet}
+      </ContentText>
+      <Details>{formatDate(created_at!)}</Details>
       <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
         <TouchableOpacity
           style={{
@@ -317,7 +260,15 @@ const Card = ({
             justifyContent: "center",
             alignItems: "center",
           }}
-          onPress={() => handleLike()}
+          onPress={() =>
+            handleLike({
+              post_id,
+              isUserLoggedIn,
+              token,
+              setStatus,
+              setCurrentLikes,
+            })
+          }
         >
           <FontAwesome
             name={status.hasLiked ? "heart" : "heart-o"} // 'heart' is filled, 'heart-o' is outlined
@@ -336,7 +287,13 @@ const Card = ({
           }}
           onPress={() => {
             {
-              handleCommentPress();
+              handleCommentPress({
+                post_id,
+                isUserLoggedIn,
+                setShowCommentSheet,
+                full,
+                dispatch,
+              });
             }
           }}
         >
@@ -367,7 +324,15 @@ const Card = ({
             justifyContent: "center",
             alignItems: "center",
           }}
-          onPress={() => handleShare()}
+          onPress={() =>
+            handleShare({
+              post_id,
+              isUserLoggedIn,
+              token,
+              setStatus,
+              setCurrentShares,
+            })
+          }
         >
           <FontAwesome6 name="share-square" size={22} color="black" />
           <IconText>{currentShares}</IconText>
@@ -382,12 +347,7 @@ const Card = ({
             marginTop: 8,
           }}
         >
-          <DisclaimerText>
-            Disclaimer: This content/video has been published directly by the
-            user on TURANT, an intermediary platform. TURANT has neither
-            reviewed nor endorsed the content and holds no prior knowledge of
-            its details.
-          </DisclaimerText>
+          <DisclaimerText>{card.disclaimer[language]}</DisclaimerText>
         </View>
       )}
     </SafeAreaView>

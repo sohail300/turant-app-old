@@ -7,9 +7,11 @@ COPY package*.json .
 
 RUN npm install
 
+RUN apk add openssl
+
 COPY . .
 
-RUN npm run compile
+RUN npm run build
 
 #Production stage
 FROM node:20.18-alpine AS production
@@ -20,6 +22,6 @@ COPY package*.json .
 
 RUN npm ci --only=production
 
-COPY --from=build /app/dist ./dist
+COPY --from=build /app .
 
 CMD ["node", "dist/index.js"]

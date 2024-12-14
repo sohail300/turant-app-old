@@ -131,7 +131,7 @@ export default function Page() {
         console.log(typeof value);
         data.append(key, format(value, "yyyy-MM-dd"));
       } else {
-        data.append(key, value);
+        data.append(key, value as string);
       }
     });
     data.append("file", file);
@@ -176,7 +176,7 @@ export default function Page() {
     isLoggedIn();
   }, []);
 
-  if (isLoading) return <Loader />;
+  // if (isLoading) return <Loader />;
 
   return (
     <div className="bg-white">
@@ -199,7 +199,9 @@ export default function Page() {
                 {...register("name")}
               />
               {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.name.message as string}
+                </p>
               )}
             </div>
 
@@ -232,7 +234,7 @@ export default function Page() {
               />
               {errors.media_type && (
                 <p className="text-red-500 text-sm">
-                  {errors.media_type.message}
+                  {errors.media_type.message as string}
                 </p>
               )}
             </div>
@@ -306,7 +308,7 @@ export default function Page() {
               />
               {errors.target_url && (
                 <p className="text-red-500 text-sm">
-                  {errors.target_url.message}
+                  {errors.target_url.message as string}
                 </p>
               )}
             </div>
@@ -356,7 +358,7 @@ export default function Page() {
               />
               {errors.start_date && (
                 <p className="text-red-500 text-sm">
-                  {errors.start_date.message}
+                  {errors.start_date.message as string}
                 </p>
               )}
             </div>
@@ -399,7 +401,7 @@ export default function Page() {
               />
               {errors.end_date && (
                 <p className="text-red-500 text-sm">
-                  {errors.end_date.message}
+                  {errors.end_date.message as string}
                 </p>
               )}
             </div>
@@ -420,7 +422,7 @@ export default function Page() {
               </div>
               {errors.duration && (
                 <p className="text-red-500 text-sm">
-                  {errors.duration.message}
+                  {errors.duration.message as string}
                 </p>
               )}
             </div>
@@ -458,7 +460,9 @@ export default function Page() {
                 )}
               />
               {errors.state && (
-                <p className="text-red-500 text-sm">{errors.state.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.state.message as string}
+                </p>
               )}
             </div>
             <div className="space-y-2">
@@ -491,7 +495,9 @@ export default function Page() {
                 )}
               />
               {errors.city && (
-                <p className="text-red-500 text-sm">{errors.city.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.city.message as string}
+                </p>
               )}
             </div>
             <div className="space-y-2">
@@ -510,7 +516,9 @@ export default function Page() {
                 </div>
               </div>
               {errors.cost && (
-                <p className="text-red-500 text-sm">{errors.cost.message}</p>
+                <p className="text-red-500 text-sm">
+                  {errors.cost.message as string}
+                </p>
               )}
             </div>
           </div>

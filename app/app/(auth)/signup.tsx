@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { changeAuth } from "@/store/AuthSlice";
 import { baseURL } from "@/constants/config";
 import { changeToken } from "@/store/TokenSlice";
+import signupPage from "@/locales/signupPage.json";
 
 export default function Signup() {
   const [language, setLanguage] = useState(
@@ -37,7 +38,9 @@ export default function Signup() {
 
   const validate = Yup.object({
     name: Yup.string().required("Name is required"),
-    username: Yup.string().required("Username is required"),
+    username: Yup.string()
+      .min(4, "Username must be at least 4 characters")
+      .max(20, "Username must be at most 20 characters"),
     email: Yup.string().email("Email is invalid").required("Email is required"),
     phone: Yup.string()
       .required("Phone is required")
@@ -81,7 +84,7 @@ export default function Signup() {
                 textAlign: "center",
               }}
             >
-              Create Your Account
+              {signupPage.createYourAccount[language]}
             </Text>
 
             <Formik
@@ -116,16 +119,20 @@ export default function Signup() {
                     }),
                   });
 
-                  const data = await response.json(); // Parse the
-                  console.log("data", data);
-                  console.log("token in signup", data.accessToken);
+                  const data = await response.json();
 
-                  dispatch(changeAuth("yes"));
-                  dispatch(changeToken(data.accessToken));
-                  setSubmitting(false);
-                  router.push("/verify");
+                  if (response.ok) {
+                    dispatch(changeAuth("yes"));
+                    dispatch(changeToken(data.accessToken));
+                    setSubmitting(false);
+                    router.push("/verify");
+                  } else {
+                    console.error(data);
+                    alert("Enter the correct details");
+                  }
                 } catch (error) {
                   console.log(error);
+                  alert("An error occurred. Please try again.");
                 }
               }}
             >
@@ -141,13 +148,15 @@ export default function Signup() {
               }) => (
                 <View style={{ gap: 16 }}>
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>Full Name</Text>
+                    <Text style={styles.Subheading2}>
+                      {signupPage.fullName[language]}
+                    </Text>
                     <TextInput
                       value={values.name}
                       keyboardType="default"
                       onChangeText={handleChange("name")}
                       onBlur={handleBlur("name")}
-                      placeholder="Enter your name"
+                      placeholder={signupPage.enterFullName[language]}
                       placeholderTextColor={Colors.light.details}
                       style={[
                         styles.ContentText,
@@ -166,13 +175,15 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>Username</Text>
+                    <Text style={styles.Subheading2}>
+                      {signupPage.username[language]}
+                    </Text>
                     <TextInput
                       value={values.username}
                       keyboardType="default"
                       onChangeText={handleChange("username")}
                       onBlur={handleBlur("username")}
-                      placeholder="Enter your username"
+                      placeholder={signupPage.enterUsername[language]}
                       placeholderTextColor={Colors.light.details}
                       style={[
                         styles.ContentText,
@@ -193,13 +204,15 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>Email</Text>
+                    <Text style={styles.Subheading2}>
+                      {signupPage.email[language]}
+                    </Text>
                     <TextInput
                       value={values.email}
                       keyboardType="default"
                       onChangeText={handleChange("email")}
                       onBlur={handleBlur("email")}
-                      placeholder="Enter your email"
+                      placeholder={signupPage.enterEmail[language]}
                       placeholderTextColor={Colors.light.details}
                       style={[
                         styles.ContentText,
@@ -218,7 +231,9 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>Phone</Text>
+                    <Text style={styles.Subheading2}>
+                      {signupPage.phone[language]}
+                    </Text>
                     <View
                       style={{
                         flexDirection: "row",
@@ -251,7 +266,7 @@ export default function Signup() {
                         keyboardType="numeric"
                         onChangeText={handleChange("phone")}
                         onBlur={handleBlur("phone")}
-                        placeholder="Enter your phone"
+                        placeholder={signupPage.enterPhone[language]}
                         placeholderTextColor={Colors.light.details}
                         style={[
                           styles.ContentText,
@@ -274,13 +289,15 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>Password</Text>
+                    <Text style={styles.Subheading2}>
+                      {signupPage.password[language]}
+                    </Text>
                     <TextInput
                       value={values.password}
                       keyboardType="default"
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
-                      placeholder="Enter your password"
+                      placeholder={signupPage.enterPassword[language]}
                       placeholderTextColor={Colors.light.details}
                       secureTextEntry={true}
                       style={[
@@ -302,13 +319,15 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>Confirm Password</Text>
+                    <Text style={styles.Subheading2}>
+                      {signupPage.confirmPassword[language]}
+                    </Text>
                     <TextInput
                       value={values.cpassword}
                       keyboardType="default"
                       onChangeText={handleChange("cpassword")}
                       onBlur={handleBlur("cpassword")}
-                      placeholder="Enter your password"
+                      placeholder={signupPage.enterCPassword[language]}
                       placeholderTextColor={Colors.light.details}
                       secureTextEntry={true}
                       style={[
@@ -337,7 +356,7 @@ export default function Signup() {
                         setFieldValue("agreement", !values.agreement);
                         console.log(values.agreement);
                       }}
-                      rightText="I agree to follow the Terms And Conditions and avoid uploading adult content."
+                      rightText={signupPage.agreement[language]}
                     />
                     {touched.agreement && errors.agreement && (
                       <ErrorText>{errors.agreement}</ErrorText>
@@ -352,7 +371,7 @@ export default function Signup() {
                       fontSize: 14,
                     }}
                   >
-                    Read Terms And Conditions
+                    {signupPage.termsAndConditions[language]}
                   </RedText>
 
                   <TouchableOpacity
@@ -360,7 +379,9 @@ export default function Signup() {
                     style={styles.buttonContainer}
                     onPress={handleSubmit}
                   >
-                    <Text style={styles.button}>Submit</Text>
+                    <Text style={styles.button}>
+                      {signupPage.submit[language]}
+                    </Text>
                     <Feather name="arrow-right-circle" size={24} color="#fff" />
                   </TouchableOpacity>
                 </View>

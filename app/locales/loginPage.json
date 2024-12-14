@@ -1,7 +1,11 @@
 {
-  "Login": {
+  "login": {
     "english": "Login",
     "hindi": "लॉग इन करें"
+  },
+  "signup": {
+    "english": "Signup",
+    "hindi": "अपना अकाउंट बनाएं"
   },
   "welcomeBack": {
     "english": "Welcome back! please enter your detail",
@@ -11,9 +15,17 @@
     "english": "Email or Phone ",
     "hindi": "ईमेल या फ़ोन"
   },
+  "enterIdentifier": {
+    "english": "Enter your email or phone",
+    "hindi": "अपना ईमेल या फ़ोन दर्ज करें"
+  },
   "password": {
     "english": "Password",
     "hindi": "पासवर्ड"
+  },
+  "enterPassword": {
+    "english": "Enter your password",
+    "hindi": "अपना पासवर्ड दर्ज करें"
   },
   "forgotPassword": {
     "english": "Forgot Password?",

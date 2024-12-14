@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const LanguageSlice = createSlice({
   name: "language",
   initialState: {
-    data: "english",
+    data: "hindi",
   },
   reducers: {
     changeLanguage(state, action) {
