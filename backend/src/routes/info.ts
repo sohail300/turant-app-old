@@ -9,4 +9,6 @@ router.get("/get-states", getStates);
 
 router.get("/get-cities", getCities);
 
+// router.get("/get-ads", getAds);
+
 export default router;
