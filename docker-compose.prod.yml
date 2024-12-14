@@ -31,7 +31,7 @@ services:
       # - frontend
     restart: always
     build:
-      context: ./nginx
+      context: ./ngnix
       dockerfile: Dockerfile
     ports:
       - "13003:80"
