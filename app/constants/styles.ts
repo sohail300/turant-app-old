@@ -41,7 +41,9 @@ export const styles = StyleSheet.create({
   },
   Subheading2: {
     fontFamily: "HindVadodara500",
+    width : '100%',
     fontSize: 20,
+    textAlign: "center",
     lineHeight: 30,
     color: Colors.light.subheading2,
   },

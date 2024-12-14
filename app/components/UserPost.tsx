@@ -11,47 +11,48 @@ const UserPost = ({ ...props }) => {
   const [offset, setOffset] = useState(0)
   const [loading, setLoading] = useState(false); // To avoid duplicate requests
   const [hasMore, setHasMore] = useState(true); // To stop fetching if no more data
-  const [data, setData] = useState([
-    {
-      id: 1,
-      heading:
-        "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-      imageUrl:
-        "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-      author: "Rahul Kumar",
-      authorImage:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      content:
-        "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
-      details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-    },
-    {
-      id: 2,
-      heading:
-        "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-      imageUrl:
-        "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-      author: "Rahul Kumar",
-      authorImage:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      content:
-        "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
-      details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-    },
-    {
-      id: 3,
-      heading:
-        "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
-      imageUrl:
-        "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
-      author: "Rahul Kumar",
-      authorImage:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
-      content:
-        "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
-      details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
-    },
-  ]);
+  const [data, setData] = useState([]);
+  // const [data, setData] = useState([
+  //   {
+  //     id: 1,
+  //     heading:
+  //       "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
+  //     imageUrl:
+  //       "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
+  //     author: "Rahul Kumar",
+  //     authorImage:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     content:
+  //       "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
+  //     details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
+  //   },
+  //   {
+  //     id: 2,
+  //     heading:
+  //       "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
+  //     imageUrl:
+  //       "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
+  //     author: "Rahul Kumar",
+  //     authorImage:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     content:
+  //       "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
+  //     details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
+  //   },
+  //   {
+  //     id: 3,
+  //     heading:
+  //       "Beyond Economics, Dr Bibek Debroy's Tongue-In-Cheek Take On Current Events",
+  //     imageUrl:
+  //       "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
+  //     author: "Rahul Kumar",
+  //     authorImage:
+  //       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrKxfjTf49GAtu0PpFXK7mKBgqyJ5MfJCgQw&s",
+  //     content:
+  //       "A being with a thousand heads, a thousand eyes and a thousand feet 'surrounds the entire universe yet there is more of him that is left over'. Dr Bibek Debroy's explanation of the Supreme in one of his around 50 books",
+  //     details: "Ranchi, Jharkhand | 1 Nov 2024 | 2:00 PM",
+  //   },
+  // ]);
 
   async function getData(initialLoad = false) {
     if (loading || !hasMore) return; // Avoid fetching if already loading or no more data
@@ -65,12 +66,13 @@ const UserPost = ({ ...props }) => {
           "Content-Type": "application/json"
         },
         body : JSON.stringify({
-          limit : 5,
-          offset : 0
+          limit : limit,
+          offset : offset
         })
       })
       const response = await request.json();
-      const posts = response.posts;
+      const posts = response.posts[0].posts;
+      console.log(posts)
       if (posts.length === 0) {
         setHasMore(false); // No more data to load
       } else {
@@ -93,6 +95,7 @@ const UserPost = ({ ...props }) => {
       {...props}
       keyExtractor={(item) => String(item.id)}
       data={data}
+      ListEmptyComponent={<Text style={{textAlign : 'center', paddingVertical : 4, backgroundColor :  'white'}}>No Posts</Text>}
       renderItem={({ item }) => (
         <Card
           heading={item.heading}
