@@ -13,6 +13,7 @@ import otpGenerator from "otp-generator";
 import { verifyForgotPasswordOtpSchema } from "../zod/auth/verifyForgotPasswordOtp";
 import { verifyRegisterOtpSchema } from "../zod/auth/verifyRegisterOtp";
 import { Request, Response } from "express";
+import { transporter } from "../utils/sendEmail";
 
 const prisma = new PrismaClient();
 
@@ -248,6 +249,14 @@ export const sendForgotPasswordOtp = async (req: Request, res: Response) => {
           expires_at: new Date(Date.now() + 10 * 60 * 1000),
         },
       });
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: `${email}`,
+        subject: 'OTP For Forgot Password',
+        text: `OTP : ${otp}`
+      };
+    
+      await transporter.sendMail(mailOptions)
     } else if (medium == "phone") {
       if (!phone) {
         res

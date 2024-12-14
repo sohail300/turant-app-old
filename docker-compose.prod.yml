@@ -6,29 +6,23 @@ services:
       dockerfile: Dockerfile
     ports:
       - "13001:3000"
-    volumes:
-      - ./backend:/app
     networks:
       - turant
 
-  # frontend:
-  #   build:
-  #     context: ./admin-dashboard
-  #     target: production
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "13002:3000"
-  #   volumes:
-  #     - .:/app
-  #     - /app/node_modules
-  #     - /app/.next
-  #   networks:
-  #     - turant
+  frontend:
+    build:
+      context: ./admin-dashboard
+      target: production
+      dockerfile: Dockerfile
+    ports:
+      - "13002:3000"
+    networks:
+      - turant
 
   nginx:
     depends_on:
       - backend
-      # - frontend
+      - frontend
     restart: always
     build:
       context: ./ngnix

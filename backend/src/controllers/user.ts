@@ -797,7 +797,7 @@ export const sendEditProfileOtp = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers; // Assuming `req.userId` holds the logged-in user's ID
     const inputData = sendEditProfileOtpSchema.safeParse(req.body);
-    
+
     if (!inputData.success) {
       res.status(400).json({
         message: "Validation error",
@@ -805,7 +805,7 @@ export const sendEditProfileOtp = async (req: Request, res: Response) => {
       });
       return;
     }
-    
+
     const { phone } = inputData.data;
 
     const otp = otpGenerator.generate(4, {
@@ -843,6 +843,17 @@ export const sendEditProfileOtp = async (req: Request, res: Response) => {
     });
 
     console.log(`Sending phone OTP to ${phone}: ${otp}`);
+    const request = await fetch(`https://cpaas.messagecentral.com/verification/v3/send?countryCode=91&customerId=${process.env.MESSAGE_CENTRAL_CUSTOMER_ID}&flowType=SMS&mobileNumber=${phone}`,{
+      method: 'POST',
+      headers: {
+        'authToken': `${process.env.MESSAGE_CENTRAL_AUTH_TOKEN}`
+      }
+    })
+    if (!request.ok){
+      throw new Error(`Error sending OTP to ${phone}: ${request.statusText}`);
+    }
+    const response = await request.json();
+    const verificationId = response.data.verificationId;
     res.json({ success: true, message: "OTP sent successfully" });
   } catch (err) {
     console.error("Error sending OTP:", err);
@@ -877,35 +888,35 @@ export const editUserProfile = async (req: Request, res: Response) => {
     } = inputData.data;
 
     const user = await prisma.user.findUnique({
-      where: { user_id : Number(userId) },
+      where: { user_id: Number(userId) },
     });
 
     if (!user) {
-          res.status(404).json({ message: "User not found" });
-          return;
-        }
-    
-        // Find OTP record for the user
-        const otpRecord = await prisma.otp.findFirst({
-          where: {
-            user_id: user.user_id,
-            related: "forgot_password",
-            otp,
-          },
-        });
-    
-        if (!otpRecord) {
-          res.status(400).json({ message: "Invalid OTP" });
-          return;
-        }
-    
-        // Check if OTP is expired
-        if (new Date(otpRecord.expires_at) < new Date()) {
-          res.status(400).json({ message: "OTP has expired" });
-          return;
-        }
-    
-        // Update the user's password
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    // Find OTP record for the user
+    const otpRecord = await prisma.otp.findFirst({
+      where: {
+        user_id: user.user_id,
+        related: "forgot_password",
+        otp,
+      },
+    });
+
+    if (!otpRecord) {
+      res.status(400).json({ message: "Invalid OTP" });
+      return;
+    }
+
+    // Check if OTP is expired
+    if (new Date(otpRecord.expires_at) < new Date()) {
+      res.status(400).json({ message: "OTP has expired" });
+      return;
+    }
+
+    // Update the user's password
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
