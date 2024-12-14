@@ -54,7 +54,7 @@ export default function HomeScreen() {
     },
     {
       ad_id: 2,
-      target_url: "https://www.youtube.com/@turantnewshindi",
+      target_url: "https://www.zomato.com/",
       image: "",
       videoUrl: "https://d3i5efosrgchej.cloudfront.net/media/sample.mp4",
     },
@@ -95,19 +95,17 @@ export default function HomeScreen() {
           },
         }
       );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const posts = await response.json();
-
-      if (posts.length === 0) {
-        setHasMore(false); // No more data to load
-      } else {
-        const newsWithAds = interleaveAds(posts, adData);
-        setData((prevData) =>
-          initialLoad ? newsWithAds : [...prevData, ...newsWithAds]
-        );
-        setOffset((prevOffset) => prevOffset + limit); // Increment offset for next fetch
+      if (response.ok) {
+        const posts = await response.json();
+        if (posts.length === 0) {
+          setHasMore(false); // No more data to load
+        } else {
+          const newsWithAds = interleaveAds(posts, adData);
+          setData((prevData) =>
+            initialLoad ? newsWithAds : [...prevData, ...newsWithAds]
+          );
+          setOffset((prevOffset) => prevOffset + limit); // Increment offset for next fetch
+        }
       }
     } catch (error) {
       console.error("Error fetching data:", error);

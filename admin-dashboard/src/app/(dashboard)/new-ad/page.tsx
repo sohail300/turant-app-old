@@ -150,8 +150,7 @@ export default function Page() {
         toast.success("Advertisement added successfully");
       }
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to add reporter";
+      const errorMessage = error.response?.data?.message || "Failed to add ad";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -347,9 +346,6 @@ export default function Page() {
                         mode="single"
                         selected={field.value}
                         onSelect={(date) => field.onChange(date)}
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
                         initialFocus
                       />
                     </PopoverContent>

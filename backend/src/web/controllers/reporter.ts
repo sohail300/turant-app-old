@@ -132,7 +132,7 @@ export const addReporter = async (req: Request, res: Response) => {
         state,
         district,
         block,
-        image: `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${image.filename}`,
+        image: `${process.env.CLOUDFRONT_NAME}/${image.filename}`,
       },
     });
 

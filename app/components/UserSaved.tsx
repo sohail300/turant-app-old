@@ -85,6 +85,8 @@ const UserSaved = ({ ...props }) => {
           authorId={item.post.user.user_id}
           author={item.post.user.display_name}
           authorImage={item.post.user.image}
+          liked={item?.liked}
+          saved={item?.saved}
           full={false}
         />
       )}

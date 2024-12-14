@@ -10,16 +10,13 @@ import formatRoute from "@/lib/formatRoute";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Button } from "./ui/button";
 import { PopoverClose } from "@radix-ui/react-popover";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 const Navbar = ({ isOpen, setIsOpen }) => {
   const router = useRouter();
-
-  const [pathname, setPathname] = useState("");
-  if (typeof window !== "undefined") {
-    setPathname(window.location.pathname);
-  }
+  const pathname = usePathname();
+  console.log(pathname);
 
   // Create a single toggle handler to manage menu state
   const handleMenuToggle = () => {

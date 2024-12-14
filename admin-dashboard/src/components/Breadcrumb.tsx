@@ -9,12 +9,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import formatRoute from "@/lib/formatRoute";
+import { usePathname } from "next/navigation";
 
 const BreadcrumbComponent = () => {
-  const [pathname, setPathname] = useState("");
-  if (typeof window !== "undefined") {
-    setPathname(window.location.pathname);
-  }
+  const pathname = usePathname();
+  console.log(pathname);
 
   return (
     <div className="text-xl font-hind500 text-brandText">

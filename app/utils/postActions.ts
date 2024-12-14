@@ -5,39 +5,6 @@ import { router } from "expo-router";
 import { Share } from "react-native";
 
 // utils/postActions.js
-export const handleLike = async ({
-  post_id,
-  isUserLoggedIn,
-  token,
-  setStatus,
-  setCurrentLikes,
-}) => {
-  try {
-    if (isUserLoggedIn === "no") {
-      router.push("/login");
-    }
-
-    const response = await fetch(`${baseURL}/post/like/${post_id}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    const data = await response.json();
-
-    if (data.success) {
-      setStatus((prevStatus) => ({
-        ...prevStatus,
-        hasLiked: !prevStatus.hasLiked,
-      }));
-      setCurrentLikes((prevLikes) =>
-        data.hasLiked ? prevLikes - 1 : prevLikes + 1
-      );
-    }
-  } catch (error) {
-    console.error("Error liking post:", error);
-  }
-};
 
 export const handleCommentPress = ({
   post_id,

@@ -117,12 +117,16 @@ export const addAd = async (req: Request, res: Response) => {
       cost,
     } = inputData.data;
 
+    console.log(inputData.data);
+    console.log(req.file);
+
     const file = req.file;
     const filePath = req.file.path;
     const originalExtension = path.extname(req.file.originalname); // e.g., ".jpg"
     const outputFilePath = `compressed_${Date.now()}_${req.file.originalname}`;
     const completeOutputFilePath = `uploads/${outputFilePath}`;
     const thumbnailPath = `uploads/thumbnail_${Date.now()}.jpg`;
+    const compressedImagePath = `uploads/compressed_${Date.now()}${originalExtension}`;
 
     let s3Url;
 
@@ -139,15 +143,11 @@ export const addAd = async (req: Request, res: Response) => {
       // Upload the compressed video to S3
       s3Url = await uploadToS3(completeOutputFilePath, file.mimetype);
     } else if (media_type === "image") {
-      const compressedImagePath = `uploads/compressed_${Date.now()}${originalExtension}`;
       fs.renameSync(filePath, compressedImagePath);
 
       // Upload the image to S3
       s3Url = await uploadToS3(compressedImagePath, file.mimetype);
       console.log(s3Url);
-
-      // Clean up local files
-      fs.unlinkSync(compressedImagePath);
     }
 
     // Save Ad data in the database
@@ -167,8 +167,12 @@ export const addAd = async (req: Request, res: Response) => {
     });
 
     // Clean up local files
-    fs.unlinkSync(filePath);
-    fs.unlinkSync(completeOutputFilePath);
+    if (media_type === "video") {
+      fs.unlinkSync(filePath);
+      fs.unlinkSync(completeOutputFilePath);
+    } else if (media_type === "image") {
+      fs.unlinkSync(compressedImagePath);
+    }
     res.json({ message: "Ad added successfully" });
   } catch (error) {
     console.error("Error adding ad:", error);

@@ -28,5 +28,5 @@ export const uploadToS3 = async (filePath: string, fileType: string) => {
   await s3Client.send(command);
 
   // Return the public S3 URL
-  return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  return `${process.env.CLOUDFRONT_NAME}/${key}`;
 };

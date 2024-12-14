@@ -35,7 +35,6 @@ import { useNavigation } from "expo-router";
 import {
   handleCommentPress,
   handleFollow,
-  handleLike,
   handleOtherProfile,
   handleSave,
   handleShare,
@@ -57,6 +56,8 @@ const Card = ({
   shares,
   views,
   authorId,
+  liked = false,
+  saved = false,
 }: {
   post_id: number;
   title: string;
@@ -73,6 +74,8 @@ const Card = ({
   shares?: number;
   views?: number;
   authorId?: number;
+  liked?: boolean;
+  saved?: boolean;
 }) => {
   const language = useSelector((state) => state.language.data);
   const token = useSelector((state) => state.token.data);
@@ -113,6 +116,32 @@ const Card = ({
     getData();
   }, []);
 
+  const handleLike = async () => {
+    try {
+      if (isUserLoggedIn === "no") {
+        router.push("/login");
+      }
+
+      const response = await fetch(`${baseURL}/post/like/${post_id}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await response.json();
+
+      setStatus((prevStatus) => ({
+        ...prevStatus,
+        liked: !liked,
+      }));
+      setCurrentLikes((prevLikes) =>
+        data.hasLiked ? prevLikes - 1 : prevLikes + 1
+      );
+    } catch (error) {
+      console.error("Error liking post:", error);
+    }
+  };
+
   return (
     <SafeAreaView
       style={{
@@ -125,7 +154,6 @@ const Card = ({
         gap: 8,
       }}
     >
-      <Text onPress={() => router.push("/setup")}>Redirect</Text>
       <Image
         source={{
           uri:
@@ -227,9 +255,9 @@ const Card = ({
           }
         >
           <Ionicons
-            name={status.hasSaved ? "bookmark-outline" : "bookmark"} // 'heart' is filled, 'heart-o' is outlined
+            name={saved ? "bookmark" : "bookmark-outline"} // 'heart' is filled, 'heart-o' is outlined
             size={24}
-            color={status.hasLiked ? "black" : "black"}
+            color={saved ? "black" : "black"}
           />
         </TouchableOpacity>
       </View>
@@ -261,20 +289,12 @@ const Card = ({
             justifyContent: "center",
             alignItems: "center",
           }}
-          onPress={() =>
-            handleLike({
-              post_id,
-              isUserLoggedIn,
-              token,
-              setStatus,
-              setCurrentLikes,
-            })
-          }
+          onPress={() => handleLike()}
         >
           <FontAwesome
-            name={status.hasLiked ? "heart" : "heart-o"} // 'heart' is filled, 'heart-o' is outlined
+            name={liked ? "heart" : "heart-o"} // 'heart' is filled, 'heart-o' is outlined
             size={24}
-            color={status.hasLiked ? "red" : "black"} // Set color to red when liked
+            color={liked ? "red" : "black"} // Set color to red when liked
           />
           <IconText>{currentLikes}</IconText>
         </TouchableOpacity>
