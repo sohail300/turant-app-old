@@ -9,7 +9,7 @@ RUN npm install
 
 RUN apk add openssl
 
-COPY . .
+COPY ./src .
 
 RUN npm run build
 
