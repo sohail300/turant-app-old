@@ -16,10 +16,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "13002:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
     networks:
       - turant
 
