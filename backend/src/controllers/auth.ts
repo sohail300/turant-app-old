@@ -407,7 +407,7 @@ export const sendRegisterOtp = async (req: Request, res: Response) => {
 
     await Promise.all([
       sendRegisterMailOtp(email),
-      sendRegisterPhoneOtp(phone),
+      // sendRegisterPhoneOtp(phone),
     ]);
 
     res.json({ success: true, message: "OTP sent successfully" });

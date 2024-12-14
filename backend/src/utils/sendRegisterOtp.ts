@@ -30,6 +30,15 @@ export const sendRegisterMailOtp = async (email) => {
     },
   });
 
+  await prisma.otp.create({
+    data: {
+      user_id: user.user_id,
+      related: "register_phone", // OTP type
+      otp,
+      expires_at: new Date(Date.now() + 10 * 60 * 1000),
+    },
+  });
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: `${email}`,
