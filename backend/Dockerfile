@@ -4,12 +4,11 @@ FROM node:20.18-alpine AS build
 WORKDIR /app
 
 # Install OpenSSL and required dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add \
     openssl \
     libssl1.1 \
     libssl-dev \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    ca-certificates
 
 # Copy application files
 COPY . .
