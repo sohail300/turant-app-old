@@ -6,7 +6,7 @@
     "compile": "npx prisma generate && tsc && node ./dist/index.js",
     "dev": "nodemon -e ts  --exec \"npm run compile\"",
     "start": "npm run compile && node ./dist/index.js",
-    "build": "tsc"
+    "build": "npx prisma generate && tsc"
   },
   "author": "",
   "license": "ISC",
