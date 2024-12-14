@@ -54,9 +54,9 @@ export default function HomeScreen() {
     },
     {
       ad_id: 2,
-      target_url: "https://www.zomato.com/",
-      image: "https://d3i5efosrgchej.cloudfront.net/media/zomato.jpg",
-      videoUrl: "",
+      target_url: "https://www.youtube.com/@turantnewshindi",
+      image: "",
+      videoUrl: "https://d3i5efosrgchej.cloudfront.net/media/sample.mp4",
     },
     {
       ad_id: 3,
