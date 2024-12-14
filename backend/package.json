@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "compile": "tsc && node ./dist/index.js",
+    "compile": "npx prisma generate && tsc && node ./dist/index.js",
     "dev": "nodemon -e ts  --exec \"npm run compile\"",
-    "start": "npm run compile && node ./dist/index.js"
+    "start": "npm run compile && node ./dist/index.js",
+    "build": "npx prisma generate && tsc"
   },
   "author": "",
   "license": "ISC",
