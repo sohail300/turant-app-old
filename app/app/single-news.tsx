@@ -1,5 +1,5 @@
-import { View, Text, Dimensions } from "react-native";
-import React, { useEffect, useState } from "react";
+import { View, Text, Dimensions, Button, StyleSheet } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import { Image, Share } from "react-native";
@@ -33,10 +33,14 @@ import {
   handleSave,
 } from "@/utils/postActions";
 import { baseURL } from "@/constants/config";
+import { Video, ResizeMode } from "expo-av";
 
 const SingleNews = () => {
   const [showCommentSheet, setShowCommentSheet] = useState(false);
   const dispatch = useDispatch();
+
+  const video = useRef(null);
+  const [videoStatus, setVideoStatus] = useState({});
 
   const {
     title,
@@ -137,14 +141,29 @@ const SingleNews = () => {
                 borderRadius={8}
               />
             ) : type === "video" ? (
-              <Image
-                source={{
-                  uri: "https://d3i5efosrgchej.cloudfront.net/misc/video.jpg",
-                }}
-                width={"100%"}
-                height={200}
-                borderRadius={8}
-              />
+              // <Image
+              //   source={{
+              //     uri: "https://d3i5efosrgchej.cloudfront.net/misc/video.jpg",
+              //   }}
+              //   width={"100%"}
+              //   height={200}
+              //   borderRadius={8}
+              // />
+
+              <View style={fileStyles.container}>
+                <Video
+                  ref={video}
+                  style={fileStyles.video}
+                  source={{
+                    uri: "https://d3i5efosrgchej.cloudfront.net/media/sample.mp4",
+                  }}
+                  useNativeControls
+                  resizeMode={ResizeMode.CONTAIN}
+                  onPlaybackStatusUpdate={(videoStatus) =>
+                    setVideoStatus(() => videoStatus)
+                  }
+                />
+              </View>
             ) : (
               ""
             )}
@@ -327,3 +346,25 @@ const SingleNews = () => {
 };
 
 export default SingleNews;
+
+const fileStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 10,
+  },
+  video: {
+    width: "100%",
+    height: 200, // Set a fixed height or adjust according to your layout
+    backgroundColor: "#000", // Placeholder background for the video
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 10,
+  },
+  buttons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

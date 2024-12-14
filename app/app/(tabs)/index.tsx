@@ -45,6 +45,41 @@ export default function HomeScreen() {
   //   initializeApp();
   // }, []);
 
+  const adData = [
+    {
+      ad_id: 1,
+      target_url: "https://www.zomato.com/",
+      image: "https://d3i5efosrgchej.cloudfront.net/media/zomato.jpg",
+      videoUrl: "",
+    },
+    {
+      ad_id: 2,
+      target_url: "https://www.zomato.com/",
+      image: "https://d3i5efosrgchej.cloudfront.net/media/zomato.jpg",
+      videoUrl: "",
+    },
+    {
+      ad_id: 3,
+      target_url: "https://www.zomato.com/",
+      image: "https://d3i5efosrgchej.cloudfront.net/media/zomato.jpg",
+      videoUrl: "",
+    },
+  ];
+
+  function interleaveAds(newsData, adData) {
+    const result = [];
+    let adIndex = 0;
+
+    for (let i = 0; i < newsData.length; i++) {
+      result.push(newsData[i]);
+      if ((i + 1) % 3 === 0 && adIndex < adData.length) {
+        result.push({ ...adData[adIndex], isAd: true });
+        adIndex = (adIndex + 1) % adData.length; // Cycle through ads
+      }
+    }
+    return result;
+  }
+
   async function getData(initialLoad = false) {
     if (loading || !hasMore) return; // Avoid fetching if already loading or no more data
     setLoading(true);
@@ -67,7 +102,10 @@ export default function HomeScreen() {
       if (posts.length === 0) {
         setHasMore(false); // No more data to load
       } else {
-        setData((prevData) => (initialLoad ? posts : [...prevData, ...posts]));
+        const newsWithAds = interleaveAds(posts, adData);
+        setData((prevData) =>
+          initialLoad ? newsWithAds : [...prevData, ...newsWithAds]
+        );
         setOffset((prevOffset) => prevOffset + limit); // Increment offset for next fetch
       }
     } catch (error) {

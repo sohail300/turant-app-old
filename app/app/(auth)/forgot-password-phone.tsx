@@ -18,13 +18,16 @@ import * as Yup from "yup";
 import ErrorText from "@/components/ErrorText";
 import logo from "@/assets/images/logo-red.png";
 import RedText from "@/components/RedText";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { OtpInput } from "react-native-otp-entry";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { baseURL } from "@/constants/config";
 import { useSelector } from "react-redux";
 
 export default function Signup() {
+  const { phone } = useLocalSearchParams();
+  console.log(phone);
+
   const [language, setLanguage] = useState(
     useSelector((state) => state.language.data)
   );
@@ -43,8 +46,6 @@ export default function Signup() {
 
   async function resendOTP() {
     try {
-      const phone = await AsyncStorage.getItem("phone");
-
       const response = await fetch(`${baseURL}/auth/send-forgot-password-otp`, {
         method: "POST", // Use POST method for the request
         headers: {
@@ -52,21 +53,18 @@ export default function Signup() {
         },
         body: JSON.stringify({
           medium: "phone",
-          phone: phone?.replaceAll('"', ""),
+          phone: phone,
         }),
       });
 
-      if (!response.ok) {
-        // Handle any errors (non-2xx responses)
-        const errorText = await response.text(); // Read the response body as text
-        console.error("Error:", errorText);
-        throw new Error("Request failed with status " + response.status);
-      }
-
       const data = await response.json();
       console.log(data);
+      if (response.ok) {
+        alert("OTP sent successfully");
+      }
     } catch (error) {
-      console.log(error);
+      console.log("error", error);
+      alert("An error occurred. Please try again.");
     }
   }
 
@@ -84,7 +82,7 @@ export default function Signup() {
               <Image source={logo} style={style.logo} />
               <Text style={style.title}>Change Password</Text>
               <Text style={style.subtitle}>
-                We have send 4 digit code to (+91) xxxxxxxxxxx
+                We have send 4 digit code to (+91){phone}
               </Text>
             </View>
 
@@ -93,8 +91,6 @@ export default function Signup() {
               validationSchema={validate}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
-                  const phone = await AsyncStorage.getItem("phone");
-
                   const response = await fetch(
                     `${baseURL}/auth/verify-forgot-password-otp`,
                     {
@@ -104,7 +100,7 @@ export default function Signup() {
                       },
                       body: JSON.stringify({
                         medium: "phone",
-                        phone: phone?.replaceAll('"', ""),
+                        phone: phone,
                         otp: values.otp,
                         password: values.password,
                       }),
@@ -137,7 +133,9 @@ export default function Signup() {
               }) => (
                 <View style={style.formContainer}>
                   <View style={style.inputGroup}>
-                    <Text style={style.inputLabel}>Enter OTP</Text>
+                    <Text style={{ ...style.inputLabel, textAlign: "left" }}>
+                      Enter OTP
+                    </Text>
                     <OtpInput
                       numberOfDigits={4}
                       autoFocus={false}
@@ -164,7 +162,9 @@ export default function Signup() {
                   </View>
 
                   <View style={style.inputGroup}>
-                    <Text style={style.inputLabel}>Password</Text>
+                    <Text style={{ ...style.inputLabel, textAlign: "left" }}>
+                      Password
+                    </Text>
                     <TextInput
                       value={values.password}
                       keyboardType="default"
@@ -184,7 +184,9 @@ export default function Signup() {
                   </View>
 
                   <View style={style.inputGroup}>
-                    <Text style={style.inputLabel}>Confirm Password</Text>
+                    <Text style={{ ...style.inputLabel, textAlign: "left" }}>
+                      Confirm Password
+                    </Text>
                     <TextInput
                       value={values.cpassword}
                       keyboardType="default"

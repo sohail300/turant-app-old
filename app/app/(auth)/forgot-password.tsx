@@ -63,11 +63,19 @@ export default function Signup() {
 
       if (response.ok) {
         if (selectedMedium === "phone") {
-          await AsyncStorage.setItem("phone", JSON.stringify(phone));
-          router.push("/forgot-password-phone");
+          router.push({
+            pathname: "/forgot-password-phone",
+            params: {
+              phone,
+            },
+          });
         } else if (selectedMedium === "email") {
-          await AsyncStorage.setItem("email", JSON.stringify(email));
-          router.push("/forgot-password-email");
+          router.push({
+            pathname: "/forgot-password-email",
+            params: {
+              email,
+            },
+          });
         }
       } else {
         alert("Enter the correct details");

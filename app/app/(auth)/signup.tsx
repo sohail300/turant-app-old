@@ -101,7 +101,7 @@ export default function Signup() {
               onSubmit={async (values, { setSubmitting }) => {
                 console.log(values);
                 try {
-                  console.log('fetched');
+                  console.log("fetched");
                   const response = await fetch(`${baseURL}/auth/signup`, {
                     method: "POST",
                     headers: {
@@ -148,7 +148,7 @@ export default function Signup() {
               }) => (
                 <View style={{ gap: 16 }}>
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>
+                    <Text style={{ ...styles.Subheading2, textAlign: "left" }}>
                       {signupPage.fullName[language]}
                     </Text>
                     <TextInput
@@ -175,7 +175,7 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>
+                    <Text style={{ ...styles.Subheading2, textAlign: "left" }}>
                       {signupPage.username[language]}
                     </Text>
                     <TextInput
@@ -204,7 +204,7 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>
+                    <Text style={{ ...styles.Subheading2, textAlign: "left" }}>
                       {signupPage.email[language]}
                     </Text>
                     <TextInput
@@ -231,7 +231,7 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>
+                    <Text style={{ ...styles.Subheading2, textAlign: "left" }}>
                       {signupPage.phone[language]}
                     </Text>
                     <View
@@ -289,7 +289,7 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>
+                    <Text style={{ ...styles.Subheading2, textAlign: "left" }}>
                       {signupPage.password[language]}
                     </Text>
                     <TextInput
@@ -319,7 +319,7 @@ export default function Signup() {
                   </View>
 
                   <View style={{ gap: 8 }}>
-                    <Text style={styles.Subheading2}>
+                    <Text style={{ ...styles.Subheading2, textAlign: "left" }}>
                       {signupPage.confirmPassword[language]}
                     </Text>
                     <TextInput

@@ -2,6 +2,7 @@ import { View, Text } from "react-native";
 import React from "react";
 import { FlatList } from "react-native-gesture-handler";
 import Card from "./Card";
+import { AdCard } from "./AdComponent";
 
 const CardFlatlistComponent = ({ data, ...props }) => {
   if (!data || data.length === 0) {
@@ -16,27 +17,37 @@ const CardFlatlistComponent = ({ data, ...props }) => {
     <View>
       <FlatList
         {...props}
-        keyExtractor={(item) => item.post_id.toString()} // Updated to use `post_id`
+        keyExtractor={(item, index) =>
+          item.isAd ? `ad-${item.ad_id}-${index}` : item.post_id.toString()
+        }
         data={data}
-        renderItem={({ item }) => (
-          <Card
-            post_id={item.post_id}
-            type={item.type}
-            title={item.title}
-            snippet={item.snippet}
-            likes={item.likes}
-            comments={item.comments}
-            shares={item.shares}
-            views={item.video_views}
-            created_at={item.created_at}
-            thumbnail={item.thumbnail}
-            authorId={item.user.user_id}
-            author={item.user.display_name}
-            authorImage={item.user.image}
-            // details={item.details}
-            full={false}
-          />
-        )}
+        renderItem={({ item }) =>
+          item.isAd ? (
+            <AdCard
+              ad_id={item.ad_id}
+              target_url={item.target_url}
+              image={item.image}
+              videoUrl={item.videoUrl}
+            />
+          ) : (
+            <Card
+              post_id={item.post_id}
+              type={item.type}
+              title={item.title}
+              snippet={item.snippet}
+              likes={item.likes}
+              comments={item.comments}
+              shares={item.shares}
+              views={item.video_views}
+              created_at={item.created_at}
+              thumbnail={item.thumbnail}
+              authorId={item.user.user_id}
+              author={item.user.display_name}
+              authorImage={item.user.image}
+              full={false}
+            />
+          )
+        }
       />
     </View>
   );

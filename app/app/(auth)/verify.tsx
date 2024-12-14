@@ -67,6 +67,27 @@ export default function Signup() {
     }
   };
 
+  async function resendOTP() {
+    try {
+      const response = await fetch(`${baseURL}/auth/send-register-otp`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      console.log(data);
+      if (response.ok) {
+        alert("OTP sent successfully");
+      }
+    } catch (error) {
+      console.log("error", error);
+      alert("An error occurred. Please try again.");
+    }
+  }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.light.white }}>
       <KeyboardAvoidingView
@@ -110,7 +131,7 @@ export default function Signup() {
             </View>
 
             <View style={{ gap: 8 }}>
-              <Text style={styles.Subheading2}>
+              <Text style={{ ...styles.Subheading2, textAlign: "left" }}>
                 {verifyPage.mailOTP[language]}
               </Text>
               <OtpInput
@@ -133,13 +154,10 @@ export default function Signup() {
                   },
                 }}
               />
-              <RedText style={{ textAlign: "right" }}>
-                {verifyPage.resend[language]}
-              </RedText>
             </View>
 
             <View style={{ gap: 8 }}>
-              <Text style={styles.Subheading2}>
+              <Text style={{ ...styles.Subheading2, textAlign: "left" }}>
                 {verifyPage.phoneOTP[language]}
               </Text>
               <OtpInput
@@ -162,7 +180,10 @@ export default function Signup() {
                   },
                 }}
               />
-              <RedText style={{ textAlign: "right" }}>
+              <RedText
+                style={{ textAlign: "right", marginTop: 24 }}
+                onPress={() => resendOTP()}
+              >
                 {verifyPage.resend[language]}
               </RedText>
             </View>

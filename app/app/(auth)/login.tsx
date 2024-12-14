@@ -182,7 +182,13 @@ export default function Signup() {
                 }) => (
                   <View style={{ gap: 16 }}>
                     <View style={{ gap: 8 }}>
-                      <Text style={{ ...styles.Subheading2, fontSize: 16 }}>
+                      <Text
+                        style={{
+                          ...styles.Subheading2,
+                          fontSize: 16,
+                          textAlign: "left",
+                        }}
+                      >
                         {loginPage.identifier[language]}
                       </Text>
                       <TextInput
@@ -213,7 +219,13 @@ export default function Signup() {
                     </View>
 
                     <View style={{ gap: 8 }}>
-                      <Text style={{ ...styles.Subheading2, fontSize: 16 }}>
+                      <Text
+                        style={{
+                          ...styles.Subheading2,
+                          fontSize: 16,
+                          textAlign: "left",
+                        }}
+                      >
                         {loginPage.password[language]}
                       </Text>
                       <TextInput
