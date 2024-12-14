@@ -33,6 +33,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import card from "@/locales/card.json";
 import { useNavigation } from "expo-router";
 import {
+  handleCommentPress,
   handleFollow,
   handleLike,
   handleOtherProfile,
@@ -111,17 +112,6 @@ const Card = ({
   useEffect(() => {
     getData();
   }, []);
-
-  const handleCommentPress = () => {
-    if (isUserLoggedIn === "no") {
-      router.push("/login");
-      return;
-    }
-    AsyncStorage.setItem("postId", post_id.toString());
-    full && setShowCommentSheet
-      ? setShowCommentSheet(true)
-      : dispatch(changeBottomSheetState(true));
-  };
 
   return (
     <SafeAreaView
@@ -242,7 +232,24 @@ const Card = ({
           />
         </TouchableOpacity>
       </View>
-      <ContentText full={false}>{snippet}</ContentText>
+      <ContentText
+        full={false}
+        title={title}
+        post_id={post_id}
+        type={type}
+        thumbnail={thumbnail}
+        snippet={snippet}
+        created_at={created_at}
+        author={author}
+        authorImage={authorImage}
+        authorId={authorId}
+        currentLikes={currentLikes}
+        currentComments={currentComments}
+        currentShares={currentShares}
+        currentViews={currentViews}
+      >
+        {snippet}
+      </ContentText>
       <Details>{formatDate(created_at!)}</Details>
       <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
         <TouchableOpacity
@@ -280,7 +287,13 @@ const Card = ({
           }}
           onPress={() => {
             {
-              handleCommentPress();
+              handleCommentPress({
+                post_id,
+                isUserLoggedIn,
+                setShowCommentSheet,
+                full,
+                dispatch,
+              });
             }
           }}
         >

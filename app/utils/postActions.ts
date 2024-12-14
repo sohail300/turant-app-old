@@ -1,4 +1,6 @@
 import { baseURL } from "@/constants/config";
+import { changeBottomSheetState } from "@/store/CommentBottomSheetSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { Share } from "react-native";
 
@@ -35,6 +37,23 @@ export const handleLike = async ({
   } catch (error) {
     console.error("Error liking post:", error);
   }
+};
+
+export const handleCommentPress = ({
+  post_id,
+  isUserLoggedIn,
+  setShowCommentSheet,
+  full,
+  dispatch,
+}) => {
+  if (isUserLoggedIn === "no") {
+    router.push("/login");
+    return;
+  }
+  AsyncStorage.setItem("postId", post_id.toString());
+  full && setShowCommentSheet
+    ? setShowCommentSheet(true)
+    : dispatch(changeBottomSheetState(true));
 };
 
 export const handleSave = async ({
@@ -83,7 +102,10 @@ export const handleShare = async ({
       },
     });
     const data = await response.json();
-    setCurrentShares((prevShares) => prevShares + 1);
+
+    if (response.ok) {
+      setCurrentShares((prevShares) => prevShares + 1);
+    }
 
     await Share.share({
       message:

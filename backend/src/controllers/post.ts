@@ -32,7 +32,7 @@ export const showPosts = async (req: Request, res: Response) => {
           const followedPosts = await prisma.post.findMany({
             where: {
               user: {
-                followers: { some: { follower_id: userId } }, // Only posts from followed users
+                followers: { some: { follower_id: Number(userId) } }, // Only posts from followed users
               },
             },
             orderBy: { created_at: "desc" },
@@ -64,7 +64,7 @@ export const showPosts = async (req: Request, res: Response) => {
           const unfollowedPosts = await prisma.post.findMany({
             where: {
               user: {
-                followers: { none: { follower_id: userId } }, // Exclude posts from followed users
+                followers: { none: { follower_id: Number(userId) } }, // Exclude posts from followed users
               },
             },
             orderBy: { created_at: "desc" },

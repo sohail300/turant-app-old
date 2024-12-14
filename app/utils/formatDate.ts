@@ -1,4 +1,4 @@
-export const formatDate = (date: string) => {
+export const formatDate = (date = "2024-12-10T07:22:01.536Z") => {
   //   convert this 2024-12-10T07:22:01.536Z to this 1 Nov 2024 | 2:00 PM
   const dateArray = date.split("T");
   const dateString = dateArray[0];
