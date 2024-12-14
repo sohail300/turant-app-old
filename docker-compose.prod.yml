@@ -28,7 +28,7 @@ services:
   nginx:
     depends_on:
       - backend
-      - frontend
+      # - frontend
     restart: always
     build:
       context: ./nginx
