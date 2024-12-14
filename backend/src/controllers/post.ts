@@ -14,18 +14,18 @@ export const showPosts = async (req: Request, res: Response) => {
     const { limit, offset } = req.query;
     console.log(req.query);
 
-    let token;
-
     const authHeader = req.headers.authorization;
     
     if (authHeader) {
-      token = authHeader.split(" ")[1];
-      const decoded = verifyAccessToken(token);
-      if (decoded) {
-        isLoggedIn = true;
-        userId = decoded.userId.toString();
-      }
-    }
+      const token = authHeader.split(" ")[1];
+
+      try {
+        const decoded = verifyAccessToken(token);
+
+        if (decoded) {
+          isLoggedIn = true;
+          userId = decoded.userId.toString();
+        }
 
         if (isLoggedIn) {
 
@@ -109,11 +109,12 @@ export const showPosts = async (req: Request, res: Response) => {
             skip: Number(offset),
           });
 
-        // Merge and sort posts
-        const posts = [...followedPosts, ...unfollowedPosts].sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
+          // Merge and sort posts
+          const posts = [...followedPosts, ...unfollowedPosts].sort(
+            (a, b) =>
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime()
+          );
 
           const formattedPosts = posts.map((post) => ({
               ...post,
