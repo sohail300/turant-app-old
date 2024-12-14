@@ -6,8 +6,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "13001:3000"
-    volumes:
-      - ./backend:/app
     networks:
       - turant
 
