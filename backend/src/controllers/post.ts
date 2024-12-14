@@ -15,7 +15,7 @@ export const showPosts = async (req: Request, res: Response) => {
     console.log(req.query);
 
     const authHeader = req.headers.authorization;
-
+    
     if (authHeader) {
       const token = authHeader.split(" ")[1];
 
@@ -28,6 +28,7 @@ export const showPosts = async (req: Request, res: Response) => {
         }
 
         if (isLoggedIn) {
+
           // Fetch posts from followed users
           const followedPosts = await prisma.post.findMany({
             where: {
@@ -54,6 +55,14 @@ export const showPosts = async (req: Request, res: Response) => {
                   display_name: true,
                   image: true,
                 },
+              },
+              post_likes: {
+                where: { user_id: Number(userId) }, // Check if the user has liked the post
+                select: { like_id: true },
+              },
+              saved_posts: {
+                where: { user_id: Number(userId) }, // Check if the user has saved the post
+                select: { saved_post_id: true },
               },
             },
             take: Number(limit),
@@ -87,6 +96,14 @@ export const showPosts = async (req: Request, res: Response) => {
                   image: true,
                 },
               },
+              post_likes: {
+                where: { user_id: Number(userId) }, // Check if the user has liked the post
+                select: { like_id: true },
+              },
+              saved_posts: {
+                where: { user_id: Number(userId) }, // Check if the user has saved the post
+                select: { saved_post_id: true },
+              },
             },
             take: Number(limit),
             skip: Number(offset),
@@ -99,42 +116,47 @@ export const showPosts = async (req: Request, res: Response) => {
               new Date(a.created_at).getTime()
           );
 
-          res.json(posts);
-          return;
-        } else {
-          // Fetch all posts for non-logged-in users
-          const posts = await prisma.post.findMany({
-            select: {
-              post_id: true,
-              user_id: true,
-              title: true,
-              type: true,
-              thumbnail: true,
-              snippet: true,
-              created_at: true,
-              likes: true, // Directly select the scalar field
-              shares: true, // Directly select the scalar field
-              comments: true, // Directly select the scalar field
-              video_views: true, // Directly select the scalar field
-              user: {
-                select: {
-                  user_id: true,
-                  display_name: true,
-                  image: true,
-                },
-              },
-            },
-            take: Number(limit),
-            skip: Number(offset),
-          });
+          const formattedPosts = posts.map((post) => ({
+              ...post,
+              liked: post.post_likes.length > 0, // True if the user has liked the post
+              saved: post.saved_posts.length > 0,
+          }))
 
-          res.status(200).json(posts);
+          res.json(formattedPosts);
           return;
         }
       } catch (error) {
         console.error("Error verifying token:", error);
       }
     }
+
+    const posts = await prisma.post.findMany({
+      select: {
+        post_id: true,
+        user_id: true,
+        title: true,
+        type: true,
+        thumbnail: true,
+        snippet: true,
+        created_at: true,
+        likes: true, // Directly select the scalar field
+        shares: true, // Directly select the scalar field
+        comments: true, // Directly select the scalar field
+        video_views: true, // Directly select the scalar field
+        user: {
+          select: {
+            user_id: true,
+            display_name: true,
+            image: true,
+          },
+        },
+      },
+      take: Number(limit),
+      skip: Number(offset),
+    });
+
+    res.status(200).json(posts);
+    return;
   } catch (error) {
     console.error("Error fetching posts:", error);
     res.status(500).json({
