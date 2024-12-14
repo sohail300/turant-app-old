@@ -283,6 +283,14 @@ export const getOwnPosts = async (req: Request, res: Response) => {
                 image: true,
               },
             },
+            post_likes: {
+              where: { user_id: Number(userId) }, // Check if the user has liked the post
+              select: { like_id: true },
+            },
+            saved_posts: {
+              where: { user_id: Number(userId) }, // Check if the user has saved the post
+              select: { saved_post_id: true },
+            },
           },
         },
       },
@@ -294,6 +302,15 @@ export const getOwnPosts = async (req: Request, res: Response) => {
       res.status(404).json({ message: "Posts not found" });
     }
 
+    const formattedPosts = posts.map((user) => ({
+      user_id: user.user_id,
+      posts: user.posts.map((post) => ({
+        ...post,
+        liked: post.post_likes.length > 0, // True if the user has liked the post
+        saved: post.saved_posts.length > 0, // True if the user has saved the post
+      })),
+    }));
+
     const totalPosts = await prisma.post.count({
       where: {
         user_id: Number(userId),
@@ -301,7 +318,7 @@ export const getOwnPosts = async (req: Request, res: Response) => {
     });
 
     res.json({
-      posts,
+      formattedPosts,
       totalPosts,
     });
   } catch (error) {
@@ -356,6 +373,14 @@ export const getUserSavedPosts = async (req: Request, res: Response) => {
                     image: true,
                   },
                 },
+                post_likes: {
+                  where: { user_id: Number(userId) }, // Check if the user has liked the post
+                  select: { like_id: true },
+                },
+                saved_posts: {
+                  where: { user_id: Number(userId) }, // Check if the user has saved the post
+                  select: { saved_post_id: true },
+                },
               },
             },
           },
@@ -369,6 +394,15 @@ export const getUserSavedPosts = async (req: Request, res: Response) => {
       res.status(404).json({ message: "Posts not found" });
     }
 
+    const formattedPosts = posts.map((user) => ({
+      user_id: user.user_id,
+      saved_posts: user.saved_posts.map((savedPost) => ({
+        ...savedPost.post,
+        liked: savedPost.post.post_likes.length > 0, // True if the user has liked the post
+        saved: savedPost.post.saved_posts.length > 0, // True if the user has saved the post
+      })),
+    }));
+
     const totalPosts = await prisma.post.count({
       where: {
         user_id: Number(userId),
@@ -376,7 +410,7 @@ export const getUserSavedPosts = async (req: Request, res: Response) => {
     });
 
     res.json({
-      posts,
+      formattedPosts,
       totalPosts,
     });
   } catch (error) {
