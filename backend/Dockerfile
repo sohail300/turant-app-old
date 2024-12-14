@@ -3,16 +3,6 @@ FROM node:20.18-alpine AS build
 
 WORKDIR /app
 
-# Install OpenSSL and required dependencies
-RUN apk add \
-    openssl \
-    libssl1.1 \
-    libssl-dev \
-    ca-certificates
-
-# Copy application files
-COPY . .
-
 COPY package*.json .
 
 RUN npm install
