@@ -11,7 +11,7 @@ RUN apk add openssl
 
 COPY . .
 
-RUN npm run compile
+RUN npm run build
 
 #Production stage
 FROM node:20.18-alpine AS production

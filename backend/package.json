@@ -5,7 +5,8 @@
   "scripts": {
     "compile": "npx prisma generate && tsc && node ./dist/index.js",
     "dev": "nodemon -e ts  --exec \"npm run compile\"",
-    "start": "npm run compile && node ./dist/index.js"
+    "start": "npm run compile && node ./dist/index.js",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
