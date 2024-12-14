@@ -22,8 +22,15 @@ import { router } from "expo-router";
 import { OtpInput } from "react-native-otp-entry";
 import { baseURL } from "@/constants/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import forgotPasswordPage from "@/locales/forgotPasswordPage.json";
+import signupPage from "@/locales/signupPage.json";
+import { useSelector } from "react-redux";
 
 export default function Signup() {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [selectedMedium, setSelectedMedium] = useState<string | null>(null); // This will store the selected medium: 'phone' or 'email'
@@ -44,36 +51,30 @@ export default function Signup() {
       }
 
       const response = await fetch(`${baseURL}/auth/send-forgot-password-otp`, {
-        method: "POST", // Use POST method for the request
+        method: "POST",
         headers: {
           "Content-Type": "application/json", // Ensure the request is sent as JSON
         },
         body: JSON.stringify(bodyObject),
       });
 
-      if (!response.ok) {
-        // Handle any errors (non-2xx responses)
-        const errorText = await response.text(); // Read the response body as text
-        console.error("Error:", errorText);
-        throw new Error("Request failed with status " + response.status);
-      }
-
       const data = await response.json();
       console.log(data);
 
-      if (selectedMedium === "phone") {
-        await AsyncStorage.setItem("phone", JSON.stringify(phone));
-      } else if (selectedMedium === "email") {
-        await AsyncStorage.setItem("email", JSON.stringify(email));
-      }
-
-      if (selectedMedium === "phone") {
-        router.push("/forgot-password-phone");
+      if (response.ok) {
+        if (selectedMedium === "phone") {
+          await AsyncStorage.setItem("phone", JSON.stringify(phone));
+          router.push("/forgot-password-phone");
+        } else if (selectedMedium === "email") {
+          await AsyncStorage.setItem("email", JSON.stringify(email));
+          router.push("/forgot-password-email");
+        }
       } else {
-        router.push("/forgot-password-email");
+        alert("Enter the correct details");
       }
     } catch (error) {
-      console.log(error);
+      alert("An error occurred. Please try again.");
+      console.log("error", error);
     }
   };
 
@@ -92,14 +93,17 @@ export default function Signup() {
           <View style={style.card}>
             <View style={style.headerContainer}>
               <Image source={logo} style={style.logo} />
-              <Text style={style.title}>Change Password</Text>
-              <Text style={style.subtitle}>Choose a medium to send OTP</Text>
+              <Text style={style.title}>
+                {forgotPasswordPage.changePassword[language]}
+              </Text>
+              <Text style={style.subtitle}>
+                {forgotPasswordPage.chooseMedium[language]}
+              </Text>
             </View>
 
             {/* There will be two radio buttons for phone and email */}
             <View style={style.formContainer}>
               <View style={style.inputGroup}>
-                <Text style={style.inputLabel}>Choose Medium</Text>
                 <View
                   style={{
                     flexDirection: "row",
@@ -113,7 +117,9 @@ export default function Signup() {
                     ]}
                     onPress={() => setSelectedMedium("phone")}
                   >
-                    <Text style={style.radioText}>Phone</Text>
+                    <Text style={style.radioText}>
+                      {signupPage.phone[language]}
+                    </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[
@@ -122,7 +128,9 @@ export default function Signup() {
                     ]}
                     onPress={() => setSelectedMedium("email")}
                   >
-                    <Text style={style.radioText}>Email</Text>
+                    <Text style={style.radioText}>
+                      {signupPage.email[language]}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -130,9 +138,13 @@ export default function Signup() {
 
             {selectedMedium === "phone" && (
               <View style={style.inputGroup}>
-                <Text style={style.inputLabel}>Phone</Text>
-
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginTop: 16,
+                  }}
+                >
                   <View
                     style={{
                       padding: 10,
@@ -153,7 +165,7 @@ export default function Signup() {
                     value={phone}
                     keyboardType="numeric"
                     onChangeText={setPhone}
-                    placeholder="Enter your phone"
+                    placeholder={signupPage.enterPhone[language]}
                     placeholderTextColor={Colors.light.details}
                     style={[
                       styles.ContentText,
@@ -173,12 +185,11 @@ export default function Signup() {
 
             {selectedMedium === "email" && (
               <View style={style.inputGroup}>
-                <Text style={style.inputLabel}>Email</Text>
                 <TextInput
                   value={email}
                   keyboardType="email-address"
                   onChangeText={setEmail}
-                  placeholder="Enter your email"
+                  placeholder={signupPage.enterEmail[language]}
                   placeholderTextColor={Colors.light.details}
                   style={[
                     styles.ContentText,
@@ -187,6 +198,7 @@ export default function Signup() {
                       borderWidth: 1,
                       borderRadius: 5,
                       padding: 10,
+                      marginTop: 16,
                     },
                   ]}
                 />
@@ -197,7 +209,9 @@ export default function Signup() {
               style={styles.buttonContainer}
               onPress={() => handleSubmit()}
             >
-              <Text style={styles.button}>Send OTP</Text>
+              <Text style={styles.button}>
+                {forgotPasswordPage.sendOTP[language]}
+              </Text>
             </TouchableOpacity>
           </View>
 

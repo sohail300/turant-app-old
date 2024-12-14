@@ -30,6 +30,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { baseURL } from "@/constants/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import card from "@/locales/card.json";
 
 const Card = ({
   post_id,
@@ -65,6 +66,7 @@ const Card = ({
   authorId?: number;
 }) => {
   const language = useSelector((state) => state.language.data);
+
   const isUserLoggedIn = useSelector((state) => state.auth.data);
   const dispatch = useDispatch();
 
@@ -246,7 +248,7 @@ const Card = ({
           objectFit: "contain",
         }}
       />
-      <Text onPress={() => router.push("/login")}>Login</Text>
+      <Text onPress={() => router.push("/forgot-password")}>Login</Text>
       <Link href={"/single-news"}>
         <Heading>{title}</Heading>
       </Link>
@@ -295,7 +297,9 @@ const Card = ({
           </TouchableOpacity>
           <Text>•</Text>
           <RedText onPress={() => handleFollow()}>
-            {status.isFollowing ? "Unfollow" : "Follow"}
+            {status.isFollowing
+              ? card.follow[language]
+              : card.unfollow[language]}
           </RedText>
         </View>
         <TouchableOpacity onPress={() => handleSave()}>
@@ -382,12 +386,7 @@ const Card = ({
             marginTop: 8,
           }}
         >
-          <DisclaimerText>
-            Disclaimer: This content/video has been published directly by the
-            user on TURANT, an intermediary platform. TURANT has neither
-            reviewed nor endorsed the content and holds no prior knowledge of
-            its details.
-          </DisclaimerText>
+          <DisclaimerText>{card.disclaimer[language]}</DisclaimerText>
         </View>
       )}
     </SafeAreaView>

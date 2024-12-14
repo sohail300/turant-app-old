@@ -8,6 +8,7 @@ const prisma = new PrismaClient();
 
 export const showPosts = async (req: Request, res: Response) => {
   try {
+    console.log("showPosts");
     const { limit, offset } = req.query;
     const posts = await prisma.post.findMany({
       select: {

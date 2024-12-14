@@ -25,19 +25,23 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(false); // To avoid duplicate requests
   const [hasMore, setHasMore] = useState(true); // To stop fetching if no more data
 
-  useEffect(() => {
-    async function getIsAppSetup() {
-      try {
-        const value = await AsyncStorage.getItem("isAppSetup");
-        if (value !== "true") {
-          router.replace("/setup");
-        }
-      } catch (error) {
-        console.error("Error getting isAppSetup:", error);
-      }
-    }
-    getIsAppSetup();
-  }, []);
+  // useEffect(() => {
+  //   async function initializeApp() {
+  //     try {
+  //       let value = await AsyncStorage.getItem("isAppSetup");
+  //       if (value === null) {
+  //         await AsyncStorage.setItem("isAppSetup", "false");
+  //         value = "false";
+  //       }
+  //       if (value !== "true") {
+  //         router.replace("/setup");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error getting isAppSetup:", error.message || error);
+  //     }
+  //   }
+  //   initializeApp();
+  // }, []);
 
   async function getData(initialLoad = false) {
     if (loading || !hasMore) return; // Avoid fetching if already loading or no more data

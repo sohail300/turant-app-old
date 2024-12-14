@@ -17,8 +17,17 @@ import {
 } from "react-native-pell-rich-editor";
 import RenderHtml from "react-native-render-html";
 import DropDownPicker from "react-native-dropdown-picker";
+import uploadPage from "@/locales/uploadPage.json";
+import { useSelector } from "react-redux";
+import { baseURL } from "@/constants/config";
+import { router } from "expo-router";
 
 const UploadArticle = () => {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+  const token = useSelector((state) => state.token.data);
+
   const [languageOpen, setLanguageOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [lanaguages, setLanaguages] = useState([
@@ -28,7 +37,8 @@ const UploadArticle = () => {
 
   const [textEditorShow, setTextEditorShow] = useState(true);
 
-  const [description, setDescription] = useState("<div><b>bsnjdjdjd</b></div>");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const richText = useRef();
 
   const handleHead = ({ tintColor }) => (
@@ -54,6 +64,24 @@ const UploadArticle = () => {
       marginBottom: 10,
     },
   };
+
+  async function handleSubmit() {
+    const response = await fetch(`${baseURL}/upload/article`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({
+        title: title,
+        content: description,
+        language: language,
+      }),
+    });
+    const data = await response.json();
+    console.log("data", data);
+    router.push("/upload");
+  }
 
   return (
     <View style={{ flex: 1 }}>
@@ -90,7 +118,7 @@ const UploadArticle = () => {
                   color: Colors.light.subheading,
                 }}
               >
-                Write an Article
+                {uploadPage.writeArticle[language]}
               </Text>
             </View>
             <View
@@ -112,8 +140,10 @@ const UploadArticle = () => {
                 >
                   <TextInput
                     style={styles.ContentText}
-                    placeholder="Title"
+                    placeholder={uploadPage.title[language]}
                     placeholderTextColor={Colors.light.details}
+                    value={title}
+                    onChangeText={(text) => setTitle(text)}
                   />
                 </View>
               </View>
@@ -134,7 +164,7 @@ const UploadArticle = () => {
                       initialHeight={300}
                       onChange={handleContentChange}
                       value={description}
-                      placeholder="Description"
+                      placeholder={uploadPage.description[language]}
                       style={{
                         maxHeight: 300,
                         borderColor: Colors.light.border,
@@ -181,7 +211,7 @@ const UploadArticle = () => {
                     onPress={() => setTextEditorShow(false)}
                   >
                     <Text style={{ color: Colors.light.subheading }}>
-                      Hide Text Editor
+                      {uploadPage.hideTextEditor[language]}
                     </Text>
                     <Feather
                       name="chevron-down"
@@ -200,7 +230,7 @@ const UploadArticle = () => {
                     onPress={() => setTextEditorShow(true)}
                   >
                     <Text style={{ color: Colors.light.subheading }}>
-                      Show Text Editor
+                      {uploadPage.showTextEditor[language]}
                     </Text>
                     <Feather
                       name="chevron-up"
@@ -255,11 +285,12 @@ const UploadArticle = () => {
                   borderRadius: 8,
                   marginVertical: 24,
                 }}
+                onPress={() => handleSubmit()}
               >
                 <Text
                   style={{ color: Colors.light.white, textAlign: "center" }}
                 >
-                  Save
+                  {uploadPage.save[language]}
                 </Text>
               </TouchableOpacity>
             </View>

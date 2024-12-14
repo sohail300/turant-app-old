@@ -1,0 +1,66 @@
+{
+  "shareContent": {
+    "english": "Share Your Content",
+    "hindi": "अपना कंटेंट शेयर करें"
+  },
+  "shareVideo": {
+    "english": "Share a Video",
+    "hindi": "वीडियो शेयर करें"
+  },
+  "postImage": {
+    "english": "Post an Image",
+    "hindi": "इमेज शेयर करें"
+  },
+  "writeArticle": {
+    "english": "Write an Article",
+    "hindi": "एक लेख लिखें"
+  },
+  "showTextEditor": {
+    "english": "Show Text Editor",
+    "hindi": "टेक्स्ट एडिटर दिखाएं"
+  },
+  "hideTextEditor": {
+    "english": "Hide Text Editor",
+    "hindi": "टेक्स्ट एडिटर छिपाएं"
+  },
+  "title": {
+    "english": "Title",
+    "hindi": "शीर्षक"
+  },
+  "description": {
+    "english": "Description",
+    "hindi": "विवरण"
+  },
+  "save": {
+    "english": "Save",
+    "hindi": "सेव"
+  },
+  "upload": {
+    "english": "Upload",
+    "hindi": "अपलोड"
+  },
+  "browse": {
+    "english": "Browse to upload",
+    "hindi": "ब्राउज़ करके अपलोड करें"
+  },
+  "videoDuration": {
+    "english": "The video duration should be between 1 and 5 minutes",
+    "hindi": "वीडियो का अवधि के बीच एक और 5 मिनट होना चाहिए"
+  },
+  "videoSupportedFormats": {
+    "english": "Supported formats: MP4",
+    "hindi": "समर्थित प्रारूप: MP4"
+  },
+  "videoMaximumFileSize": {
+    "english": "Maximum file size: 10 MB",
+    "hindi": "अधिकतम फ़ाइल आकार: 10 MB"
+  },
+  "imageSupportedFormats": {
+    "english": "Supported formats: JPG, JPEG, PNG",
+    "hindi": "समर्थित प्रारूप: JPG, JPEG, PNG"
+  },
+  "imageMaximumFileSize": {
+    "english": "Maximum file size: 300 KB",
+    "hindi": "अधिकतम फ़ाइल आकार: 300 KB"
+  }
+}

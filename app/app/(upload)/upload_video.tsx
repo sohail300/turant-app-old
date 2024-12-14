@@ -1,8 +1,16 @@
-import { View, Text, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  Dimensions,
+  Pressable,
+  Image,
+  StyleSheet,
+} from "react-native";
 import React, { useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Colors } from "@/constants/Colors";
 import {
+  FlatList,
   ScrollView,
   TextInput,
   TouchableOpacity,
@@ -17,11 +25,22 @@ import {
 } from "react-native-pell-rich-editor";
 import RenderHtml from "react-native-render-html";
 import DropDownPicker from "react-native-dropdown-picker";
+import uploadPage from "@/locales/uploadPage.json";
+import { useSelector } from "react-redux";
+import { AntDesign } from "@expo/vector-icons";
+import { baseURL } from "@/constants/config";
+import * as ImagePicker from "expo-image-picker";
 
 const UploadVideo = () => {
+  const [language, setLanguage] = useState(
+    useSelector((state) => state.language.data)
+  );
+
+  const token = useSelector((state) => state.token.data);
+
   const [languageOpen, setLanguageOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
-  const [lanaguages, setLanaguages] = useState([
+  const [languages, setLanguages] = useState([
     { label: "English", value: "English" },
     { label: "Hindi", value: "Hindi" },
   ]);
@@ -53,6 +72,78 @@ const UploadVideo = () => {
     div: {
       marginBottom: 10,
     },
+  };
+
+  const [selectedVideo, setSelectedVideo] = useState(null);
+
+  const handleVideoPick = async () => {
+    // Request permission to access media library
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (!permissionResult.granted) {
+      alert("Permission to access media library is required!");
+      return;
+    }
+
+    // Open the video picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos, // Allow only videos
+      allowsMultipleSelection: false, // Only one video
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const video = result.assets[0]; // Get the selected video
+      setSelectedVideo({
+        uri: video.uri,
+        name: video.fileName || `video-${Date.now()}.mp4`,
+        type: "video/mp4",
+      });
+    }
+  };
+
+  const handleRemoveVideo = () => {
+    setSelectedVideo(null); // Clear the selected video
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedVideo) {
+      alert("Please select a video to upload!");
+      return;
+    }
+
+    const formData = new FormData();
+
+    // Append article data
+    formData.append("title", "Your Article Title");
+    formData.append("content", "Your article description");
+    formData.append("language", language);
+
+    // Append the selected video
+    formData.append("video", selectedVideo);
+
+    try {
+      const response = await fetch(`${baseURL}/upload/video`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData, // Send as multipart form
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("Video uploaded successfully!");
+        setSelectedVideo(null); // Clear selected video
+      } else {
+        console.error(result);
+        alert("Failed to upload video. Please try again.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred. Please try again.");
+    }
   };
 
   return (
@@ -90,7 +181,7 @@ const UploadVideo = () => {
                   color: Colors.light.subheading,
                 }}
               >
-                Share a Video
+                {uploadPage.shareVideo[language]}
               </Text>
             </View>
             <View
@@ -128,7 +219,7 @@ const UploadVideo = () => {
                       textAlign: "center",
                     }}
                   >
-                    Drag and drop a video or browse to upload
+                    {uploadPage.browse[language]}
                   </Text>
                   <TouchableOpacity
                     style={{
@@ -140,6 +231,7 @@ const UploadVideo = () => {
                       alignItems: "center",
                       gap: 8,
                     }}
+                    onPress={() => handleVideoPick()}
                   >
                     <Feather
                       name="upload"
@@ -152,20 +244,35 @@ const UploadVideo = () => {
                         color: Colors.light.accent,
                       }}
                     >
-                      Upload
+                      {uploadPage.upload[language]}
                     </Text>
                   </TouchableOpacity>
                 </View>
+
+                {/* Preview Section */}
+                {selectedVideo && (
+                  <View style={{ alignItems: "center", marginTop: 16 }}>
+                    <Text style={{ fontSize: 16, marginBottom: 8 }}>
+                      {selectedVideo.name}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={handleRemoveVideo}
+                      style={{ marginTop: 8 }}
+                    >
+                      <AntDesign name="closecircle" size={24} color="red" />
+                    </TouchableOpacity>
+                  </View>
+                )}
               </View>
               <View style={{ marginVertical: 12 }}>
                 <Text style={{ ...styles.details, textAlign: "center" }}>
-                  The video duration should be between 1 and 5 minutes
+                  {uploadPage.videoDuration[language]}
                 </Text>
                 <Text style={{ ...styles.details, textAlign: "center" }}>
-                  Supported formats: MP4
+                  {uploadPage.videoSupportedFormats[language]}
                 </Text>
                 <Text style={{ ...styles.details, textAlign: "center" }}>
-                  Maximum file size: 10 MB
+                  {uploadPage.videoMaximumFileSize[language]}
                 </Text>
               </View>
               <View style={{ marginTop: 12 }}>
@@ -181,7 +288,7 @@ const UploadVideo = () => {
                 >
                   <TextInput
                     style={styles.ContentText}
-                    placeholder="Title"
+                    placeholder={uploadPage.title[language]}
                     placeholderTextColor={Colors.light.details}
                   />
                 </View>
@@ -203,7 +310,7 @@ const UploadVideo = () => {
                       initialHeight={300}
                       onChange={handleContentChange}
                       value={description}
-                      placeholder="Description"
+                      placeholder={uploadPage.description[language]}
                       style={{
                         maxHeight: 300,
                         borderColor: Colors.light.border,
@@ -250,7 +357,7 @@ const UploadVideo = () => {
                     onPress={() => setTextEditorShow(false)}
                   >
                     <Text style={{ color: Colors.light.subheading }}>
-                      Hide Text Editor
+                      {uploadPage.hideTextEditor[language]}
                     </Text>
                     <Feather
                       name="chevron-down"
@@ -269,7 +376,7 @@ const UploadVideo = () => {
                     onPress={() => setTextEditorShow(true)}
                   >
                     <Text style={{ color: Colors.light.subheading }}>
-                      Show Text Editor
+                      {uploadPage.showTextEditor[language]}
                     </Text>
                     <Feather
                       name="chevron-up"
@@ -298,10 +405,10 @@ const UploadVideo = () => {
                 }}
                 open={languageOpen}
                 value={selectedLanguage}
-                items={lanaguages}
+                items={languages}
                 setOpen={setLanguageOpen}
                 setValue={setSelectedLanguage}
-                setItems={setLanaguages}
+                setItems={setLanguages}
                 placeholder="Select Language"
                 zIndex={2000}
                 zIndexInverse={1000}
@@ -324,11 +431,12 @@ const UploadVideo = () => {
                   borderRadius: 8,
                   marginVertical: 24,
                 }}
+                onPress={() => handleSubmit()}
               >
                 <Text
                   style={{ color: Colors.light.white, textAlign: "center" }}
                 >
-                  Save
+                  {uploadPage.save[language]}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -340,3 +448,25 @@ const UploadVideo = () => {
 };
 
 export default UploadVideo;
+
+const fileStyles = StyleSheet.create({
+  imagePreview: {
+    width: 80,
+    height: 80,
+    marginRight: 8,
+    position: "relative", // Ensure the parent container has position set
+  },
+  image: {
+    width: "100%", // Adjust to fill the container fully
+    height: "100%", // Adjust to fill the container fully
+    borderRadius: 8,
+  },
+  removeIcon: {
+    position: "absolute",
+    top: 0, // Slightly outside the image for better visibility
+    right: 0, // Slightly outside the image for better visibility
+    borderRadius: 12,
+    padding: 4,
+    zIndex: 50,
+  },
+});
