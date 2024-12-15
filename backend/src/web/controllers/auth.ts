@@ -98,7 +98,7 @@ export const login = async (req: Request, res: Response) => {
     // Find the user by either email or phone
     const user = await prisma.admin.findFirst({
       where: {
-        email,
+        email: { contains: email, mode: "insensitive" },
       },
     });
 
