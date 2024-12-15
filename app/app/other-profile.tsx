@@ -26,7 +26,6 @@ const OtherProfile = () => {
 
     try {
       const authorId = await AsyncStorage.getItem("authorId");
-      console.log("authorId", authorId);
 
       const response = await fetch(`${baseURL}/user/others-posts`, {
         method: "POST",

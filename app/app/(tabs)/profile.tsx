@@ -196,6 +196,7 @@ const profile = () => {
                       email: profileData?.email,
                       phone: profileData?.phone,
                       image: profileData?.image,
+                      verified: profileData?.verified,
                     },
                   })
                 }

@@ -33,8 +33,6 @@ export default function Signup() {
     useSelector((state) => state.location.data)
   );
   const dispatch = useDispatch();
-  console.log("language", language);
-  console.log("location", location);
 
   const validate = Yup.object({
     name: Yup.string().required("Name is required"),

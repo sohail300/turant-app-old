@@ -36,7 +36,7 @@ const SearchBottomSheet = ({
   const dispatch = useDispatch();
 
   const [searchText, setSearchText] = useState("");
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState([]);
   // const [users, setUsers] = useState([
   //   {
   //     id: 1,
@@ -109,8 +109,9 @@ const SearchBottomSheet = ({
   //     username: "@rahulkumar001",
   //   },
   // ]);
-  const fetchUsers = async () =>{
-    const response = await fetch(`${baseURL}/user/search-users`,{
+
+  const fetchUsers = async () => {
+    const response = await fetch(`${baseURL}/user/search-users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -120,18 +121,18 @@ const SearchBottomSheet = ({
         identifier: searchText,
         limit: 10,
         offset: 0,
-      })
-    })
-    const usersData = await response.json()
-    console.log("usersData")
-    console.log(usersData)
-    setUsers(usersData.users)
-  }
+      }),
+    });
+    const usersData = await response.json();
+    console.log("usersData");
+    console.log(usersData);
+    setUsers(usersData.users);
+  };
   useEffect(() => {
-    if (searchText.length > 0){
-      fetchUsers()
+    if (searchText.length > 0) {
+      fetchUsers();
     }
-  },[searchText])
+  }, [searchText]);
 
   const [limit, setLimit] = useState(10); // Limit for each request
 
@@ -171,14 +172,48 @@ const SearchBottomSheet = ({
           borderRadius: 10,
         }}
       >
-        <BottomSheetView style={{ height: searchText ? "auto" : 90 }}>
-          <View style={fileStyles.headerContainer}>
+        <BottomSheetView
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <View
+            style={{
+              borderBottomColor: "#B1B1B1",
+              borderBottomWidth: 1,
+              width: Dimensions.get("window").width,
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              position: "relative",
+            }}
+          >
             <Pressable onPress={handleClose}>
               <Feather name="chevron-down" size={24} color="black" />
             </Pressable>
-            <Text style={styles.Subheading2}>Search</Text>
+            <Text style={styles.Subheading2}>Comments</Text>
             <SafeAreaView />
           </View>
+          <FlatList
+            data={comments}
+            keyExtractor={(item) => item.created_at}
+            renderItem={({ item }) => (
+              <CommentCard
+                comment={item.comment}
+                name={item.user.display_name}
+                image={item.user.image}
+              />
+            )}
+            style={{
+              flexGrow: 0,
+              maxHeight: Dimensions.get("window").height * 0.54, // Constrain height
+            }}
+          />
           <View
             style={{
               display: "flex",
@@ -187,50 +222,50 @@ const SearchBottomSheet = ({
               alignItems: "center",
               padding: 24,
               gap: 4,
-              position: "",
+              position: "absolute",
               bottom: 0,
               left: 0,
               right: 0,
               backgroundColor: "#fff", // Ensure background is set
-              // shadowColor: "#000", // Shadow color
-              // shadowOffset: { width: 0, height: -2 }, // Top shadow with a negative height
-              // shadowOpacity: 0.25, // Opacity of the shadow
-              // shadowRadius: 4, // Blur radius
-              // elevation: 8, // For Android
+              shadowColor: "#000", // Shadow color
+              shadowOffset: { width: 0, height: -2 }, // Top shadow with a negative height
+              shadowOpacity: 0.25, // Opacity of the shadow
+              shadowRadius: 4, // Blur radius
+              elevation: 8, // For Android
             }}
           >
             <TextInput
               style={{
                 borderColor: Colors.light.border,
                 borderWidth: 1,
-                width: '100%',
+                width: 240,
                 borderRadius: 4,
                 minHeight: 48,
                 paddingLeft: 16,
               }}
-              multiline={false}
-              value={searchText}
+              multiline={true}
+              value={comment}
               placeholder="Add your comment"
               placeholderTextColor={"#A8A8A8"}
-              onChangeText={(text) => setSearchText(text)}
+              onChangeText={(text) => setComment(text)}
             ></TextInput>
+            <TouchableOpacity
+              style={{
+                width: 80,
+                borderRadius: 4,
+                borderColor: Colors.light.accent,
+                borderWidth: 1,
+                padding: 8,
+              }}
+              onPress={() => {
+                handlePost();
+              }}
+            >
+              <Text style={{ ...styles.button, color: Colors.light.accent }}>
+                Post
+              </Text>
+            </TouchableOpacity>
           </View>
-          <FlatList
-            data={users}
-            keyExtractor={(item) => item.created_at}
-            renderItem={({ item }) => (
-              <UserCard
-                key={item.username}
-                username={item.username}
-                name={item.display_name}
-                image={item.image}
-              />
-            )}
-            style={{
-              flexGrow: 0,
-              maxHeight: Dimensions.get("window").height * 0.54, // Constrain height
-            }}
-          />
         </BottomSheetView>
       </BottomSheet>
     </View>
@@ -239,80 +274,38 @@ const SearchBottomSheet = ({
 
 export default SearchBottomSheet;
 
-const fileStyles = StyleSheet.create({
-  contentContainer: {
-    flex: 1,
-  },
-  headerContainer: {
-    borderBottomColor: "#B1B1B1",
-    borderBottomWidth: 1,
-    width: Dimensions.get("window").width,
-    display: "flex",
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-  },
-  searchContainer: {
-    borderTopColor: "#B1B1B1",
-    borderTopWidth: 1,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 24,
-    gap: 4,
-    backgroundColor: "white",
-    width: "100%",
-  },
-  searchContainerAbsolute: {
-    position: "absolute",
-    bottom: 0,
-  },
-  searchInput: {
-    borderColor: Colors.light.border,
-    borderWidth: 1,
-    flex: 1,
-    borderRadius: 4,
-    minHeight: 48,
-    paddingLeft: 16,
-    paddingRight: 80,
-  },
-  closeIcon: {
-    position: "absolute",
-    right: 72,
-  },
-  searchIcon: {
-    position: "absolute",
-    right: 36,
-  },
-  expandedContent: {
-    flex: 1,
-    height: "100%",
-  },
-});
-
-function UserCard({ name, image, username }) {
+function CommentCard({ name, image, comment }) {
   return (
     <View
       style={{
         display: "flex",
         flexDirection: "row",
-        alignItems: "center",
-        paddingTop: 24,
-        paddingHorizontal: 24,
+        justifyContent: "flex-start",
+        paddingVertical: 16,
+        paddingHorizontal: 6,
         gap: 12,
+        borderBottomColor: "#DBDBDB",
+        borderBottomWidth: 1,
       }}
     >
-      <Image
-        source={{ uri: image }}
-        width={40}
-        height={40}
-        borderRadius={50}
-      ></Image>
-      <Text style={styles.Subheading}>{name}</Text>
-      <Text style={{ ...styles.details, fontSize: 16, lineHeight: 24 }}>
-        {username}
-      </Text>
+      <Pressable onPress={() => router.push("/other-profile")}>
+        <Image
+          source={{ uri: image }}
+          width={40}
+          height={40}
+          borderRadius={50}
+        />
+      </Pressable>
+      <View
+        style={{
+          display: "flex",
+        }}
+      >
+        <Pressable onPress={() => router.push("/other-profile")}>
+          <Text style={styles.Subheading}>{name}</Text>
+        </Pressable>
+        <Text style={styles.ContentText}>{comment}</Text>
+      </View>
     </View>
   );
 }

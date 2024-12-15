@@ -155,7 +155,8 @@ export const login = async (req: Request, res: Response) => {
     const user = await prisma.user.findFirst({
       where: {
         OR: [
-          { email: identifier }, // Check by email
+          // email is not case sensitive
+          { email: { contains: identifier, mode: "insensitive" } },
           { phone: identifier }, // Check by phone
         ],
       },

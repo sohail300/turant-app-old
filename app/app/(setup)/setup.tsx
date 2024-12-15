@@ -113,8 +113,8 @@ const setup = () => {
       `${baseURL}/info/get-cities?state=${selectedState}`
     );
     const data = await response.json();
-    console.log(data);
-    // setCities(data);
+    console.log(data.cities);
+    // setCities(data.cities);
   };
 
   useEffect(() => {
@@ -258,6 +258,7 @@ const setup = () => {
               style={{
                 ...styles.Subheading2,
                 marginBottom: 8,
+                textAlign: "left",
               }}
             >
               {setupPage.state[language]}
@@ -291,6 +292,7 @@ const setup = () => {
                 ...styles.Subheading2,
                 marginTop: 20,
                 marginBottom: 8,
+                textAlign: "left",
               }}
             >
               {setupPage.city[language]}
