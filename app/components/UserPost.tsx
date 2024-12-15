@@ -31,15 +31,15 @@ const UserPost = ({ ...props }) => {
       });
 
       const response = await request.json();
-      // console.log(response.posts[0].posts[0].user);
+      console.log(response.formattedPosts[0].posts);
 
-      if (response.posts[0].posts.length === 0) {
+      if (response.formattedPosts[0].posts.length === 0) {
         setHasMore(false); // No more data to load
       } else {
         setData((prevData) =>
           initialLoad
-            ? response.posts[0].posts
-            : [...prevData, ...response.posts[0].posts]
+            ? response.formattedPosts[0].posts
+            : [...prevData, ...response.formattedPosts[0].posts]
         );
         setOffset((prevOffset) => prevOffset + limit); // Increment offset for next fetch
       }

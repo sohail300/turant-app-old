@@ -72,33 +72,7 @@ const setup = () => {
     { label: "Jammu and Kashmir", value: "jammu_and_kashmir" },
   ]);
 
-  const [cities, setCities] = useState([
-    { label: "Ranchi", value: "ranchi" },
-    { label: "Jamshedpur", value: "jamshedpur" },
-    { label: "Dhanbad", value: "dhanbad" },
-    { label: "Bokaro", value: "bokaro" },
-    { label: "Deoghar", value: "deoghar" },
-    { label: "Hazaribagh", value: "hazaribagh" },
-    { label: "Giridih", value: "giridih" },
-    { label: "Ramgarh", value: "ramgarh" },
-    { label: "Phusro", value: "phusro" },
-    { label: "Gumia", value: "gumia" },
-    { label: "Chatra", value: "chatra" },
-    { label: "Koderma", value: "koderma" },
-    { label: "Simdega", value: "simdega" },
-    { label: "Chaibasa", value: "chaibasa" },
-    { label: "Medininagar", value: "medininagar" },
-    { label: "Lohardaga", value: "lohardaga" },
-    { label: "Pakur", value: "pakur" },
-    { label: "Sahibganj", value: "sahibganj" },
-    { label: "Jhumri Telaiya", value: "jhumri_telaiya" },
-    { label: "Ghatshila", value: "ghatshila" },
-    { label: "Daltonganj", value: "daltonganj" },
-    { label: "Khunti", value: "khunti" },
-    { label: "Latehar", value: "latehar" },
-    { label: "Dumka", value: "dumka" },
-    { label: "Gharwa", value: "gharwa" },
-  ]);
+  const [cities, setCities] = useState([]);
 
   const onStateOpen = () => {
     setCityOpen(false);
@@ -113,8 +87,8 @@ const setup = () => {
       `${baseURL}/info/get-cities?state=${selectedState}`
     );
     const data = await response.json();
-    console.log(data);
-    // setCities(data);
+    console.log(data.cities);
+    setCities(data.cities);
   };
 
   useEffect(() => {
@@ -258,6 +232,7 @@ const setup = () => {
               style={{
                 ...styles.Subheading2,
                 marginBottom: 8,
+                textAlign: "left",
               }}
             >
               {setupPage.state[language]}
@@ -291,6 +266,7 @@ const setup = () => {
                 ...styles.Subheading2,
                 marginTop: 20,
                 marginBottom: 8,
+                textAlign: "left",
               }}
             >
               {setupPage.city[language]}

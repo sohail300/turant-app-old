@@ -15,10 +15,14 @@ import {
   searchUserFollowings,
   isUsernameAvailable,
   sendEditProfileOtp,
+  changeProfilePic,
 } from "../controllers/user";
 import { authenticate } from "../middlewares/authenticate";
+import multer from "multer";
 
 const router = Router();
+
+const upload = multer({ dest: "uploads/" });
 
 router.post("/search-users", authenticate, searchUsers);
 
@@ -45,6 +49,13 @@ router.post("/search-followers", authenticate, searchUserFollowers);
 router.post("/search-following", authenticate, searchUserFollowings);
 
 router.put("/edit-profile", authenticate, editUserProfile);
+
+router.put(
+  "/change-profile-pic",
+  authenticate,
+  upload.single("image"),
+  changeProfilePic
+);
 
 router.post("/send-edit-profile-otp", authenticate, sendEditProfileOtp);
 

@@ -20,21 +20,28 @@ import RedText from "@/components/RedText";
 import { OtpInput } from "react-native-otp-entry";
 import { useSelector } from "react-redux";
 import { baseURL } from "@/constants/config";
+import * as ImagePicker from "expo-image-picker";
 
 export default function Signup() {
-  const { display_name, username, email, phone, image } =
+  const { display_name, username, email, phone, image, verified } =
     useLocalSearchParams();
-  console.log(display_name);
+
+  console.log(verified);
 
   const [originalPhone, setOriginalPhone] = useState(phone);
   const [originalName, setOriginalName] = useState(display_name);
   const [originalUsername, setOriginalUsername] = useState(username);
   const [originalEmail, setOriginalEmail] = useState(email);
 
+  const [imagePicked, setImagePicked] = useState(false);
+  const [newImage, setNewImage] = useState(null);
+
   const [sendOrConfirm, setSendOrConfirm] = useState("send");
 
   const token = useSelector((state) => state.token.data);
   const location = useSelector((state) => state.location.data);
+  const language = useSelector((state) => state.language.data);
+
   const languages = [
     { label: "Hindi", value: "hindi" },
     { label: "English", value: "english" },
@@ -134,6 +141,77 @@ export default function Signup() {
     [debounceTimeout]
   );
 
+  const handleProfilePicChange = async () => {
+    if (!image) {
+      console.error("No image selected");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", {
+      uri: newImage,
+      name: "profile-pic.jpg",
+      type: "image/jpeg",
+    });
+    formData.append("imageId", "12345"); // Optional: Add image ID
+
+    try {
+      const response = await fetch(`${baseURL}/user/change-profile-pic`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("Response:", data);
+      alert("Profile picture changed successfully");
+      setImagePicked(false); // Set the flag to false
+    } catch (error) {
+      console.error("Error changing profile picture:", error);
+    }
+  };
+
+  const handleProfilePicSelection = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1], // Square aspect ratio
+      quality: 1, // Best quality
+    });
+
+    if (!result.canceled) {
+      // Set the image URI
+      setNewImage(result.assets[0].uri); // Save the image URI in state
+      setImagePicked(true); // Set the flag to true
+    } else {
+      console.log("Image selection canceled");
+    }
+  };
+
+  async function handleVerify() {
+    try {
+      const response = await fetch(`${baseURL}/auth/send-register-otp`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      console.log("Response:", data);
+      if (response.ok) {
+        router.push("/verify");
+      } else {
+        console.error("Error sending OTP:", data);
+        alert("Error sending OTP");
+      }
+    } catch (error) {
+      console.error("Error verifying:", error);
+    }
+  }
+
   return (
     <View
       style={{
@@ -169,7 +247,7 @@ export default function Signup() {
             >
               <Image
                 source={{
-                  uri: image,
+                  uri: newImage !== null ? newImage : image,
                 }}
                 style={{
                   width: 72,
@@ -177,7 +255,15 @@ export default function Signup() {
                   borderRadius: 36,
                 }}
               />
-              <RedText>Change Profile Picture</RedText>
+              {imagePicked === true ? (
+                <RedText onPress={() => handleProfilePicChange()}>
+                  Confirm
+                </RedText>
+              ) : (
+                <RedText onPress={() => handleProfilePicSelection()}>
+                  Change Profile Picture
+                </RedText>
+              )}
             </View>
             <Formik
               initialValues={{
@@ -190,26 +276,43 @@ export default function Signup() {
               }}
               // validationSchema={validate}
               onSubmit={async (values) => {
-                const request = await fetch(`${baseURL}/user/edit-profile`, {
-                  method: "PUT",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    display_name: values.name,
-                    username: values.username,
-                    email: values.email,
-                    state: "bihar",
-                    city: "delhi",
-                    app_language: "english",
-                  }),
-                });
+                const updatedFields = {};
 
-                const response = await request.json();
-                console.log(response);
-                if (request.ok) {
-                  router.push("/profile");
+                // Compare current values with original values and only add changes to the `updatedFields` object
+                if (values.name !== originalName) {
+                  updatedFields.display_name = values.name;
+                }
+                if (values.username !== originalUsername) {
+                  updatedFields.username = values.username;
+                }
+                if (values.email !== originalEmail) {
+                  updatedFields.email = values.email;
+                }
+
+                // Add constant fields if required
+                updatedFields.state = location.countryState;
+                updatedFields.city = location.city;
+                updatedFields.app_language = values.language;
+
+                // Proceed only if there are changes
+                if (Object.keys(updatedFields).length > 0) {
+                  const request = await fetch(`${baseURL}/user/edit-profile`, {
+                    method: "PUT",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify(updatedFields),
+                  });
+
+                  const response = await request.json();
+                  console.log(response);
+
+                  if (request.ok) {
+                    router.push("/profile");
+                  }
+                } else {
+                  console.log("No changes detected.");
                 }
               }}
             >
@@ -372,20 +475,21 @@ export default function Signup() {
                           ]}
                         />
 
-                        {sendOrConfirm === "send" && (
-                          <RedText
-                            style={{
-                              ...style.resendButton,
-                              position: "absolute",
-                              right: 10, // Slight padding from the edge
-                              top: "50%", // Move to 50% of container height
-                              transform: [{ translateY: -12 }], // Offset by half height to center vertically
-                            }}
-                            onPress={() => sendOTP(values.phone)}
-                          >
-                            Send OTP
-                          </RedText>
-                        )}
+                        {sendOrConfirm === "send" &&
+                          originalPhone !== values.phone && (
+                            <RedText
+                              style={{
+                                ...style.resendButton,
+                                position: "absolute",
+                                right: 10, // Slight padding from the edge
+                                top: "50%", // Move to 50% of container height
+                                transform: [{ translateY: -12 }], // Offset by half height to center vertically
+                              }}
+                              onPress={() => sendOTP(values.phone)}
+                            >
+                              Send OTP
+                            </RedText>
+                          )}
                         {sendOrConfirm === "confirm" &&
                           originalPhone !== values.phone && (
                             <RedText
@@ -549,6 +653,58 @@ export default function Signup() {
                       </View>
                       {touched.language && errors.language && (
                         <ErrorText>{errors.language}</ErrorText>
+                      )}
+                    </View>
+
+                    <View style={{ gap: 8 }}>
+                      <Text
+                        style={{ ...styles.Subheading2, textAlign: "left" }}
+                      >
+                        Verified
+                      </Text>
+
+                      {verified === "false" ? (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              backgroundColor: Colors.light.orange,
+                              padding: 10,
+                              borderRadius: 5,
+                              color: Colors.light.white,
+                            }}
+                          >
+                            Not Verified
+                          </Text>
+
+                          <RedText onPress={() => handleVerify()}>
+                            Verify
+                          </RedText>
+                        </View>
+                      ) : (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              backgroundColor: Colors.light.green,
+                              padding: 10,
+                              borderRadius: 5,
+                              color: Colors.light.white,
+                            }}
+                          >
+                            Verified
+                          </Text>
+                        </View>
                       )}
                     </View>
 

@@ -7,6 +7,9 @@ import { paginationSchema } from "../zod/user/pagination";
 import bcrypt from "bcrypt";
 import { sendEditProfileOtpSchema } from "../zod/user/sendEditProfileOtp";
 import otpGenerator from "otp-generator";
+import path from "path";
+import fs from "fs";
+import { uploadToS3 } from "../utils/uploadToS3";
 
 const prisma = new PrismaClient();
 
@@ -150,6 +153,7 @@ export const getOwnProfile = async (req: Request, res: Response) => {
         image: true,
         phone: true,
         email: true,
+        verified: true,
       },
     });
 
@@ -925,15 +929,27 @@ export const editUserProfile = async (req: Request, res: Response) => {
   try {
     const { userId } = req.headers; // Logged-in user's ID (from middleware/auth)
 
+    // Ensure userId is provided and valid
+    if (!userId || isNaN(Number(userId))) {
+      res.status(400).json({
+        message: "Invalid user ID",
+      });
+      return;
+    }
+
+    // Fetch the logged-in user's profile
     const user = await prisma.user.findUnique({
       where: { user_id: Number(userId) },
     });
 
     if (!user) {
-      res.status(404).json({ message: "User not found" });
+      res.status(404).json({
+        message: "User not found",
+      });
       return;
     }
 
+    // Validate the input data
     const inputData = editUserProfileSchema.safeParse(req.body);
 
     if (!inputData.success) {
@@ -949,54 +965,64 @@ export const editUserProfile = async (req: Request, res: Response) => {
 
     console.log(display_name, username, email, app_language, state, city);
 
-    // const usernameAlreadyTaken = await prisma.user.findFirst({
-    //   where: {
-    //     username,
-    //   },
-    // });
+    // Check if the username is taken by another user
+    if (username && username !== user.username) {
+      const usernameAlreadyTaken = await prisma.user.findFirst({
+        where: {
+          username,
+          user_id: { not: Number(userId) }, // Exclude the current user's ID
+        },
+      });
 
-    // if (usernameAlreadyTaken) {
-    //   res.status(400).json({
-    //     message: "Username already taken",
-    //   });
-    //   return;
-    // }
+      if (usernameAlreadyTaken) {
+        res.status(400).json({
+          message: "Username is already taken. Please choose another one.",
+        });
+        return;
+      }
+    }
 
-    // const emailAlreadyTaken = await prisma.user.findFirst({
-    //   where: {
-    //     email,
-    //   },
-    // });
+    // Check if the email is taken by another user
+    if (email && email !== user.email) {
+      const emailAlreadyTaken = await prisma.user.findFirst({
+        where: {
+          email,
+          user_id: { not: Number(userId) }, // Exclude the current user's ID
+        },
+      });
 
-    // if (emailAlreadyTaken) {
-    //   res.status(400).json({
-    //     message: "Email already taken",
-    //   });
-    //   return;
-    // }
+      if (emailAlreadyTaken) {
+        res.status(400).json({
+          message: "Email is already in use. Please use a different email.",
+        });
+        return;
+      }
+    }
+
+    // Build the update data dynamically to avoid overwriting fields with undefined
+    const updateData: any = {};
+    if (display_name !== undefined) updateData.display_name = display_name;
+    if (username !== undefined) updateData.username = username;
+    if (email !== undefined) updateData.email = email;
+    if (app_language !== undefined) updateData.app_language = app_language;
+    if (state !== undefined) updateData.state = state;
+    if (city !== undefined) updateData.city = city;
 
     // Update the user's profile
     await prisma.user.update({
       where: {
         user_id: Number(userId),
       },
-      data: {
-        display_name,
-        username,
-        email,
-        app_language,
-        state,
-        city,
-      },
+      data: updateData,
     });
 
     res.json({
-      msg: "Profile updated successfully",
+      message: "Profile updated successfully.",
     });
   } catch (error) {
     console.error("Error updating user profile:", error);
     res.status(500).json({
-      message: "Internal server error",
+      message: "Internal server error. Please try again later.",
     });
   }
 };
@@ -1035,6 +1061,55 @@ export const isUsernameAvailable = async (req: Request, res: Response) => {
     }
   } catch (error) {
     console.error("Error validating username:", error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
+export const changeProfilePic = async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.headers; // Logged-in user's ID (from middleware/auth)
+
+    const user = await prisma.user.findUnique({
+      where: { user_id: Number(userId) },
+    });
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const file = req.file;
+    console.log(file);
+    const filePath = req.file.path;
+    const originalExtension = path.extname(req.file.originalname); // e.g., ".jpg"
+    const compressedImagePath = `uploads/compressed_${Date.now()}${originalExtension}`;
+
+    let s3Url;
+
+    fs.renameSync(filePath, compressedImagePath);
+
+    s3Url = await uploadToS3(compressedImagePath, file.mimetype);
+    console.log(s3Url);
+
+    // Save Ad data in the database
+    await prisma.user.update({
+      where: {
+        user_id: Number(userId),
+      },
+      data: {
+        image: s3Url,
+      },
+    });
+
+    fs.unlinkSync(compressedImagePath);
+
+    res.json({
+      msg: "Profile picture updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating user profile picture:", error);
     res.status(500).json({
       message: "Internal server error",
     });

@@ -30,16 +30,15 @@ const UserSaved = ({ ...props }) => {
         }),
       });
       const response = await request.json();
-      console.log(response.posts[0].saved_posts[0].post);
-      // console.log(response.posts[0].saved_posts[0].user);
+      console.log(response.formattedPosts[0].saved_posts);
 
-      if (response.posts[0].saved_posts.length === 0) {
+      if (response.formattedPosts[0].saved_posts.length === 0) {
         setHasMore(false); // No more data to load
       } else {
         setData((prevData) =>
           initialLoad
-            ? response.posts[0].saved_posts
-            : [...prevData, ...response.posts[0].saved_posts]
+            ? response.formattedPosts[0].saved_posts
+            : [...prevData, ...response.formattedPosts[0].saved_posts]
         );
         setOffset((prevOffset) => prevOffset + limit); // Increment offset for next fetch
       }
@@ -57,7 +56,7 @@ const UserSaved = ({ ...props }) => {
   return (
     <FlatList
       {...props}
-      keyExtractor={(item) => String(item.post_id)}
+      keyExtractor={(item, index) => String(index)}
       data={data}
       ListEmptyComponent={
         <Text
@@ -73,18 +72,18 @@ const UserSaved = ({ ...props }) => {
       renderItem={({ item }) => (
         <Card
           post_id={item.post_id}
-          type={item.post.type}
-          title={item.post.title}
-          snippet={item.post.snippet}
+          type={item.type}
+          title={item.title}
+          snippet={item.snippet}
           likes={item.likes}
-          comments={item.post.comments}
-          shares={item.post.shares}
-          views={item.post.video_views}
-          created_at={item.post.created_at}
-          thumbnail={item.post.thumbnail}
-          authorId={item.post.user.user_id}
-          author={item.post.user.display_name}
-          authorImage={item.post.user.image}
+          comments={item.comments}
+          shares={item.shares}
+          views={item.video_views}
+          created_at={item.created_at}
+          thumbnail={item.thumbnail}
+          authorId={item.user.user_id}
+          author={item.user.display_name}
+          authorImage={item.user.image}
           liked={item?.liked}
           saved={item?.saved}
           full={false}
