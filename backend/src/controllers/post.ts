@@ -54,6 +54,10 @@ export const showPosts = async (req: Request, res: Response) => {
                   user_id: true,
                   display_name: true,
                   image: true,
+                  followers: {
+                    where: { follower_id: Number(userId) }, // Check if the logged-in user follows this user
+                    select: { follower_id: true },
+                  },
                 },
               },
               post_likes: {
@@ -94,6 +98,10 @@ export const showPosts = async (req: Request, res: Response) => {
                   user_id: true,
                   display_name: true,
                   image: true,
+                  followers: {
+                    where: { follower_id: Number(userId) }, // Check if the logged-in user follows this user
+                    select: { follower_id: true },
+                  },
                 },
               },
               post_likes: {
@@ -120,6 +128,7 @@ export const showPosts = async (req: Request, res: Response) => {
               ...post,
               liked: post.post_likes.length > 0, // True if the user has liked the post
               saved: post.saved_posts.length > 0,
+              following: post.user.followers.length > 0,
           }))
 
           res.json(formattedPosts);
