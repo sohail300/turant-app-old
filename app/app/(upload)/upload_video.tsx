@@ -48,6 +48,7 @@ const UploadVideo = () => {
   const [textEditorShow, setTextEditorShow] = useState(true);
 
   const [description, setDescription] = useState("<div><b>bsnjdjdjd</b></div>");
+  const [title, setTitle] = useState("");
   const richText = useRef();
 
   const handleHead = ({ tintColor }) => (
@@ -116,8 +117,8 @@ const UploadVideo = () => {
     const formData = new FormData();
 
     // Append article data
-    formData.append("title", "Your Article Title");
-    formData.append("content", "Your article description");
+    formData.append("title", title);
+    formData.append("content", description);
     formData.append("language", language);
 
     // Append the selected video
@@ -290,6 +291,8 @@ const UploadVideo = () => {
                     style={styles.ContentText}
                     placeholder={uploadPage.title[language]}
                     placeholderTextColor={Colors.light.details}
+                    value={title}
+                    onChangeText={(text) => setTitle(text)}
                   />
                 </View>
               </View>

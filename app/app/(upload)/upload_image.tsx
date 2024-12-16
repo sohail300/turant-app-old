@@ -119,8 +119,8 @@ const UploadImage = () => {
     const formData = new FormData();
 
     // Append article data
-    formData.append("title", "Your Article Title");
-    formData.append("content", "Your article description");
+    formData.append("title", title);
+    formData.append("content", description);
     formData.append("language", language);
 
     // Append selected images

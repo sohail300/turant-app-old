@@ -39,6 +39,7 @@ import {
   handleSave,
   handleShare,
 } from "@/utils/postActions";
+import RenderHTML from "react-native-render-html";
 
 const Card = ({
   post_id,
@@ -277,7 +278,7 @@ const Card = ({
         currentShares={currentShares}
         currentViews={currentViews}
       >
-        {snippet}
+        <RenderHTML source={{html: snippet}} />
       </ContentText>
       <Details>{formatDate(created_at!)}</Details>
       <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
