@@ -116,11 +116,7 @@ export const showPosts = async (req: Request, res: Response) => {
           });
 
           // Merge and sort posts
-          const posts = [...followedPosts, ...unfollowedPosts].sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
-          );
+          const posts = [...followedPosts, ...unfollowedPosts]
 
           const formattedPosts = posts.map((post) => ({
               ...post,
