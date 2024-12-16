@@ -46,7 +46,6 @@ const CardFlatlistComponent = ({ data, ...props }) => {
               authorImage={item.user.image}
               liked={item?.liked}
               saved={item?.saved}
-              full={false}
             />
           )
         }

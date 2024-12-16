@@ -11,7 +11,6 @@ import card from "@/locales/card.json";
 const ContentText = ({
   children,
   style,
-  full,
   title,
   post_id,
   type,
@@ -35,45 +34,33 @@ const ContentText = ({
 
   return (
     <View>
-      {full ? (
-        <Text style={[styles.ContentText, style]} {...props}>
-          {children}
-        </Text>
-      ) : (
-        <>
-          <Text
-            style={[styles.ContentText, style]}
-            {...props}
-            numberOfLines={5}
-          >
-            {children}
-          </Text>
-          <RedText
-            onPress={() =>
-              router.push({
-                pathname: "/single-news",
-                params: {
-                  title,
-                  post_id,
-                  type,
-                  thumbnail,
-                  snippet,
-                  created_at,
-                  author,
-                  authorImage,
-                  authorId,
-                  currentLikes,
-                  currentComments,
-                  currentShares,
-                  currentViews,
-                },
-              })
-            }
-          >
-            {card.readMore[language]}
-          </RedText>
-        </>
-      )}
+      <Text style={[styles.ContentText, style]} {...props} numberOfLines={5}>
+        {children}
+      </Text>
+      <RedText
+        onPress={() =>
+          router.push({
+            pathname: "/single-news",
+            params: {
+              title,
+              post_id,
+              type,
+              thumbnail,
+              snippet,
+              created_at,
+              author,
+              authorImage,
+              authorId,
+              currentLikes,
+              currentComments,
+              currentShares,
+              currentViews,
+            },
+          })
+        }
+      >
+        {card.readMore[language]}
+      </RedText>
     </View>
   );
 };
