@@ -140,6 +140,7 @@ export const showPosts = async (req: Request, res: Response) => {
     }
 
     const posts = await prisma.post.findMany({
+      orderBy: { created_at: "desc" },
       select: {
         post_id: true,
         user_id: true,
@@ -164,15 +165,9 @@ export const showPosts = async (req: Request, res: Response) => {
       skip: Number(offset),
     });
 
-    const newPosts = [...posts].sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() -
-        new Date(a.created_at).getTime()
-    );
-
     console.log("not login post");
     
-    res.status(200).json(newPosts);
+    res.status(200).json(posts);
     return;
   } catch (error) {
     console.error("Error fetching posts:", error);
