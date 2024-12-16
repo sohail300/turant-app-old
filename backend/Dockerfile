@@ -9,7 +9,7 @@ RUN npm install
 
 RUN apk add openssl
 
-RUN apk install ffmpeg
+# RUN apk install ffmpeg
 
 COPY . .
 
