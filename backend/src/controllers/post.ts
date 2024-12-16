@@ -12,8 +12,6 @@ export const showPosts = async (req: Request, res: Response) => {
     let isLoggedIn = false;
     let userId;
     const { limit, offset } = req.query;
-    console.log(req.query);
-
     const authHeader = req.headers.authorization;
     
     if (authHeader) {
@@ -131,6 +129,8 @@ export const showPosts = async (req: Request, res: Response) => {
               following: post.user.followers.length > 0,
           }))
 
+          console.log("login post");
+          
           res.json(formattedPosts);
           return;
         }
@@ -164,6 +164,8 @@ export const showPosts = async (req: Request, res: Response) => {
       skip: Number(offset),
     });
 
+    console.log("not login post");
+    
     res.status(200).json(posts);
     return;
   } catch (error) {

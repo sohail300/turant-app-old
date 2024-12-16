@@ -41,7 +41,7 @@ export const AdCard = ({
       {image && image !== "" && (
         <Pressable
           onPress={async () =>
-            await WebBrowser.openBrowserAsync("https://www.zomato.com/")
+            await WebBrowser.openBrowserAsync("https://youtube.com/@turantnews-f6c?si=o2r2mW6-fy6fd7YP")
           }
         >
           <Image
@@ -81,7 +81,7 @@ export const AdCard = ({
             style={StyleSheet.absoluteFill} // Makes the Pressable fill the entire Video component
             onPress={async () =>
               await WebBrowser.openBrowserAsync(
-                target_url || "https://www.zomato.com/"
+                target_url || "https://youtube.com/@turantnews-f6c?si=o2r2mW6-fy6fd7YP"
               )
             }
           />

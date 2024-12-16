@@ -9,6 +9,8 @@ RUN npm install
 
 RUN apk add openssl
 
+RUN apk install ffmpeg
+
 COPY . .
 
 RUN npm run build

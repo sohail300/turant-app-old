@@ -77,9 +77,9 @@ const Card = ({
   liked?: boolean;
   saved?: boolean;
 }) => {
-  const language = useSelector((state) => state.language.data);
-  const token = useSelector((state) => state.token.data);
-  const isUserLoggedIn = useSelector((state) => state.auth.data);
+  const language = useSelector((state: any) => state.language.data);
+  const token = useSelector((state: any) => state.token.data);
+  const isUserLoggedIn = useSelector((state: any) => state.auth.data);
   const dispatch = useDispatch();
 
   const [currentLikes, setCurrentLikes] = useState(likes);
