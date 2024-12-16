@@ -113,6 +113,7 @@ export default function Page() {
     formState: { errors },
     reset,
     control,
+    watch,
   } = useForm({
     resolver: zodResolver(addAdSchema),
   });
@@ -120,8 +121,8 @@ export default function Page() {
   const onSubmit = async (formData) => {
     console.log(formData);
 
-    if (!file) {
-      toast.error("Please upload an image");
+    if (formData.media_type !== "text" && !file) {
+      toast.error("Please upload an image or video");
       return;
     }
 
@@ -134,7 +135,9 @@ export default function Page() {
         data.append(key, value as string);
       }
     });
-    data.append("file", file);
+    if (formData.media_type === "image") {
+      data.append("file", file);
+    }
 
     try {
       setIsLoading(true);
@@ -238,63 +241,65 @@ export default function Page() {
               )}
             </div>
 
-            <div
-              className={`border-2 border-dashed border-gray-300 rounded-lg p-8 transition-colors
+            {["image", "video"].includes(watch("media_type")) && (
+              <div
+                className={`border-2 border-dashed border-gray-300 rounded-lg p-8 transition-colors
               ${!file ? "hover:border-gray-400" : ""}`}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-            >
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                className="hidden"
-                accept="image/*,video/*"
-              />
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  accept="image/*,video/*"
+                />
 
-              {!file ? (
-                <div className="flex flex-col items-center justify-center text-center space-y-2">
-                  <p className="text-brandText font-hind500 text-lg">
-                    Drag and drop an image or
-                  </p>
-                  <p className="text-brandText font-hind500 text-lg">
-                    browse to upload
-                  </p>
-                  <Button
-                    variant="ghost"
-                    className="mt-4 text-brandAccent flex flex-row justify-center items-center font-hind500 text-lg hover:text-brandAccent/80"
-                    onClick={handleBrowseClick}
-                  >
-                    <Upload className="h-8 w-8 text-brandAccent" />
-                    Upload
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex items-center justify-between bg-gray-50 p-4 rounded-md">
-                  <div className="flex items-center space-x-4">
-                    <div className="p-2 bg-white rounded-md">
-                      <Upload className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900">
-                        {file.name}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {(file.size / 1024).toFixed(2)} KB
-                      </span>
-                    </div>
+                {!file ? (
+                  <div className="flex flex-col items-center justify-center text-center space-y-2">
+                    <p className="text-brandText font-hind500 text-lg">
+                      Drag and drop an image or
+                    </p>
+                    <p className="text-brandText font-hind500 text-lg">
+                      browse to upload
+                    </p>
+                    <Button
+                      variant="ghost"
+                      className="mt-4 text-brandAccent flex flex-row justify-center items-center font-hind500 text-lg hover:text-brandAccent/80"
+                      onClick={handleBrowseClick}
+                    >
+                      <Upload className="h-8 w-8 text-brandAccent" />
+                      Upload
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeFile}
-                    className="text-gray-500 hover:text-brandAccent"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              )}
-            </div>
+                ) : (
+                  <div className="flex items-center justify-between bg-gray-50 p-4 rounded-md">
+                    <div className="flex items-center space-x-4">
+                      <div className="p-2 bg-white rounded-md">
+                        <Upload className="h-5 w-5 text-gray-400" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">
+                          {file.name}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {(file.size / 1024).toFixed(2)} KB
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={removeFile}
+                      className="text-gray-500 hover:text-brandAccent"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2">
               <label className="text-brandGray font-hind500 text-lg">
@@ -347,6 +352,9 @@ export default function Page() {
                         selected={field.value}
                         onSelect={(date) => field.onChange(date)}
                         initialFocus
+                        disabled={{
+                          before: new Date(), // Disables all dates before today
+                        }}
                       />
                     </PopoverContent>
                   </Popover>
@@ -365,7 +373,13 @@ export default function Page() {
               <Controller
                 name="end_date"
                 control={control}
-                rules={{ required: "End date is required" }}
+                rules={{
+                  required: "End date is required",
+                  validate: (endDate) =>
+                    !watch("start_date") ||
+                    endDate >= watch("start_date") ||
+                    "End date must be after start date",
+                }}
                 render={({ field }) => (
                   <Popover>
                     <PopoverTrigger asChild>
@@ -390,6 +404,15 @@ export default function Page() {
                         selected={field.value}
                         onSelect={(date) => field.onChange(date)}
                         initialFocus
+                        disabled={(date) => {
+                          const startDate = watch("start_date");
+                          // Disable all dates if start_date is not selected
+                          if (!startDate) {
+                            return true;
+                          }
+                          // Otherwise, disable dates before start_date
+                          return date < startDate;
+                        }}
                       />
                     </PopoverContent>
                   </Popover>
@@ -411,6 +434,16 @@ export default function Page() {
                   type="number"
                   className="rounded-r-md placeholder:font-hind400 placeholder:text-brandBorder placeholder:text-base"
                   placeholder="Enter Duration"
+                  disabled
+                  value={
+                    watch("start_date") && watch("end_date")
+                      ? Math.ceil(
+                          (new Date(watch("end_date") as string) -
+                            new Date(watch("start_date") as string)) /
+                            (1000 * 60 * 60 * 24)
+                        ) + 1
+                      : null
+                  }
                 />
                 <div className="absolute right-0 bg-brandHeader px-4 py-0 h-full border border-l-0 rounded-r-md text-brandText font-hind500 text-lg flex justify-center items-center">
                   Days

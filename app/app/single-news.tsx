@@ -28,7 +28,6 @@ import { formatDate } from "@/utils/formatDate";
 import {
   handleCommentPress,
   handleFollow,
-  handleLike,
   handleOtherProfile,
   handleSave,
 } from "@/utils/postActions";

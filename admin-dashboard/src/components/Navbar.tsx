@@ -16,7 +16,6 @@ import { toast } from "react-toastify";
 const Navbar = ({ isOpen, setIsOpen }) => {
   const router = useRouter();
   const pathname = usePathname();
-  console.log(pathname);
 
   // Create a single toggle handler to manage menu state
   const handleMenuToggle = () => {

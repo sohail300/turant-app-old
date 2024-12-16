@@ -29,7 +29,8 @@ export const createColumns = (
   actionDetails,
   setActionDetails,
   actionMessage,
-  setActionMessage
+  setActionMessage,
+  setShowDetails
 ): ColumnDef<User>[] => {
   async function getActionDetails(userId: number) {
     try {
@@ -293,51 +294,17 @@ export const createColumns = (
       cell: ({ row }) => (
         <div className="min-w-[160px]">
           {row.getValue("banTill") && (
-            <Popover
-              onOpenChange={(open) => {
-                if (open) {
-                  getActionDetails(row.original.user_id);
-                }
+            <Button
+              variant={"ghost"}
+              className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
+              onClick={() => {
+                console.log("sass");
+                setShowDetails(true);
               }}
             >
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"ghost"}
-                  className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
-                >
-                  View Details
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <div className=" py-4 px-6">
-                  <div className=" flex justify-end">
-                    <PopoverClose asChild>
-                      <Button
-                        size={"icon"}
-                        variant="ghost"
-                        className="w-8 h-8 mb-2"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </PopoverClose>
-                  </div>
-                  <div className=" border-b border-brandBorder pb-4">
-                    Shubham Kumar (username: shubhamkumar001)
-                  </div>
-                  <div className="flex flex-col gap-6 mt-4">
-                    <div className="flex flex-row justify-between">
-                      <div>Message</div>
-                      <div>{actionDetails.violationMessage}</div>
-                    </div>
-                    <div className="flex flex-row justify-between">
-                      <div className=" whitespace-nowrap">Post ID</div>
-                      <div>{actionDetails.violationpostId}</div>
-                    </div>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+              View Details
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
           )}
         </div>
       ),

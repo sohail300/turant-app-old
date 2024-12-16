@@ -40,13 +40,15 @@ const Page = () => {
   const [data, setData] = useState<Advertiser[]>([]);
   const [totalAds, setTotalAds] = useState(0);
 
+  const [showDetails, setShowDetails] = useState(false);
+
   const { isLoading, setIsLoading } = useContext(LoaderContext);
 
   const [debouncedFilter] = useDebounce(globalFilter, 300);
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 5,
   });
 
   const [currentCallTotalAds, setCurrentCallTotalAds] = useState(0);
@@ -115,7 +117,7 @@ const Page = () => {
 
   const table = useReactTable({
     data,
-    columns: createColumns(fetchData, fetchTotalAds, setIsLoading),
+    columns: createColumns(setIsLoading, setShowDetails),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -149,7 +151,7 @@ const Page = () => {
     isLoggedIn();
   }, []);
 
-  if (isLoading) return <Loader />;
+  // if (isLoading) return <Loader />;
 
   return (
     <div className="bg-white">
@@ -247,8 +249,38 @@ const Page = () => {
       </div>
 
       <TableComponent table={table} />
+      {showDetails && <DetailsModal setShowDetails={setShowDetails} />}
     </div>
   );
 };
 
 export default Page;
+
+function DetailsModal({ setShowDetails }) {
+  const handleClose = () => {
+    setShowDetails(false);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 z-50"
+      onClick={handleClose} // Close the modal if the background is clicked
+    >
+      <div
+        className="bg-white rounded-lg shadow-lg max-w-sm w-full"
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+      >
+        <div className="flex justify-between items-center bg-brandAccent rounded-tr-lg rounded-tl-lg p-4">
+          <h2 className="text-2xl text-white">Details</h2>
+          <button
+            className="text-xl text-white"
+            onClick={handleClose} // Close the modal when the cross button is clicked
+          >
+            X
+          </button>
+        </div>
+        <div className=" p-4">Details of the advertiser</div>
+      </div>
+    </div>
+  );
+}

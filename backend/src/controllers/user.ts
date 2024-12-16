@@ -41,7 +41,7 @@ export const searchUsers = async (req: Request, res: Response) => {
         display_name: true,
         email: true,
         phone: true,
-        profile_url: true,
+        image: true,
       },
       take: limit,
       skip: offset,
