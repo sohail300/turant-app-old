@@ -23,9 +23,8 @@ import { PopoverClose } from "@radix-ui/react-popover";
 import { formatDate } from "@/lib/extractDate";
 
 export const createColumns = (
-  fetchData,
-  fetchTotalAds,
-  setIsLoading
+  setIsLoading,
+  setShowDetails
 ): ColumnDef<Advertiser>[] => {
   return [
     {
@@ -111,29 +110,16 @@ export const createColumns = (
       header: "Detail",
       cell: ({ row }) => (
         <div className="min-w-[160px]">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"ghost"}
-                className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
-              >
-                View Details
-                <ChevronRight className="ml-2 h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
-              <div className=" py-8 px-6 space-y-6">
-                <div className=" flex justify-end">
-                  <PopoverClose asChild>
-                    <Button size={"icon"} variant="ghost" className="w-8 h-8">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </PopoverClose>
-                </div>
-                <div>Details of the advertiser</div>
-              </div>
-            </PopoverContent>
-          </Popover>
+          <Button
+            variant={"ghost"}
+            className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
+            onClick={() => {
+              setShowDetails(true);
+            }}
+          >
+            View Details
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
         </div>
       ),
     },

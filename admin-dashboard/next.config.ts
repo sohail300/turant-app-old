@@ -1,7 +1,7 @@
 /** @type {import('next/dist/server/config').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ["turant-news-bucket.s3.ap-south-1.amazonaws.com"],
+    domains: ["d3i5efosrgchej.cloudfront.net"],
   },
 };
 

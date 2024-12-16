@@ -13,7 +13,6 @@ import { usePathname } from "next/navigation";
 
 const BreadcrumbComponent = () => {
   const pathname = usePathname();
-  console.log(pathname);
 
   return (
     <div className="text-xl font-hind500 text-brandText">

@@ -118,6 +118,24 @@ export const addAd = async (req: Request, res: Response) => {
     } = inputData.data;
 
     console.log(inputData.data);
+    if (media_type === "text") {
+      await prisma.ad.create({
+        data: {
+          company_name: name,
+          media_type,
+          target_url,
+          start_date,
+          end_date,
+          duration,
+          target_state: state,
+          target_city: city,
+          cost,
+        },
+      });
+      res.json({ message: "Ad added successfully" });
+      return;
+    }
+
     console.log(req.file);
 
     const file = req.file;

@@ -58,6 +58,10 @@ const UserDetailsDashboard = () => {
 
   const { isLoading, setIsLoading } = useContext(LoaderContext);
 
+  const [totalUsersinCurrentCall, setTotalUsersinCurrentCall] = useState(0);
+
+  const [showDetails, setShowDetails] = useState(false);
+
   const [debouncedFilter] = useDebounce(globalFilter, 300);
 
   const [pagination, setPagination] = useState({
@@ -130,8 +134,9 @@ const UserDetailsDashboard = () => {
         }
       );
 
-      console.log(response.data.users);
+      console.log(response.data);
       const { users, totalUsers } = response.data;
+      setTotalUsersinCurrentCall(totalUsers);
 
       const transformedData = users.map((user) => ({
         ...user,
@@ -186,7 +191,8 @@ const UserDetailsDashboard = () => {
       actionDetails,
       setActionDetails,
       actionMessage,
-      setActionMessage
+      setActionMessage,
+      setShowDetails
     ),
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -199,7 +205,7 @@ const UserDetailsDashboard = () => {
       globalFilter,
       pagination,
     },
-    pageCount: Math.ceil(user.totalUsers / pagination.pageSize),
+    pageCount: Math.ceil(totalUsersinCurrentCall / pagination.pageSize),
     manualPagination: true,
   });
 
@@ -291,6 +297,12 @@ const UserDetailsDashboard = () => {
       </div>
 
       <TableComponent table={table} />
+      {showDetails && (
+        <DetailsModal
+          setShowDetails={setShowDetails}
+          actionDetails={actionDetails}
+        />
+      )}
 
       {isEditEnabled && (
         <div className="flex flex-row gap-4 mt-4 justify-end px-4">
@@ -310,3 +322,42 @@ const UserDetailsDashboard = () => {
 };
 
 export default UserDetailsDashboard;
+
+function DetailsModal({ setShowDetails, actionDetails }) {
+  const handleClose = () => {
+    setShowDetails(false);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 z-50"
+      onClick={handleClose} // Close the modal if the background is clicked
+    >
+      <div
+        className="bg-white rounded-lg shadow-lg max-w-sm w-full"
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+      >
+        <div className="flex justify-between items-center bg-brandAccent rounded-tr-lg rounded-tl-lg p-4">
+          <h2 className="text-2xl text-white">Details</h2>
+          <button
+            className="text-xl text-white"
+            onClick={handleClose} // Close the modal when the cross button is clicked
+          >
+            X
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-6 mt-4">
+          <div className="flex flex-row justify-between">
+            <div>Message</div>
+            <div>{actionDetails.violationMessage}</div>
+          </div>
+          <div className="flex flex-row justify-between">
+            <div className=" whitespace-nowrap">Post ID</div>
+            <div>{actionDetails.violationpostId}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
