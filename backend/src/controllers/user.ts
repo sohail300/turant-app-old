@@ -196,6 +196,7 @@ export const getOtherUserPosts = async (req: Request, res: Response) => {
         user_id: Number(userId),
       },
       select: {
+        user_id: true,
         posts: {
           select: {
             post_id: true,
@@ -213,7 +214,19 @@ export const getOtherUserPosts = async (req: Request, res: Response) => {
                 user_id: true,
                 display_name: true,
                 image: true,
+                followers: {
+                  where: { follower_id: Number(userId) }, // Check if the logged-in user follows this user
+                  select: { follower_id: true },
+                },
               },
+            },
+            post_likes: {
+              where: { user_id: Number(userId) }, // Check if the user has liked the post
+              select: { like_id: true },
+            },
+            saved_posts: {
+              where: { user_id: Number(userId) }, // Check if the user has saved the post
+              select: { saved_post_id: true },
             },
           },
         },
@@ -232,6 +245,16 @@ export const getOtherUserPosts = async (req: Request, res: Response) => {
         user_id: Number(userId),
       },
     });
+
+    const formattedPosts = posts.map((user) => ({
+      user_id: user.user_id,
+      posts: user.posts.map((post) => ({
+        ...post,
+        liked: post.post_likes.length > 0, // True if the user has liked the post
+        saved: post.saved_posts.length > 0, // True if the user has saved the post
+        following: post.user.followers.length > 0,
+      })),
+    }));
 
     res.json({
       posts,
@@ -285,6 +308,10 @@ export const getOwnPosts = async (req: Request, res: Response) => {
                 user_id: true,
                 display_name: true,
                 image: true,
+                followers: {
+                  where: { follower_id: Number(userId) }, // Check if the logged-in user follows this user
+                  select: { follower_id: true },
+                },
               },
             },
             post_likes: {
@@ -312,6 +339,7 @@ export const getOwnPosts = async (req: Request, res: Response) => {
         ...post,
         liked: post.post_likes.length > 0, // True if the user has liked the post
         saved: post.saved_posts.length > 0, // True if the user has saved the post
+        following: post.user.followers.length > 0,
       })),
     }));
 
@@ -375,6 +403,10 @@ export const getUserSavedPosts = async (req: Request, res: Response) => {
                     user_id: true,
                     display_name: true,
                     image: true,
+                    followers: {
+                      where: { follower_id: Number(userId) }, // Check if the logged-in user follows this user
+                      select: { follower_id: true },
+                    },
                   },
                 },
                 post_likes: {
@@ -404,6 +436,7 @@ export const getUserSavedPosts = async (req: Request, res: Response) => {
         ...savedPost.post,
         liked: savedPost.post.post_likes.length > 0, // True if the user has liked the post
         saved: savedPost.post.saved_posts.length > 0, // True if the user has saved the post
+        following: savedPost.post.user.followers.length > 0,
       })),
     }));
 

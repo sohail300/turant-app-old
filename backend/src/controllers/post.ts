@@ -12,8 +12,6 @@ export const showPosts = async (req: Request, res: Response) => {
     let isLoggedIn = false;
     let userId;
     const { limit, offset } = req.query;
-    console.log(req.query);
-
     const authHeader = req.headers.authorization;
     
     if (authHeader) {
@@ -54,6 +52,10 @@ export const showPosts = async (req: Request, res: Response) => {
                   user_id: true,
                   display_name: true,
                   image: true,
+                  followers: {
+                    where: { follower_id: Number(userId) }, // Check if the logged-in user follows this user
+                    select: { follower_id: true },
+                  },
                 },
               },
               post_likes: {
@@ -94,6 +96,10 @@ export const showPosts = async (req: Request, res: Response) => {
                   user_id: true,
                   display_name: true,
                   image: true,
+                  followers: {
+                    where: { follower_id: Number(userId) }, // Check if the logged-in user follows this user
+                    select: { follower_id: true },
+                  },
                 },
               },
               post_likes: {
@@ -110,18 +116,17 @@ export const showPosts = async (req: Request, res: Response) => {
           });
 
           // Merge and sort posts
-          const posts = [...followedPosts, ...unfollowedPosts].sort(
-            (a, b) =>
-              new Date(b.created_at).getTime() -
-              new Date(a.created_at).getTime()
-          );
+          const posts = [...followedPosts, ...unfollowedPosts]
 
           const formattedPosts = posts.map((post) => ({
               ...post,
               liked: post.post_likes.length > 0, // True if the user has liked the post
               saved: post.saved_posts.length > 0,
+              following: post.user.followers.length > 0,
           }))
 
+          console.log("login post");
+          
           res.json(formattedPosts);
           return;
         }
@@ -131,6 +136,7 @@ export const showPosts = async (req: Request, res: Response) => {
     }
 
     const posts = await prisma.post.findMany({
+      orderBy: { created_at: "desc" },
       select: {
         post_id: true,
         user_id: true,
@@ -155,6 +161,8 @@ export const showPosts = async (req: Request, res: Response) => {
       skip: Number(offset),
     });
 
+    console.log("not login post");
+    
     res.status(200).json(posts);
     return;
   } catch (error) {
