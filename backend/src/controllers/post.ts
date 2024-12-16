@@ -164,9 +164,15 @@ export const showPosts = async (req: Request, res: Response) => {
       skip: Number(offset),
     });
 
+    const newPosts = [...posts].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime()
+    );
+
     console.log("not login post");
     
-    res.status(200).json(posts);
+    res.status(200).json(newPosts);
     return;
   } catch (error) {
     console.error("Error fetching posts:", error);
