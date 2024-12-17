@@ -33,6 +33,7 @@ import {
 } from "@/utils/postActions";
 import { baseURL } from "@/constants/config";
 import { Video, ResizeMode } from "expo-av";
+import RenderHTML from "react-native-render-html";
 
 const SingleNews = () => {
   const [showCommentSheet, setShowCommentSheet] = useState(false);
@@ -64,6 +65,7 @@ const SingleNews = () => {
   const token = useSelector((state) => state.token.data);
 
   const [content, setContent] = useState("");
+  const [media, setMedia] = useState("");
 
   const [status, setStatus] = useState({
     hasLiked: false,
@@ -85,6 +87,16 @@ const SingleNews = () => {
         );
         const data = await response.json();
         setContent(data.post.content);
+        setMedia(data.post.video);
+      } else if(type == "text"){
+        const response = await fetch(
+          `${baseURL}/post/single-post/${post_id}`,
+          {
+            method: "GET",
+          }
+        );
+        const data = await response.json();
+        setContent(data.post.content);
       } else {
         const response = await fetch(
           `${baseURL}/post/single-image/${post_id}`,
@@ -94,6 +106,7 @@ const SingleNews = () => {
         );
         const data = await response.json();
         setContent(data.post.content);
+        setMedia(data.post.photo);
       }
     } catch (error) {
       console.log("error", error);
@@ -133,7 +146,7 @@ const SingleNews = () => {
             {type === "image" ? (
               <Image
                 source={{
-                  uri: "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
+                  uri: media || "https://fl-i.thgim.com/public/incoming/svh489/article68831258.ece/alternates/LANDSCAPE_1200/Bibek%20Debroy%20Obit.jpg",
                 }}
                 width={"100%"}
                 height={200}
@@ -154,7 +167,7 @@ const SingleNews = () => {
                   ref={video}
                   style={fileStyles.video}
                   source={{
-                    uri: "https://d3i5efosrgchej.cloudfront.net/media/sample.mp4",
+                    uri: media || "https://d3i5efosrgchej.cloudfront.net/media/sample.mp4",
                   }}
                   useNativeControls
                   resizeMode={ResizeMode.CONTAIN}
@@ -237,7 +250,8 @@ const SingleNews = () => {
                 />
               </TouchableOpacity>
             </View>
-            <ContentText full={true}>{snippet}</ContentText>
+            {/* <ContentText full={true}><RenderHTML source={{html: snippet}} /></ContentText> */}
+            <RenderHTML source={{html: String(snippet)}} />
             <Details>{formatDate(created_at!)}</Details>
             <View style={{ display: "flex", flexDirection: "row", gap: 16 }}>
               <TouchableOpacity

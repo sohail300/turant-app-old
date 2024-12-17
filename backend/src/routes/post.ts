@@ -9,12 +9,15 @@ import {
   showPosts,
   showImagePost,
   showVideoPost,
+  showSinglePost,
 } from "../controllers/post";
 import { authenticate } from "../middlewares/authenticate";
 
 const router = Router();
 
 router.get("/show-posts", showPosts);
+
+router.get("/post/single-post/:postId", showSinglePost);
 
 router.get("/single-image/:postId", showImagePost);
 
