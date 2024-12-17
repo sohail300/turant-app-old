@@ -297,9 +297,30 @@ export const createColumns = (
             <Button
               variant={"ghost"}
               className={`flex flex-row gap-2 items-center py-1 text-base font-hind500 whitespace-nowrap text-brandAccent hover:text-brandAccent`}
-              onClick={() => {
+              onClick={async () => {
                 console.log("sass");
+                const userId = row.original.user_id;
                 setShowDetails(true);
+                try {
+                  const response = await api.post(
+                    "/user/get-action-details",
+                    {
+                      userId,
+                    },
+                    {
+                      headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                          "token"
+                        )}`,
+                      },
+                    }
+                  );
+
+                  console.log(response.data.details);
+                  setActionDetails(response.data.details);
+                } catch (error) {
+                  console.log(error);
+                }
               }}
             >
               View Details
@@ -313,13 +334,12 @@ export const createColumns = (
 };
 
 const TableComponent = ({ table }) => {
-  // Memoize the pagination state to prevent unnecessary re-renders
   const [currentPage, setCurrentPage] = useState(
     table.getState().pagination.pageIndex
   );
+
   const pageCount = table.getPageCount();
 
-  // Handle page changes
   const handlePreviousPage = () => {
     if (table.getCanPreviousPage()) {
       table.previousPage();
@@ -334,7 +354,6 @@ const TableComponent = ({ table }) => {
     }
   };
 
-  // Update local state when table state changes
   useEffect(() => {
     setCurrentPage(table.getState().pagination.pageIndex);
   }, [table.getState().pagination.pageIndex]);

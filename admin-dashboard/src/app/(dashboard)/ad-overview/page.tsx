@@ -46,11 +46,6 @@ const Page = () => {
 
   const [debouncedFilter] = useDebounce(globalFilter, 300);
 
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 5,
-  });
-
   const [currentCallTotalAds, setCurrentCallTotalAds] = useState(0);
 
   const [timeFilter, setTimeFilter] = useState("active");
@@ -78,15 +73,11 @@ const Page = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const { pageIndex, pageSize } = pagination;
-
       const response = await api.post(
         "/ad/search-ads",
         {
           identifier: debouncedFilter || "",
           timeFilter,
-          limit: pageSize,
-          offset: pageIndex * pageSize,
         },
         {
           headers: {
@@ -113,7 +104,7 @@ const Page = () => {
 
   useEffect(() => {
     fetchData();
-  }, [debouncedFilter, pagination, timeFilter]);
+  }, [debouncedFilter, timeFilter]);
 
   const table = useReactTable({
     data,
@@ -127,10 +118,7 @@ const Page = () => {
     state: {
       sorting,
       globalFilter,
-      pagination,
     },
-    pageCount: Math.ceil(currentCallTotalAds / pagination.pageSize),
-    manualPagination: true,
   });
 
   async function isLoggedIn() {

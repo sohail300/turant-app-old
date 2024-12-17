@@ -40,11 +40,6 @@ const Page = () => {
 
   const [debouncedFilter] = useDebounce(globalFilter, 300);
 
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
   const [currentCallTotalReporters, setCurrentCallTotalReporters] = useState(0);
 
   const fetchTotalReporters = async () => {
@@ -70,14 +65,10 @@ const Page = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const { pageIndex, pageSize } = pagination;
-
       const response = await api.post(
         "/reporter/search-reporters",
         {
           identifier: debouncedFilter || "",
-          limit: pageSize,
-          offset: pageIndex * pageSize,
         },
         {
           headers: {
@@ -99,7 +90,7 @@ const Page = () => {
 
   useEffect(() => {
     fetchData();
-  }, [debouncedFilter, pagination]);
+  }, [debouncedFilter]);
 
   async function isLoggedIn() {
     try {
@@ -126,16 +117,12 @@ const Page = () => {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onPaginationChange: setPagination,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
       globalFilter,
-      pagination,
     },
-    pageCount: Math.ceil(currentCallTotalReporters / pagination.pageSize),
-    manualPagination: true,
   });
 
   return (

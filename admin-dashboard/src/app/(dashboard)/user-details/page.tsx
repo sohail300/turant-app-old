@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useEffect } from "react";
+import React, { use, useContext, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Filter, Edit, ChevronDown, Search } from "lucide-react";
 import {
@@ -64,11 +64,6 @@ const UserDetailsDashboard = () => {
 
   const [debouncedFilter] = useDebounce(globalFilter, 300);
 
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10,
-  });
-
   const [filterState, setFilterState] = useState({
     active: false,
     3: false,
@@ -118,14 +113,10 @@ const UserDetailsDashboard = () => {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const { pageIndex, pageSize } = pagination;
-
       const response = await api.post(
         "/user/search-users",
         {
           identifier: debouncedFilter || "",
-          limit: pageSize,
-          offset: pageIndex * pageSize,
         },
         {
           headers: {
@@ -134,8 +125,8 @@ const UserDetailsDashboard = () => {
         }
       );
 
-      console.log(response.data);
       const { users, totalUsers } = response.data;
+      console.log(totalUsers);
       setTotalUsersinCurrentCall(totalUsers);
 
       const transformedData = users.map((user) => ({
@@ -153,7 +144,7 @@ const UserDetailsDashboard = () => {
 
   useEffect(() => {
     fetchData();
-  }, [debouncedFilter, pagination]);
+  }, [debouncedFilter]);
 
   // Toggle function for checkboxes
   const toggleCheckbox = (key) => {
@@ -203,10 +194,7 @@ const UserDetailsDashboard = () => {
     state: {
       sorting,
       globalFilter,
-      pagination,
     },
-    pageCount: Math.ceil(totalUsersinCurrentCall / pagination.pageSize),
-    manualPagination: true,
   });
 
   // if (isLoading) return <Loader />;
@@ -347,14 +335,14 @@ function DetailsModal({ setShowDetails, actionDetails }) {
           </button>
         </div>
 
-        <div className="flex flex-col gap-6 mt-4">
+        <div className="flex flex-col gap-6 p-4">
           <div className="flex flex-row justify-between">
             <div>Message</div>
             <div>{actionDetails.violationMessage}</div>
           </div>
           <div className="flex flex-row justify-between">
             <div className=" whitespace-nowrap">Post ID</div>
-            <div>{actionDetails.violationpostId}</div>
+            <div>{actionDetails.violationPostId}</div>
           </div>
         </div>
       </div>

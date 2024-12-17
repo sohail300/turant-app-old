@@ -36,7 +36,7 @@ export const searchAds = async (req: Request, res: Response) => {
       return;
     }
 
-    const { identifier, timeFilter, limit, offset } = inputData.data;
+    const { identifier, timeFilter } = inputData.data;
 
     const currentDate = new Date();
     // Define filters with correct Prisma type
@@ -75,8 +75,6 @@ export const searchAds = async (req: Request, res: Response) => {
           },
         },
       },
-      take: limit,
-      skip: offset,
     });
 
     // Search for users by username or name

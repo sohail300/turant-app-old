@@ -40,7 +40,7 @@ export const searchUsers = async (req: Request, res: Response) => {
       return;
     }
 
-    const { identifier, limit, offset } = inputData.data;
+    const { identifier } = inputData.data;
 
     // Search for users by username or name
     const users = await prisma.user.findMany({
@@ -71,8 +71,6 @@ export const searchUsers = async (req: Request, res: Response) => {
           },
         },
       },
-      take: limit,
-      skip: offset,
     });
 
     // Search for users by username or name

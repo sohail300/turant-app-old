@@ -44,7 +44,7 @@ export const searchReporters = async (req: Request, res: Response) => {
       return;
     }
 
-    const { identifier, limit, offset } = inputData.data;
+    const { identifier } = inputData.data;
 
     // Search for users by username or name
     const users = await prisma.reporter.findMany({
@@ -60,8 +60,6 @@ export const searchReporters = async (req: Request, res: Response) => {
         district: true,
         block: true,
       },
-      take: limit,
-      skip: offset,
     });
 
     // Search for users by username or name
